@@ -89,6 +89,16 @@ public class MainActivity extends AppCompatActivity {
                 btnDrawerClicked = !btnDrawerClicked;
             }
         });
+
+        fragmentFullScreen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(btnDrawerClicked){
+                    reverseAnimate(scaleRatio);
+                    btnDrawerClicked = !btnDrawerClicked;
+                }
+            }
+        });
     }
 
     private void doAnimate(float scaleRatioX){
