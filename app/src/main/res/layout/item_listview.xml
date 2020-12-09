@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="10"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <RelativeLayout
+        android:layout_weight="7"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/songIcon"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_baseline_music_note_24"
+                android:layout_width="85dp"
+                android:layout_height="90dp"/>
+
+            <LinearLayout
+                android:layoutDirection="rtl"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textSize="24sp"
+                    android:id="@+id/txtCatalogueName"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="catalogue name"
+                    android:textColor="@color/black" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+    <LinearLayout
+        android:layoutDirection="rtl"
+        android:layout_weight="3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_marginStart="5dp"
+            android:id="@+id/btnMore"
+            android:backgroundTint="@color/white"
+            android:background="@drawable/ic_baseline_more_vert_24"
+            android:layout_width="24dp"
+            android:layout_height="24dp"/>
+        <Button
+            android:id="@+id/btnMarkFavorite"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/selector_favorite"
+            android:layout_width="24dp"
+            android:layout_height="24dp"/>
+
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/ic_baseline_arrow_circle_down_24"
+            android:layout_width="24dp"
+            android:layout_height="24dp"/>
+
+    </LinearLayout>
+</LinearLayout>

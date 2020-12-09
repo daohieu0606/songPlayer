@@ -6,7 +6,7 @@
         android:fromYDelta="10%p"
         android:toYDelta="30%p"
         android:fillAfter="false"
-        android:repeatCount="infinite"
+        android:repeatCount="2"
         android:duration="800"
         android:repeatMode="reverse"
         />
