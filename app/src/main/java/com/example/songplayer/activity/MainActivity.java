@@ -28,7 +28,6 @@ import com.example.songplayer.adapter.DrawerAdapter;
 import com.example.songplayer.adapter.HorizontalAdapter;
 import com.example.songplayer.adapter.VerticalAdapter;
 import com.example.songplayer.adapter.adaper_item.DrawerItem;
-import com.example.songplayer.db.SongDbHelper;
 import com.example.songplayer.db.SongEntity;
 import com.example.songplayer.viewmodel.SongViewModel;
 

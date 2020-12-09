@@ -4,7 +4,7 @@ import android.app.Application;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.songplayer.db.SongDbHelper;
+import com.example.songplayer.utils.SongDbHelper;
 import com.example.songplayer.db.SongEntity;
 
 import java.util.ArrayList;
@@ -35,7 +35,15 @@ public class SongDAOImp implements SongDAO{
     }
 
     public void delete(int ID) {
-        songDbHelper.deleteSongByID(ID);
+        SongEntity delSong = null;
+        for (SongEntity tmpSong :
+                listMutableLiveData.getValue()) {
+            if (tmpSong.getId() == ID) {
+                delSong = tmpSong;
+                break;
+            }
+        }
+        songDbHelper.delete(delSong);
         listMutableLiveData.postValue(songDbHelper.getAllSongs());
     }
 

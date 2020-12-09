@@ -1,4 +1,4 @@
-package com.example.songplayer.db;
+package com.example.songplayer.utils;
 
 import android.app.Application;
 import android.content.ContentResolver;
@@ -9,6 +9,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.example.songplayer.db.SongEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,18 +62,10 @@ public class SongDbHelper {
     }
 
     public void delete(SongEntity songEntity) {
-
-    }
-
-    public boolean update(SongEntity songEntity) {
-        return false;
+        FileHelper.removeFile(application, songEntity.getUriString());
     }
 
     public void updateSong(SongEntity songEntity) {
-
-    }
-
-    public void deleteSongByID(int id) {
 
     }
 }

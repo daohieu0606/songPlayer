@@ -30,6 +30,7 @@ public class SplashScreen extends AppCompatActivity {
         imgDot2 = findViewById(R.id.imgDot2);
         imgDot3 = findViewById(R.id.imgDot3);
     }
+
     public void doAnimate(){
         Animation animation = AnimationUtils.loadAnimation(this,R.anim.up_and_down_anim);
         imgDot1.startAnimation(animation);
