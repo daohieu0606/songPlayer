@@ -8,9 +8,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
-import com.example.songplayer.db.SongEntity;
+import com.example.songplayer.db.entity.SongEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +30,17 @@ public class SongDbHelper {
                 MediaStore.Audio.Media.RELATIVE_PATH,
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Media.DATE_TAKEN,
+                MediaStore.Audio.Artists.ARTIST,
+                MediaStore.Audio.Albums.ALBUM
                };
         ContentResolver resolver = application.getContentResolver();
         Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), songProjection,null,null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            Log.d(TAG, "getAllSongs: " + "co vo day");
+            Log.d(TAG, "getAllSongs: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)));
+            Log.d(TAG, "getAllSongs: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)));
+            Log.d(TAG, "getAllSongs: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
             SongEntity songEntity = new SongEntity();
 
             songEntity.setId(cursor.getInt(0));

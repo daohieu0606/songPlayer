@@ -28,7 +28,10 @@ import com.example.songplayer.adapter.DrawerAdapter;
 import com.example.songplayer.adapter.HorizontalAdapter;
 import com.example.songplayer.adapter.VerticalAdapter;
 import com.example.songplayer.adapter.adaper_item.DrawerItem;
-import com.example.songplayer.db.SongEntity;
+import com.example.songplayer.dao.AlbumDAO;
+import com.example.songplayer.dao.ArtistDAO;
+import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.viewmodel.SongViewModel;
 
 import java.util.ArrayList;
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkAndRequestPermissin();
+        checkAndRequestPermission();
         setUp();
         bindViews();
 
@@ -80,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void checkAndRequestPermissin() {
+    private void checkAndRequestPermission() {
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 7003);
         }

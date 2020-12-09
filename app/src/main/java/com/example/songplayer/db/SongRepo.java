@@ -7,6 +7,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.songplayer.dao.OnlSongDAOImp;
 import com.example.songplayer.dao.SongDAOImp;
+import com.example.songplayer.db.entity.SongEntity;
+
 import java.util.List;
 
 public class SongRepo {

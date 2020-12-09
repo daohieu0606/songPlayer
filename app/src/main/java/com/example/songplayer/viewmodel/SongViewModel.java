@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.songplayer.db.SongEntity;
+import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.db.SongRepo;
 
 import java.util.List;

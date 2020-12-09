@@ -1,4 +1,4 @@
-package com.example.songplayer.db;
+package com.example.songplayer.db.entity;
 
 import com.example.songplayer.model.MySong;
 

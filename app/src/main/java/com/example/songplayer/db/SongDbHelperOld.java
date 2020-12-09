@@ -2,14 +2,14 @@ package com.example.songplayer.db;
 
 
 import android.app.Application;
-import android.content.ContentResolver;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.example.songplayer.db.entity.SongEntity;
 
 import java.util.ArrayList;
 import java.util.List;

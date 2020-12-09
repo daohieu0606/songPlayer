@@ -3,7 +3,7 @@ package com.example.songplayer.dao;
 import android.app.Application;
 
 import androidx.lifecycle.MutableLiveData;
-import com.example.songplayer.db.SongEntity;
+import com.example.songplayer.db.entity.SongEntity;
 import java.util.ArrayList;
 import java.util.List;
 

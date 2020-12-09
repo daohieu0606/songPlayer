@@ -2,10 +2,13 @@ package com.example.songplayer.utils;
 
 import android.app.Activity;
 import android.app.RecoverableSecurityException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.widget.Toast;
 
 public class FileHelper {
@@ -43,5 +46,25 @@ public class FileHelper {
         }
 
         return result;
+    }
+
+    public static Uri getNewSongFileUri(Context context) {
+        ContentResolver resolver = context.getApplicationContext()
+                .getContentResolver();
+
+        Uri audioCollection;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            audioCollection = MediaStore.Audio.Media
+                    .getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        } else {
+            audioCollection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        }
+
+        ContentValues newSongDetails = new ContentValues();
+        newSongDetails.put(MediaStore.Audio.Media.DISPLAY_NAME,
+                "My Song.mp3");
+
+        Uri result = resolver.insert(audioCollection, newSongDetails);
+        return  result;
     }
 }
