@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,6 +37,7 @@ import com.example.songplayer.dao.ArtistDAO;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.utils.AlbumDbHelper;
+import com.example.songplayer.utils.ArtistDbHelper;
 import com.example.songplayer.viewmodel.SongViewModel;
 
 import java.util.ArrayList;
@@ -74,9 +76,14 @@ public class MainActivity extends AppCompatActivity {
         songViewModel.getAllSongs().observe(this, new Observer<List<SongEntity>>() {
             @Override
             public void onChanged(List<SongEntity> songEntities) {
-                Log.d(TAG, "onChanged: " +  songEntities.size());
+                Log.d(TAG, "onCreate: " +  songEntities.size());
             }
         });
+        AlbumDbHelper albumDbHelper = new AlbumDbHelper(getApplication());
+        Log.d(TAG, "onCreate: so luong album " + albumDbHelper.getAllAlbums().size());
+
+        ArtistDbHelper artistDbHelper = new ArtistDbHelper(getApplication());
+        Log.d(TAG, "onCreate: so luong ca si " + artistDbHelper.getAllArtists().size());
     }
 
     private void checkAndRequestPermission() {
@@ -99,10 +106,9 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.container, dashboardFragment);
+
         transaction.commit();
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

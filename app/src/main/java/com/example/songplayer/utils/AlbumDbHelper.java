@@ -2,7 +2,9 @@ package com.example.songplayer.utils;
 
 import android.app.Application;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 import com.example.songplayer.db.entity.AlbumEntity;
@@ -29,12 +31,16 @@ public class AlbumDbHelper {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            Log.d(TAG, "getAllAlbums: " + cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums._ID)));
-            Log.d(TAG, "getAllAlbums: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)));
+            /*Log.d(TAG, "getAllAlbums: " + cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums._ID)));
+            Log.d(TAG, "getAllAlbums: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)));*/
 
             AlbumEntity albumEntity = new AlbumEntity();
             albumEntity.setId(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums._ID)));
             albumEntity.setAlbumName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)));
+
+            Uri ARTWORK_URI = Uri.parse("content://media/external/audio/albumart");
+            Uri artUri = ContentUris.withAppendedId(ARTWORK_URI, albumEntity.getId());
+            albumEntity.setArtUri(artUri);
 
             albumEntities.add(albumEntity);
             cursor.moveToNext();

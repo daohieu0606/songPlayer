@@ -38,9 +38,6 @@ public class SongDbHelper {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            Log.d(TAG, "getAllSongs: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)));
-            Log.d(TAG, "getAllSongs: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)));
-            Log.d(TAG, "getAllSongs: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
             SongEntity songEntity = new SongEntity();
 
             songEntity.setId(cursor.getInt(0));

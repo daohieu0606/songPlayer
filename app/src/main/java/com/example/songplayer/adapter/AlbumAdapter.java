@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,12 +16,13 @@ import com.example.songplayer.db.entity.AlbumEntity;
 import java.util.List;
 import java.util.Random;
 
-public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.ViewHolder> {
-    private List<String> itemList;
+public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder>{
+
+    private List<AlbumEntity> itemList;
     private Activity activity;
     private int[] itemBackground;
 
-    public VerticalAdapter(Activity newActivity, List<String> newItemList) {
+    public AlbumAdapter(Activity newActivity, List<AlbumEntity> newItemList) {
         itemList = newItemList;
         activity = newActivity;
 
@@ -38,7 +40,7 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.ViewHo
 
     }
 
-    public VerticalAdapter(Activity newActivity) {
+    public AlbumAdapter(Activity newActivity) {
         activity = newActivity;
 
         itemBackground = new int[10];
@@ -57,12 +59,12 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.ViewHo
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        VerticalAdapter.ViewHolder result = null;
+    public AlbumAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        AlbumAdapter.ViewHolder result = null;
 
         LayoutInflater inflater = LayoutInflater.from(activity);
         View view = inflater.inflate(R.layout.item_listview, null);
-        result = new VerticalAdapter.ViewHolder(view);
+        result = new AlbumAdapter.ViewHolder(view);
 
         Random random = new Random();
         view.setBackgroundResource(itemBackground[random.nextInt(10)]);
@@ -70,9 +72,12 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AlbumAdapter.ViewHolder holder, int position) {
         if (0 <= position && itemList.size() > position) {
-            holder.txtCatalogueName.setText(itemList.get(position));
+            holder.txtCatalogueName.setText(itemList.get(position).getAlbumName());
+            if (itemList.get(position).getArtUri() != null) {
+                holder.albumThumbnail.setImageURI(itemList.get(position).getArtUri());
+            }
         }
     }
 
@@ -81,12 +86,19 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.ViewHo
         return itemList.size();
     }
 
+    public void setAlbum(List<AlbumEntity> albumEntities) {
+        itemList = albumEntities;
+        notifyDataSetChanged();
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder{
         public TextView txtCatalogueName;
+        public ImageView albumThumbnail;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtCatalogueName = itemView.findViewById(R.id.txtCatalogueName);
+            albumThumbnail = itemView.findViewById(R.id.songIcon);
         }
     }
 }

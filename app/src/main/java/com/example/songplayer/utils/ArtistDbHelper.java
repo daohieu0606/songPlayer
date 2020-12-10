@@ -30,8 +30,8 @@ public class ArtistDbHelper {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            Log.d(TAG, "getAllArtists: " + cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists._ID)));
-            Log.d(TAG, "getAllArtists: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
+            /*Log.d(TAG, "getAllArtists: " + cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists._ID)));
+            Log.d(TAG, "getAllArtists: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));*/
 
             ArtistEntity artistEntity = new ArtistEntity();
             artistEntity.setId(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists._ID)));

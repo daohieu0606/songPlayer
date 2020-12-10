@@ -23,7 +23,6 @@ public class SongDatabase{
     public SongDAOImp songDAO() {
         return songDAOImp;
     }
-
     public OnlSongDAOImp OnlSongDAO() {
         return onlSongDAOImp;
     }
