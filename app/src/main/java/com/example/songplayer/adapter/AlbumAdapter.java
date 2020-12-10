@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.AlbumEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -42,6 +43,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder>{
 
     public AlbumAdapter(Activity newActivity) {
         activity = newActivity;
+        itemList = new ArrayList<>();
 
         itemBackground = new int[10];
         itemBackground[0] = R.drawable.gradient1;
@@ -98,7 +100,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder>{
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtCatalogueName = itemView.findViewById(R.id.txtCatalogueName);
-            albumThumbnail = itemView.findViewById(R.id.songIcon);
+            albumThumbnail = itemView.findViewById(R.id.imgAlbumThumbnail);
         }
     }
 }

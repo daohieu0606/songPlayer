@@ -18,9 +18,12 @@ import android.view.ViewGroup;
 import com.example.songplayer.R;
 import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.adapter.AlbumAdapter;
+import com.example.songplayer.adapter.ArtistAdapter;
 import com.example.songplayer.adapter.HorizontalAdapter;
 import com.example.songplayer.db.entity.AlbumEntity;
+import com.example.songplayer.db.entity.ArtistEntity;
 import com.example.songplayer.viewmodel.AlbumViewModel;
+import com.example.songplayer.viewmodel.ArtistViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +31,12 @@ import java.util.List;
 public class DashboardFragment extends Fragment {
 
     private MainActivity mainActivity;
-    private RecyclerView singerListView;
-    private List<String> singers;
-    private HorizontalAdapter singerListAdapter;
 
-    private RecyclerView albumListView;
+    private RecyclerView lstArtists;
+    private ArtistAdapter artistAdapter;
+    private ArtistViewModel artistViewModel;
+
+    private RecyclerView lstAlbums;
     private AlbumAdapter albumAdapter;
     private AlbumViewModel albumViewModel;
 
@@ -48,6 +52,14 @@ public class DashboardFragment extends Fragment {
                 return (T) new AlbumViewModel(getActivity().getApplication());
             }
         }).get(AlbumViewModel.class);
+
+        artistViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                return (T) new ArtistViewModel(getActivity().getApplication());
+            }
+        }).get(ArtistViewModel.class);
     }
 
     @Override
@@ -64,43 +76,42 @@ public class DashboardFragment extends Fragment {
                 albumAdapter.setAlbum(albumEntities);
             }
         });
+
+        artistViewModel.getAllArtists().observe(getActivity(), new Observer<List<ArtistEntity>>() {
+            @Override
+            public void onChanged(List<ArtistEntity> artistEntities) {
+                artistAdapter.setArtists(artistEntities);
+            }
+        });
         return result;
     }
 
     private void setUpAlbumList(View view) {
-        albumListView = view.findViewById(R.id.lstAlbums);
+        lstAlbums = view.findViewById(R.id.lstAlbums);
 
         albumAdapter = new AlbumAdapter(getActivity(), new ArrayList<AlbumEntity>());
-        albumListView.setAdapter(albumAdapter);
+        lstAlbums.setAdapter(albumAdapter);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-        albumListView.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(albumListView.getContext(),
+        lstAlbums.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(lstAlbums.getContext(),
                 ((LinearLayoutManager) layoutManager).getOrientation());
-        albumListView.addItemDecoration(dividerItemDecoration);
+        lstAlbums.addItemDecoration(dividerItemDecoration);
         albumAdapter.notifyDataSetChanged();
     }
 
     private void setUpSingerListView(View view) {
-        singerListView = view.findViewById(R.id.lstSinger);
-        singers = new ArrayList<>();
-        singerListAdapter = new HorizontalAdapter(getActivity(), singers);
-        singerListView.setAdapter(singerListAdapter);
+
+        lstArtists = view.findViewById(R.id.lstArtist);
+        artistAdapter = new ArtistAdapter(getActivity());
+        lstArtists.setAdapter(artistAdapter);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        singerListView.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(singerListView.getContext(),
+        lstArtists.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(lstArtists.getContext(),
                 ((LinearLayoutManager) layoutManager).getOrientation());
-        singerListView.addItemDecoration(dividerItemDecoration);
+        lstArtists.addItemDecoration(dividerItemDecoration);
 
-        singers.add("Den Vau");
-        singers.add("Kimmese");
-        singers.add("Bich Phuong");
-        singers.add("DSK");
-        singers.add("Karik");
-        singers.add("Phuong Ly");
-        singers.add("Wowy");
-
-        singerListAdapter.notifyDataSetChanged();
+        artistAdapter.notifyDataSetChanged();
     }
 }

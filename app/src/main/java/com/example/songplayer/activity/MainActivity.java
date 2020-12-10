@@ -50,10 +50,9 @@ public class MainActivity extends AppCompatActivity {
     ImageView btnDrawer;
     View fragmentFullScreen;
     boolean btnDrawerClicked = false;
+
     private RecyclerView drawerMenu;
-
     private SearchView searchView;
-
     private SongViewModel songViewModel;
 
     @Override
@@ -194,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    
     private void doAnimate(float scaleRatioX){
 
         fragmentFullScreen.animate().scaleY(scaleRatioX).scaleX(scaleRatioX)

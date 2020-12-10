@@ -16,7 +16,6 @@ import java.util.List;
 public class SongDbHelper {
     private static final String TAG = "TESST";
     private Application application;
-
     public SongDbHelper(Application newApplication) {
         application = newApplication;
     }
