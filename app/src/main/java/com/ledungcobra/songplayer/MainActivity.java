@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ledungcobra.songplayer.fragment.ScreenHolderFragment;
+import com.ledungcobra.songplayer.fragment.MusicPlayerFragment;
 import com.ledungcobra.songplayer.ui_adaper.DrawerAdapter;
 import com.ledungcobra.songplayer.ui_adaper.adaper_item.DrawerItem;
 
@@ -30,10 +30,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_song_player);
+        setContentView(R.layout.main_activity);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment_container,new ScreenHolderFragment());
+
+        ft.replace(R.id.fragment_container ,MusicPlayerFragment.newInstance());
         ft.commit();
 
 
