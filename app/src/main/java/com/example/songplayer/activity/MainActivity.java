@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +34,7 @@ import com.example.songplayer.adapter.adaper_item.DrawerItem;
 import com.example.songplayer.dao.AlbumDAO;
 import com.example.songplayer.dao.ArtistDAO;
 import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.viewmodel.SongViewModel;
 
@@ -47,14 +51,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView drawerMenu;
 
     private SearchView searchView;
-
-    private RecyclerView singerListView;
-    private List<String> singers;
-    private HorizontalAdapter singerListAdapter;
-
-    private RecyclerView catalogueListView;
-    private List<String> catalogues;
-    private VerticalAdapter catalogueAdapter;
 
     private SongViewModel songViewModel;
 
@@ -97,49 +93,16 @@ public class MainActivity extends AppCompatActivity {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
-        setUpSingerListView();
-        setUpCatalogueListView();
+
+        DashboardFragment dashboardFragment = new DashboardFragment();
+
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.container, dashboardFragment);
+        transaction.commit();
     }
 
-    private void setUpCatalogueListView() {
-        catalogueListView = findViewById(R.id.lstCatalogueList);
-        catalogues = new ArrayList<>();
-        catalogueAdapter = new VerticalAdapter(this, catalogues);
-        catalogueListView.setAdapter(catalogueAdapter);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        catalogueListView.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(catalogueListView.getContext(),
-                ((LinearLayoutManager) layoutManager).getOrientation());
-        catalogueListView.addItemDecoration(dividerItemDecoration);
-        catalogues.add("The Kings");
-        catalogues.add("DSK - Playlist #1");
-        catalogues.add("DSK - Playlist #2");
-        catalogues.add("Hoa Hải Đường");
-        catalogues.add("Gặp lại nhưng không ở lại");
-        catalogues.add("Tình khúc quê hương");
-        catalogues.add("Sai lầm của anh");
-        catalogueAdapter.notifyDataSetChanged();
-    }
 
-    private void setUpSingerListView() {
-        singerListView = findViewById(R.id.lstSinger);
-        singers = new ArrayList<>();
-        singerListAdapter = new HorizontalAdapter(this, singers);
-        singerListView.setAdapter(singerListAdapter);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        singerListView.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(singerListView.getContext(),
-                ((LinearLayoutManager) layoutManager).getOrientation());
-        singerListView.addItemDecoration(dividerItemDecoration);
-        singers.add("Den Vau");
-        singers.add("Kimmese");
-        singers.add("Bich Phuong");
-        singers.add("DSK");
-        singers.add("Karik");
-        singers.add("Phuong Ly");
-        singers.add("Wowy");
-        singerListAdapter.notifyDataSetChanged();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -225,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
     private void doAnimate(float scaleRatioX){
 
         fragmentFullScreen.animate().scaleY(scaleRatioX).scaleX(scaleRatioX)

@@ -16,7 +16,6 @@ public class SongRepo {
 
     private SongDAOImp songDAO;
     private OnlSongDAOImp onlSongDAOImp;
-
     private MutableLiveData<List<SongEntity>> allSongs;
     private MutableLiveData<List<SongEntity>> allOnlineSongs;
 
