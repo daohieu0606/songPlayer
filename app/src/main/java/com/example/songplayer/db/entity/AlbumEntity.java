@@ -7,6 +7,13 @@ public class AlbumEntity {
     private String albumName;
     private Uri artUri;
 
+    public AlbumEntity() {
+    }
+
+    public AlbumEntity(String albumName) {
+        this.albumName = albumName;
+    }
+
     public Uri getArtUri() {
         return artUri;
     }

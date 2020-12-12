@@ -12,6 +12,18 @@ public class SongEntity implements MySong {
         id = random.nextInt();
     }
 
+    public SongEntity(String songName, String uriString, String path, double size, String artist, String singer, boolean isFavorite) {
+        Random random = new Random();
+        this.id = random.nextInt();
+        this.songName = songName;
+        this.uriString = uriString;
+        this.path = path;
+        this.size = size;
+        this.artist = artist;
+        this.singer = singer;
+        this.isFavorite = isFavorite;
+    }
+
     private int id;
     private String songName;
     private String uriString;
