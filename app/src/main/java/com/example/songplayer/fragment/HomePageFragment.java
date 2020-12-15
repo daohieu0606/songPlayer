@@ -1,4 +1,4 @@
-package com.ledungcobra.songplayer.fragment;
+package com.example.songplayer.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

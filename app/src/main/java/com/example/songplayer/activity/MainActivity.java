@@ -1,5 +1,16 @@
 package com.example.songplayer.activity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.ImageView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -11,36 +22,18 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.ImageView;
-
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
-import com.example.songplayer.adapter.HorizontalAdapter;
-import com.example.songplayer.adapter.VerticalAdapter;
 import com.example.songplayer.adapter.adaper_item.DrawerItem;
-import com.example.songplayer.dao.AlbumDAO;
-import com.example.songplayer.dao.ArtistDAO;
 import com.example.songplayer.db.entity.SongEntity;
-import com.example.songplayer.fragment.DashboardFragment;
+import com.example.songplayer.fragment.MusicPlayerFragment;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.utils.ArtistDbHelper;
 import com.example.songplayer.viewmodel.SongViewModel;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,8 +54,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         checkAndRequestPermission();
-        setUp();
         bindViews();
+
+        setUp();
 
         songViewModel = new ViewModelProvider(this,
                 new ViewModelProvider.Factory() {
@@ -100,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
 
-        DashboardFragment dashboardFragment = new DashboardFragment();
+        Fragment dashboardFragment = new MusicPlayerFragment();
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -145,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void bindViews(){
         btnDrawer = findViewById(R.id.btnDrawer);
+        fragmentFullScreen = findViewById(R.id.fragment_full_screen);
 
         drawerMenu = findViewById(R.id.rv_drawer_menu);
 
@@ -167,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         drawerMenu.setAdapter(adapter);
-        fragmentFullScreen = findViewById(R.id.fragment_full_screen);
         final float scaleRatio = 0.65f;
 
         btnDrawer.setOnClickListener(new View.OnClickListener() {

@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -46,11 +47,15 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/btnPause2"
+        <ImageButton
+            android:background="@android:color/transparent"
+
+            android:scaleType="centerInside"
+            android:id="@+id/ibtnPlay2"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:tag="@string/pause_ic"
             android:paddingHorizontal="5dp"
             android:paddingVertical="7dp"
             android:src="@drawable/pauseic"
@@ -113,7 +118,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:progress="10" />
+            android:progress="10"
+            android:contextClickable="false"
+            tools:ignore="NestedWeights" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -131,53 +138,60 @@
         android:paddingVertical="5dp">
 
         <ImageButton
-            android:id="@+id/btnLove"
+            android:id="@+id/ibtnLove"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
-            android:src="@drawable/favsic" />
-
-        <ImageButton
-            android:id="@+id/btnBackward"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
-            android:src="@drawable/backwardic" />
-
-        <ImageButton
-            android:id="@+id/btnPause"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
-            android:src="@drawable/pauseic" />
-
-        <ImageButton
-            android:id="@+id/btnForward"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
-            android:src="@drawable/forwardic" />
-
-        <ImageButton
-            android:id="@+id/btnDownload"
-            android:layout_width="0dp"
+            android:tag="@string/not_love"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@android:color/transparent"
             android:scaleX="0.6"
             android:scaleY="0.6"
+            android:scaleType="centerInside"
+            android:src="@drawable/favsic" />
+
+        <ImageButton
+            android:id="@+id/ibtnBackward"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            android:scaleType="centerInside"
+            android:src="@drawable/backwardic" />
+
+        <ImageButton
+            android:id="@+id/ibtnPlay"
+            android:layout_width="0dp"
+            android:tag="@string/pause_ic"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:scaleX="0.6"
+            android:scaleY="0.6"
+            android:scaleType="centerInside"
+            android:src="@drawable/pauseic" />
+
+        <ImageButton
+            android:id="@+id/ibtnForward"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            android:scaleType="centerInside"
+            android:src="@drawable/forwardic" />
+
+        <ImageButton
+            android:id="@+id/ibtnDownload"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            android:scaleType="centerInside"
             android:src="@drawable/newdownload" />
 
     </LinearLayout>

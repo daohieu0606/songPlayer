@@ -2,4 +2,8 @@
     <string name="app_name">songPlayer</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pause_ic">pause_ic</string>
+    <string name="not_love">!love</string>
+    <string name="play_ic">play_ic</string>
+    <string name="love">love</string>
 </resources>
