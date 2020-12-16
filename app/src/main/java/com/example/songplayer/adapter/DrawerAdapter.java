@@ -1,91 +1,114 @@
 package com.example.songplayer.adapter;
 
-import android.graphics.Color;
-import android.view.LayoutInflater;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.songplayer.R;
 import com.example.songplayer.adapter.adaper_item.DrawerItem;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder> {
 
-    private OnDrawerItemClickListener listener;
-    List<DrawerItem> drawerItemList;
+    private List<DrawerItem> items;
+    private Map<Class<? extends DrawerItem>, Integer> viewTypes;
+    private SparseArray<DrawerItem> holderFactories;
 
-    public DrawerAdapter(List<DrawerItem> drawerItems){
-        this.drawerItemList = drawerItems;
-    }
+    private OnItemSelectedListener listener;
 
-    public void setOnItemClickListener(OnDrawerItemClickListener listener){
-        this.listener = listener;
+    public DrawerAdapter(List<DrawerItem> items) {
+        this.items = items;
+        this.viewTypes = new HashMap<>();
+        this.holderFactories = new SparseArray<>();
+
+        processViewTypes();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater =  LayoutInflater.from(parent.getContext());
-        View itemView = inflater.inflate(R.layout.drawer_item,parent,false);
-
-        if(viewType == 1){
-            itemView = inflater.inflate(R.layout.drawer_item_underlined,parent,false);
-        }
-
-        return new ViewHolder(itemView);
+        ViewHolder holder = holderFactories.get(viewType).createViewHolder(parent);
+        holder.adapter = this;
+        return holder;
     }
 
+
+
     @Override
+    @SuppressWarnings("unchecked")
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onClick(drawerItemList.get(position));
-            }
-        });
-
-        holder.imgIcon.setImageResource(drawerItemList.get(position).getIconID());
-        holder.tvDrawerItemTitle.setText(drawerItemList.get(position).getDrawerTitle());
-
-        if(position == 3){
-            holder.tvCategory.setText("Community");
-        }
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if(position == 3){
-            return 1;
-        }
-        return 0;
+        items.get(position).bindViewHolder(holder);
     }
 
     @Override
     public int getItemCount() {
-        return drawerItemList.size();
+        return items.size();
     }
 
-    public static class ViewHolder extends  RecyclerView.ViewHolder{
-        public ImageView imgIcon;
-        public TextView tvDrawerItemTitle;
-        public TextView tvCategory;
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imgIcon = itemView.findViewById(R.id.imv_icon);
-            imgIcon.setColorFilter(Color.WHITE);
-            tvDrawerItemTitle = itemView.findViewById(R.id.tv_menu_title);
-            tvCategory = itemView.findViewById(R.id.tv_menu_category);
+    @Override
+    public int getItemViewType(int position) {
+        return viewTypes.get(items.get(position).getClass());
+    }
+
+    private void processViewTypes() {
+        int type = 0;
+        for (DrawerItem item : items) {
+            if (!viewTypes.containsKey(item.getClass())) {
+                viewTypes.put(item.getClass(), type);
+                holderFactories.put(type, item);
+                type++;
+            }
         }
     }
 
-    public interface OnDrawerItemClickListener{
-        void onClick(DrawerItem item);
+    public void setSelected(int position) {
+        DrawerItem newChecked = items.get(position);
+        if (!newChecked.isSelectable()) {
+            return;
+        }
+
+        for (int i = 0; i < items.size(); i++) {
+            DrawerItem item = items.get(i);
+            if (item.isChecked()) {
+                item.setChecked(false);
+                notifyItemChanged(i);
+                break;
+            }
+        }
+
+        newChecked.setChecked(true);
+        notifyItemChanged(position);
+
+        if (listener != null) {
+            listener.onItemSelected(position);
+        }
+    }
+
+    public void setListener(OnItemSelectedListener listener) {
+        this.listener = listener;
+    }
+
+    public static abstract class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        private DrawerAdapter adapter;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            adapter.setSelected(getAdapterPosition());
+        }
+    }
+
+    public interface OnItemSelectedListener {
+        void onItemSelected(int position);
     }
 }

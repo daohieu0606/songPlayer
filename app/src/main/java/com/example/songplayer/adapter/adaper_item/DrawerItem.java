@@ -1,27 +1,27 @@
 package com.example.songplayer.adapter.adaper_item;
+import android.view.ViewGroup;
+import com.example.songplayer.adapter.DrawerAdapter;
 
-public class DrawerItem {
-    private int iconID;
-    private String drawerTitle;
 
-    public DrawerItem(int iconID, String drawerTitle) {
-        this.iconID = iconID;
-        this.drawerTitle = drawerTitle;
+public abstract class DrawerItem<T extends DrawerAdapter.ViewHolder> {
+
+    protected boolean isChecked;
+
+    public abstract T createViewHolder(ViewGroup parent);
+
+    public abstract void bindViewHolder(T holder);
+
+    public DrawerItem<T> setChecked(boolean isChecked) {
+        this.isChecked = isChecked;
+        return this;
     }
 
-    public int getIconID() {
-        return iconID;
+    public boolean isChecked() {
+        return isChecked;
     }
 
-    public void setIconID(int iconID) {
-        this.iconID = iconID;
+    public boolean isSelectable() {
+        return true;
     }
 
-    public String getDrawerTitle() {
-        return drawerTitle;
-    }
-
-    public void setDrawerTitle(String drawerTitle) {
-        this.drawerTitle = drawerTitle;
-    }
 }

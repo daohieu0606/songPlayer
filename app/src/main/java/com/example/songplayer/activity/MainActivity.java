@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,41 +20,44 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
-import com.example.songplayer.adapter.adaper_item.DrawerItem;
 import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.fragment.MusicPlayerFragment;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.utils.ArtistDbHelper;
+import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
+import com.yarolegovich.slidingrootnav.SlidingRootNav;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
+import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
 
-    private static final String TAG = "TESST";
-    ImageView btnDrawer;
-    View fragmentFullScreen;
-    boolean btnDrawerClicked = false;
+public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnItemSelectedListener{
 
-    private RecyclerView drawerMenu;
+    //VIEW
     private SearchView searchView;
     private SongViewModel songViewModel;
+    private SlidingRootNav slidingRootNav;
+    //DATA
+    private static final String TAG = "TESST";
+    private Bundle savedInstance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.savedInstance = savedInstanceState;
 
         checkAndRequestPermission();
         bindViews();
-
         setUp();
+
 
         songViewModel = new ViewModelProvider(this,
                 new ViewModelProvider.Factory() {
@@ -86,15 +87,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUp() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         if (Build.VERSION.SDK_INT >= 21) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
-
-        Fragment dashboardFragment = new MusicPlayerFragment();
+        
+        Fragment dashboardFragment = new DashboardFragment();
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -138,68 +137,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bindViews(){
-        btnDrawer = findViewById(R.id.btnDrawer);
-        fragmentFullScreen = findViewById(R.id.fragment_full_screen);
 
-        drawerMenu = findViewById(R.id.rv_drawer_menu);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        drawerMenu.setLayoutManager(new LinearLayoutManager(this));
-        DrawerAdapter adapter = new DrawerAdapter(Arrays.asList(
-                new DrawerItem(R.drawable.ic_home,"Home"),
-                new DrawerItem(R.drawable.ic_category,"Category"),
-                new DrawerItem(R.drawable.ic_favorite,"Favorite"),
-                new DrawerItem(R.drawable.downloadic,"Download"),
-                new DrawerItem(R.drawable.ic_share, "Share"),
-                new DrawerItem(R.drawable.ic_rate, "Rate App"),
-                new DrawerItem(R.drawable.ic_more_app,"More App")
-        ));
-
-        adapter.setOnItemClickListener(new DrawerAdapter.OnDrawerItemClickListener() {
-            @Override
-            public void onClick(DrawerItem item) {
-
-            }
-        });
-
-        drawerMenu.setAdapter(adapter);
-        final float scaleRatio = 0.65f;
-
-        btnDrawer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!btnDrawerClicked) {
-                    doAnimate(scaleRatio);
-                }else{
-                    reverseAnimate(scaleRatio);
-                }
-
-                btnDrawerClicked = !btnDrawerClicked;
-            }
-        });
-
-        fragmentFullScreen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(btnDrawerClicked){
-                    reverseAnimate(scaleRatio);
-                    btnDrawerClicked = !btnDrawerClicked;
-                }
-            }
-        });
-    }
-    
-    private void doAnimate(float scaleRatioX){
-
-        fragmentFullScreen.animate().scaleY(scaleRatioX).scaleX(scaleRatioX)
-                .setDuration(500)
-                .translationXBy(fragmentFullScreen.getMeasuredWidth()*(1-scaleRatioX)/1.5f)
-                .start();
-    }
-    private void reverseAnimate(float scaleRatioX){
-        fragmentFullScreen.animate().scaleY(1f).scaleX(1f)
-                .setDuration(500)
-                .translationXBy(-fragmentFullScreen.getMeasuredWidth()*(1-scaleRatioX)/1.5f)
-                .start();
+        //Creating Drawer
+        final DrawerCreater drawerCreater = new DrawerCreater(this,toolbar);
+        this.slidingRootNav = drawerCreater.createDrawer();
     }
 
+    @Override
+    public void onItemSelected(int position) {
+        Fragment fragment = null;
+
+        if (position == POS_HOME) {
+            //TODO: Order accepted
+            fragment = new DashboardFragment();
+        } else if (position == POS_MUSIC){
+            fragment = new MusicPlayerFragment();
+        }
+        if(slidingRootNav!=null ){
+            slidingRootNav.closeMenu();
+        }
+
+        showFragment(fragment);
+    }
+
+    private void showFragment(Fragment fragment) {
+        if (fragment == null) return;
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
+    }
+
+    public Bundle getSavedInstance(){
+        return this.savedInstance;
+    }
+
+    public RecyclerView getMenu(){
+        return findViewById(R.id.list);
+    }
 }
