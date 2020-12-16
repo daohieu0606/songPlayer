@@ -144,7 +144,9 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
 
         //Creating Drawer
         final DrawerCreater drawerCreater = new DrawerCreater(this,toolbar);
-        this.slidingRootNav = drawerCreater.createDrawer();
+
+        getSupportActionBar().setHomeAsUpIndicator(getDrawable(R.drawable.ic_baseline_format_list_bulleted_24));       this.slidingRootNav = drawerCreater.createDrawer();
+
     }
 
     @Override
