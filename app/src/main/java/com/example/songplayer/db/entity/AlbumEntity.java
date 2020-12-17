@@ -2,9 +2,18 @@ package com.example.songplayer.db.entity;
 
 import android.net.Uri;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class AlbumEntity {
+    @PrimaryKey
+    @ColumnInfo(name = "id")
     private int id;
+    @ColumnInfo(name = "albumName")
     private String albumName;
+    @ColumnInfo(name = "artUri")
     private Uri artUri;
 
     public Uri getArtUri() {

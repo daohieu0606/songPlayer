@@ -2,12 +2,15 @@ package com.example.songplayer.dao;
 
 import android.app.Application;
 import androidx.lifecycle.MutableLiveData;
+import androidx.room.Dao;
+
 import com.example.songplayer.db.entity.AlbumEntity;
 import com.example.songplayer.utils.AlbumDbHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Dao
 public class AlbumDAO {
     private MutableLiveData<List<AlbumEntity>> albumMutableLiveData;
     private Application application;

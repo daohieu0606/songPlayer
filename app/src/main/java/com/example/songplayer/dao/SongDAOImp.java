@@ -3,6 +3,9 @@ package com.example.songplayer.dao;
 import android.app.Application;
 
 import androidx.lifecycle.MutableLiveData;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Update;
 
 import com.example.songplayer.utils.SongDbHelper;
 import com.example.songplayer.db.entity.SongEntity;
@@ -34,6 +37,7 @@ public class SongDAOImp implements SongDAO{
         return listMutableLiveData;
     }
 
+    @Delete
     public void delete(int ID) {
         SongEntity delSong = null;
         for (SongEntity tmpSong :
@@ -47,11 +51,13 @@ public class SongDAOImp implements SongDAO{
         listMutableLiveData.postValue(songDbHelper.getAllSongs());
     }
 
+    @Insert
     public void insert(SongEntity songEntity) {
         songDbHelper.insert(songEntity);
         listMutableLiveData.postValue(songDbHelper.getAllSongs());
     }
 
+    @Update
     public void update(SongEntity songEntity) {
         songDbHelper.updateSong(songEntity);
         listMutableLiveData.postValue(songDbHelper.getAllSongs());

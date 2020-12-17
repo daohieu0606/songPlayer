@@ -1,9 +1,14 @@
 package com.example.songplayer.db.entity;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.example.songplayer.model.MySong;
 
 import java.util.Random;
 
+@Entity
 public class SongEntity implements MySong {
 
     public SongEntity() {
@@ -11,14 +16,29 @@ public class SongEntity implements MySong {
         songName = String.valueOf(random.nextDouble());
         id = random.nextInt();
     }
-
+    @PrimaryKey
+    @ColumnInfo(name = "id")
     private int id;
+
+    @ColumnInfo(name = "song_name")
     private String songName;
+
+    @ColumnInfo(name = "URI")
     private String uriString;
+
+    @ColumnInfo(name = "path")
     private String path;
+
+    @ColumnInfo(name = "size")
     private double size;
+
+    @ColumnInfo(name = "artist")
     private String artist;
+
+    @ColumnInfo(name = "singer")
     private String singer;
+
+    @ColumnInfo(name = "isFavorite")
     private boolean isFavorite;
 
     @Override
