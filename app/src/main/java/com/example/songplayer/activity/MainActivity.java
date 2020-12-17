@@ -14,19 +14,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
 import com.example.songplayer.db.entity.SongEntity;
-import com.example.songplayer.fragment.DashboardFragment;
-import com.example.songplayer.fragment.MusicPlayerFragment;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.utils.ArtistDbHelper;
 import com.example.songplayer.utils.DrawerCreater;
@@ -44,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     private SearchView searchView;
     private SongViewModel songViewModel;
     private SlidingRootNav slidingRootNav;
+    private NavHostFragment navHostFragment ;
+    private NavController navController;
     //DATA
     private static final String TAG = "TESST";
     private Bundle savedInstance;
@@ -92,14 +91,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
-        
-        Fragment dashboardFragment = new DashboardFragment();
-
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.container, dashboardFragment);
-
-        transaction.commit();
+        navController.navigate(R.id.action_play_music);
     }
 
     @Override
@@ -137,6 +129,9 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     }
 
     private void bindViews(){
+        //Set up nav controller
+        this.navHostFragment=(NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        navController = navHostFragment.getNavController();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -144,30 +139,26 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
 
         //Creating Drawer
         final DrawerCreater drawerCreater = new DrawerCreater(this,toolbar);
-        this.slidingRootNav = drawerCreater.createDrawer();
+
+        getSupportActionBar().setHomeAsUpIndicator(getDrawable(R.drawable.ic_baseline_format_list_bulleted_24));       this.slidingRootNav = drawerCreater.createDrawer();
+
     }
 
     @Override
     public void onItemSelected(int position) {
-        Fragment fragment = null;
 
         if (position == POS_HOME) {
-            //TODO: Order accepted
-            fragment = new DashboardFragment();
+            navController.navigate(R.id.dashboardFragment);
         } else if (position == POS_MUSIC){
-            fragment = new MusicPlayerFragment();
+            navController.navigate(R.id.musicPlayerFragment);
         }
         if(slidingRootNav!=null ){
             slidingRootNav.closeMenu();
         }
 
-        showFragment(fragment);
     }
 
-    private void showFragment(Fragment fragment) {
-        if (fragment == null) return;
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
-    }
+
 
     public Bundle getSavedInstance(){
         return this.savedInstance;
