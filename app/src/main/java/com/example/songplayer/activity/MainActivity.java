@@ -23,12 +23,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
+import com.example.songplayer.adapter.HorizontalAdapter;
+import com.example.songplayer.adapter.VerticalAdapter;
+import com.example.songplayer.adapter.adaper_item.DrawerItem;
+import com.example.songplayer.dao.AlbumDAO;
+import com.example.songplayer.dao.ArtistDAO;
+import com.example.songplayer.db.entity.AlbumEntity;
+import com.example.songplayer.db.entity.ArtistEntity;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.utils.ArtistDbHelper;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -52,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.savedInstance = savedInstanceState;
+
 
         checkAndRequestPermission();
         bindViews();
