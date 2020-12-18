@@ -51,7 +51,7 @@
             android:background="@android:color/transparent"
 
             android:scaleType="centerInside"
-            android:id="@+id/ibtnPlay2"
+            android:id="@+id/btnPlay2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -85,6 +85,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/txtSongTittle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Forest birds"
@@ -92,6 +93,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/txtArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Animals"
@@ -102,6 +104,7 @@
     <!--        end song name-->
     <!--        music time line-->
     <LinearLayout
+        android:id="@+id/timeControlContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -137,20 +140,23 @@
         android:paddingHorizontal="5dp"
         android:paddingVertical="5dp">
 
-        <ImageButton
-            android:id="@+id/ibtnLove"
+        <ToggleButton
+            android:height="25dp"
+            android:width="25dp"
+            android:textOn=""
+            android:textOff=""
+            android:id="@+id/btnLove"
             android:layout_width="0dp"
             android:tag="@string/not_love"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="@drawable/selector_favorite"
             android:scaleX="0.6"
             android:scaleY="0.6"
-            android:scaleType="centerInside"
-            android:src="@drawable/favsic" />
+            android:scaleType="centerInside"/>
 
         <ImageButton
-            android:id="@+id/ibtnBackward"
+            android:id="@+id/btnBackward"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -160,20 +166,23 @@
             android:scaleType="centerInside"
             android:src="@drawable/backwardic" />
 
-        <ImageButton
-            android:id="@+id/ibtnPlay"
+        <ToggleButton
+            android:height="25dp"
+            android:width="25dp"
+            android:textOff=""
+            android:textOn=""
+            android:id="@+id/btnPlay"
             android:layout_width="0dp"
             android:tag="@string/pause_ic"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:background="@drawable/selector_pause_resume"
             android:scaleX="0.6"
             android:scaleY="0.6"
-            android:scaleType="centerInside"
-            android:src="@drawable/pauseic" />
+            android:scaleType="centerInside"/>
 
         <ImageButton
-            android:id="@+id/ibtnForward"
+            android:id="@+id/btnForward"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -184,7 +193,7 @@
             android:src="@drawable/forwardic" />
 
         <ImageButton
-            android:id="@+id/ibtnDownload"
+            android:id="@+id/btnDownload"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

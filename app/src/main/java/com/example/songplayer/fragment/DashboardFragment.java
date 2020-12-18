@@ -1,6 +1,7 @@
 package com.example.songplayer.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import java.util.List;
 
 public class DashboardFragment extends Fragment {
 
+    private static final String TAG = "DASHBOARD";
     private MainActivity mainActivity;
 
     private RecyclerView lstArtists;
@@ -43,6 +45,7 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         albumViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
             @NonNull
             @Override
@@ -72,6 +75,10 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onChanged(List<AlbumEntity> albumEntities) {
                 albumAdapter.setAlbum(albumEntities);
+                for (AlbumEntity entity :
+                        albumEntities) {
+                    Log.d(TAG, "onChanged: " + entity.getArtUri().toString());
+                }
             }
         });
 

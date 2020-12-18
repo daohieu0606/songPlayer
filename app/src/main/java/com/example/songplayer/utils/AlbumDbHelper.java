@@ -3,6 +3,7 @@ package com.example.songplayer.utils;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -46,6 +47,7 @@ public class AlbumDbHelper {
             cursor.moveToNext();
         }
         cursor.close();
+
         return albumEntities;
     }
 

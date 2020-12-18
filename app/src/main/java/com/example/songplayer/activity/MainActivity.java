@@ -9,6 +9,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -17,31 +20,16 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
-import com.example.songplayer.adapter.HorizontalAdapter;
-import com.example.songplayer.adapter.VerticalAdapter;
-import com.example.songplayer.adapter.adaper_item.DrawerItem;
-import com.example.songplayer.dao.AlbumDAO;
-import com.example.songplayer.dao.ArtistDAO;
-import com.example.songplayer.db.entity.AlbumEntity;
-import com.example.songplayer.db.entity.ArtistEntity;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.utils.ArtistDbHelper;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -96,6 +84,9 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     private void checkAndRequestPermission() {
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 7003);
+        }
+        if (checkSelfPermission(Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] { Manifest.permission.WAKE_LOCK}, 7004);
         }
     }
 
@@ -154,7 +145,8 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         //Creating Drawer
         final DrawerCreater drawerCreater = new DrawerCreater(this,toolbar);
 
-        getSupportActionBar().setHomeAsUpIndicator(getDrawable(R.drawable.ic_baseline_format_list_bulleted_24));       this.slidingRootNav = drawerCreater.createDrawer();
+        getSupportActionBar().setHomeAsUpIndicator(getDrawable(R.drawable.ic_baseline_format_list_bulleted_24));
+        this.slidingRootNav = drawerCreater.createDrawer();
 
     }
 
@@ -171,8 +163,6 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         }
 
     }
-
-
 
     public Bundle getSavedInstance(){
         return this.savedInstance;

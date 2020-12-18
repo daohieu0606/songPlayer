@@ -1,6 +1,8 @@
 package com.example.songplayer.adapter;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.AlbumEntity;
 
@@ -19,6 +23,7 @@ import java.util.Random;
 
 public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder>{
 
+    private static final String TAG = "ALBUM_ADAPTER";
     private List<AlbumEntity> itemList;
     private Activity activity;
     private int[] itemBackground;
@@ -77,8 +82,12 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder>{
     public void onBindViewHolder(@NonNull AlbumAdapter.ViewHolder holder, int position) {
         if (0 <= position && itemList.size() > position) {
             holder.txtCatalogueName.setText(itemList.get(position).getAlbumName());
-            if (itemList.get(position).getArtUri() != null) {
-                holder.albumThumbnail.setImageURI(itemList.get(position).getArtUri());
+            if (itemList.get(position).getArtUri() != null && itemList.get(position).getId() > 0) {
+             //   holder.albumThumbnail.setImageURI(itemList.get(position).getArtUri());
+
+                /*Glide.with(activity).load(itemList.get(position).getArtUri().getPath())
+                        .apply(new RequestOptions().centerCrop())
+                        .into(holder.albumThumbnail);*/
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.ledungcobra.songplayer.ui_adaper;
+package com.example.songplayer.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
