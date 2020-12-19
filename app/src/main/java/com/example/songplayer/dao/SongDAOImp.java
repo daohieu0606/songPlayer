@@ -30,10 +30,12 @@ public class SongDAOImp implements SongDAO{
         listMutableLiveData.getValue().addAll(songEntityList);
     }
 
+    @Override
     public MutableLiveData<List<SongEntity>> getAllSongs() {
         return listMutableLiveData;
     }
 
+    @Override
     public void delete(int ID) {
         SongEntity delSong = null;
         for (SongEntity tmpSong :
@@ -47,11 +49,13 @@ public class SongDAOImp implements SongDAO{
         listMutableLiveData.postValue(songDbHelper.getAllSongs());
     }
 
+    @Override
     public void insert(SongEntity songEntity) {
         songDbHelper.insert(songEntity);
         listMutableLiveData.postValue(songDbHelper.getAllSongs());
     }
 
+    @Override
     public void update(SongEntity songEntity) {
         songDbHelper.updateSong(songEntity);
         listMutableLiveData.postValue(songDbHelper.getAllSongs());

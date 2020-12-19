@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
-import com.example.songplayer.db.entity.AlbumEntity;
 
 import java.util.List;
 import java.util.Random;
@@ -61,7 +60,7 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.ViewHo
         VerticalAdapter.ViewHolder result = null;
 
         LayoutInflater inflater = LayoutInflater.from(activity);
-        View view = inflater.inflate(R.layout.item_listview, null);
+        View view = inflater.inflate(R.layout.item_album, null);
         result = new VerticalAdapter.ViewHolder(view);
 
         Random random = new Random();
@@ -86,7 +85,7 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.ViewHo
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            txtCatalogueName = itemView.findViewById(R.id.txtCatalogueName);
+            txtCatalogueName = itemView.findViewById(R.id.txtAlbumName);
         }
     }
 }

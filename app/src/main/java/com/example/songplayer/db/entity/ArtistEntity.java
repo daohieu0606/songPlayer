@@ -4,6 +4,13 @@ public class ArtistEntity {
     private int id;
     private String artistName;
 
+    public ArtistEntity( String artistName) {
+        this.artistName = artistName;
+    }
+
+    public ArtistEntity() {
+    }
+
     public int getId() {
         return id;
     }

@@ -5,58 +5,64 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
+
+import androidx.lifecycle.MutableLiveData;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
-import com.example.songplayer.adapter.adaper_item.DrawerItem;
 import com.example.songplayer.db.entity.SongEntity;
-import com.example.songplayer.fragment.MusicPlayerFragment;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.utils.ArtistDbHelper;
+import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
+import com.yarolegovich.slidingrootnav.SlidingRootNav;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
+import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
 
-    private static final String TAG = "TESST";
-    ImageView btnDrawer;
-    View fragmentFullScreen;
-    boolean btnDrawerClicked = false;
+public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnItemSelectedListener{
 
-    private RecyclerView drawerMenu;
+    //VIEW
     private SearchView searchView;
     private SongViewModel songViewModel;
+    private SlidingRootNav slidingRootNav;
+    private NavHostFragment navHostFragment ;
+    private NavController navController;
+    //DATA
+    private static final String TAG = "TESST";
+    private Bundle savedInstance;
+    private MutableLiveData<Boolean> menuClosed = new MutableLiveData<>(true);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.savedInstance = savedInstanceState;
+
 
         checkAndRequestPermission();
         bindViews();
-
         setUp();
+
 
         songViewModel = new ViewModelProvider(this,
                 new ViewModelProvider.Factory() {
@@ -83,24 +89,18 @@ public class MainActivity extends AppCompatActivity {
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 7003);
         }
+        if (checkSelfPermission(Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] { Manifest.permission.WAKE_LOCK}, 7004);
+        }
     }
 
     private void setUp() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         if (Build.VERSION.SDK_INT >= 21) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
-
-        Fragment dashboardFragment = new MusicPlayerFragment();
-
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.container, dashboardFragment);
-
-        transaction.commit();
+        navController.navigate(R.id.action_play_music);
     }
 
     @Override
@@ -138,68 +138,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bindViews(){
-        btnDrawer = findViewById(R.id.btnDrawer);
-        fragmentFullScreen = findViewById(R.id.fragment_full_screen);
+        //Set up nav controller
+        this.navHostFragment=(NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        navController = navHostFragment.getNavController();
 
-        drawerMenu = findViewById(R.id.rv_drawer_menu);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        drawerMenu.setLayoutManager(new LinearLayoutManager(this));
-        DrawerAdapter adapter = new DrawerAdapter(Arrays.asList(
-                new DrawerItem(R.drawable.ic_home,"Home"),
-                new DrawerItem(R.drawable.ic_category,"Category"),
-                new DrawerItem(R.drawable.ic_favorite,"Favorite"),
-                new DrawerItem(R.drawable.downloadic,"Download"),
-                new DrawerItem(R.drawable.ic_share, "Share"),
-                new DrawerItem(R.drawable.ic_rate, "Rate App"),
-                new DrawerItem(R.drawable.ic_more_app,"More App")
-        ));
+        //Creating Drawer
+        final DrawerCreater drawerCreater = new DrawerCreater(this,toolbar);
 
-        adapter.setOnItemClickListener(new DrawerAdapter.OnDrawerItemClickListener() {
+        getSupportActionBar().setHomeAsUpIndicator(getDrawable(R.drawable.ic_baseline_format_list_bulleted_24));
+        this.slidingRootNav = drawerCreater.createDrawer();
+        
+        slidingRootNav.getLayout().setOnDragListener(new View.OnDragListener() {
             @Override
-            public void onClick(DrawerItem item) {
+            public boolean onDrag(View view, DragEvent dragEvent) {
 
+                Log.d(TAG, "onDrag: ");
+                return false;
             }
         });
 
-        drawerMenu.setAdapter(adapter);
-        final float scaleRatio = 0.65f;
 
-        btnDrawer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!btnDrawerClicked) {
-                    doAnimate(scaleRatio);
-                }else{
-                    reverseAnimate(scaleRatio);
-                }
-
-                btnDrawerClicked = !btnDrawerClicked;
-            }
-        });
-
-        fragmentFullScreen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(btnDrawerClicked){
-                    reverseAnimate(scaleRatio);
-                    btnDrawerClicked = !btnDrawerClicked;
-                }
-            }
-        });
-    }
-    
-    private void doAnimate(float scaleRatioX){
-
-        fragmentFullScreen.animate().scaleY(scaleRatioX).scaleX(scaleRatioX)
-                .setDuration(500)
-                .translationXBy(fragmentFullScreen.getMeasuredWidth()*(1-scaleRatioX)/1.5f)
-                .start();
-    }
-    private void reverseAnimate(float scaleRatioX){
-        fragmentFullScreen.animate().scaleY(1f).scaleX(1f)
-                .setDuration(500)
-                .translationXBy(-fragmentFullScreen.getMeasuredWidth()*(1-scaleRatioX)/1.5f)
-                .start();
     }
 
+    @Override
+    public void onItemSelected(int position) {
+
+        if (position == POS_HOME) {
+            navController.navigate(R.id.dashboardFragment);
+        } else if (position == POS_MUSIC){
+            navController.navigate(R.id.musicPlayerFragment);
+        }
+        if(slidingRootNav!=null ){
+            slidingRootNav.closeMenu();
+        }
+
+    }
+
+    public Bundle getSavedInstance(){
+        return this.savedInstance;
+    }
+
+    public RecyclerView getMenu(){
+        return findViewById(R.id.list);
+    }
 }
