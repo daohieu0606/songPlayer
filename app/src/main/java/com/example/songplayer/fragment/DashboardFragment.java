@@ -1,39 +1,34 @@
 package com.example.songplayer.fragment;
 
+import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.songplayer.Data.DummyData;
 import com.example.songplayer.R;
 import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.adapter.AlbumAdapter;
-import com.example.songplayer.adapter.ArtistAdapter;
-import com.example.songplayer.db.entity.AlbumEntity;
-import com.example.songplayer.db.entity.ArtistEntity;
+import com.example.songplayer.adapter.SongAdapter;
+import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.viewmodel.AlbumViewModel;
 import com.example.songplayer.viewmodel.ArtistViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class DashboardFragment extends Fragment {
+public class DashboardFragment extends Fragment implements SongAdapter.SongAdapterCallback {
 
     private static final String TAG = "DASHBOARD";
     private MainActivity mainActivity;
 
-    private RecyclerView lstArtists;
-    private ArtistAdapter artistAdapter;
+    private RecyclerView rvSongs;
+    private SongAdapter songAdapter;
     private ArtistViewModel artistViewModel;
 
     private RecyclerView lstAlbums;
@@ -68,55 +63,90 @@ public class DashboardFragment extends Fragment {
                              Bundle savedInstanceState) {
         View result = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
-        setUpSingerListView(result);
+        setUpSongListView(result);
         setUpAlbumList(result);
 
-        albumViewModel.getAllAlbums().observe(getActivity(), new Observer<List<AlbumEntity>>() {
-            @Override
-            public void onChanged(List<AlbumEntity> albumEntities) {
-                albumAdapter.setAlbum(albumEntities);
-                for (AlbumEntity entity :
-                        albumEntities) {
-                    Log.d(TAG, "onChanged: " + entity.getArtUri().toString());
-                }
-            }
-        });
+//        albumViewModel.getAllAlbums().observe(getActivity(), new Observer<List<AlbumEntity>>() {
+//            @Override
+//            public void onChanged(List<AlbumEntity> albumEntities) {
+//                albumAdapter.setAlbum(albumEntities);
+//                for (AlbumEntity entity :
+//                        albumEntities) {
+//                    Log.d(TAG, "onChanged: " + entity.getArtUri().toString());
+//                }
+//            }
+//        });
 
-        artistViewModel.getAllArtists().observe(getActivity(), new Observer<List<ArtistEntity>>() {
-            @Override
-            public void onChanged(List<ArtistEntity> artistEntities) {
-                artistAdapter.setArtists(artistEntities);
-            }
-        });
+//        artistViewModel.getAllArtists().observe(getActivity(), new Observer<List<ArtistEntity>>() {
+//            @Override
+//            public void onChanged(List<ArtistEntity> artistEntities) {
+//                songAdapter.setArtists(artistEntities);
+//            }
+//        });
         return result;
     }
 
     private void setUpAlbumList(View view) {
-        lstAlbums = view.findViewById(R.id.lstAlbums);
+        lstAlbums = view.findViewById(R.id.rvAlbums);
 
-        albumAdapter = new AlbumAdapter(getActivity(), new ArrayList<AlbumEntity>());
+        albumAdapter = new AlbumAdapter(DummyData.albums);
         lstAlbums.setAdapter(albumAdapter);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         lstAlbums.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(lstAlbums.getContext(),
-                ((LinearLayoutManager) layoutManager).getOrientation());
-        lstAlbums.addItemDecoration(dividerItemDecoration);
+
+        lstAlbums.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                outRect.right = 30;
+
+            }
+        });
         albumAdapter.notifyDataSetChanged();
     }
 
-    private void setUpSingerListView(View view) {
+    private void setUpSongListView(View view) {
 
-        lstArtists = view.findViewById(R.id.lstArtist);
-        artistAdapter = new ArtistAdapter(getActivity());
-        lstArtists.setAdapter(artistAdapter);
+        rvSongs = view.findViewById(R.id.rvSongs);
+        songAdapter = new SongAdapter(DummyData.songs,DummyData.gradients);
+        rvSongs.setAdapter(songAdapter);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        lstArtists.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(lstArtists.getContext(),
-                ((LinearLayoutManager) layoutManager).getOrientation());
-        lstArtists.addItemDecoration(dividerItemDecoration);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        rvSongs.setLayoutManager(layoutManager);
 
-        artistAdapter.notifyDataSetChanged();
+        rvSongs.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                outRect.bottom = 25;
+            }
+        });
+
+        songAdapter.notifyDataSetChanged();
+    }
+
+
+    @Override
+    public void downloadASong(SongEntity song) {
+
+    }
+
+    @Override
+    public void favoriteASong(SongEntity song) {
+
+    }
+
+    @Override
+    public void setASongAsRingTone(SongEntity song) {
+
+    }
+
+    @Override
+    public void setASongAsNotification(SongEntity song) {
+
+    }
+
+    @Override
+    public void setASongAsAlarm(SongEntity song) {
+
     }
 }

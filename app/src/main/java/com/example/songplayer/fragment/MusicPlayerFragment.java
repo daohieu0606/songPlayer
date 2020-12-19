@@ -1,11 +1,7 @@
 package com.example.songplayer.fragment;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.songplayer.R;
 import com.example.songplayer.controller.MusicController;
-import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.service.MusicService;
-import com.example.songplayer.service.MusicService.MusicBinder;
-import com.example.songplayer.utils.SongDbHelper;
 
 
 /**
@@ -49,7 +42,7 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
     private boolean musicBound = false;
 
     private MusicController musicController;
-    private SongEntity currentSong;
+//    private SongEntity currentSong;
 
     public MusicPlayerFragment() {
         // Required empty public constructor
@@ -71,8 +64,8 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
         }
 
         /*following code for test*/
-        SongDbHelper songDbHelper = new SongDbHelper(getActivity().getApplication());
-        currentSong = songDbHelper.getAllSongs().get(0);
+//        SongDbHelper songDbHelper = new SongDbHelper(getActivity().getApplication());
+//        currentSong = songDbHelper.getAllSongs().get(0);
 
     }
 
@@ -85,27 +78,27 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
         return view;
     }
 
-    private ServiceConnection musicConnection = new ServiceConnection(){
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicBinder binder = (MusicBinder)service;
-
-            musicService = binder.getService();
-
-            //test
-            musicService.setCurrentSong(currentSong);
-            musicService.preparePlay();
-
-            musicBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicBound = false;
-        }
-    };
-
+//    private ServiceConnection musicConnection = new ServiceConnection(){
+//
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            MusicBinder binder = (MusicBinder)service;
+//
+//            musicService = binder.getService();
+//
+//            //test
+//            musicService.setCurrentSong(currentSong);
+//            musicService.preparePlay();
+//
+//            musicBound = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            musicBound = false;
+//        }
+//    };
+//
     private void initUI(View view) {
         btnPlay = view.findViewById(R.id.btnPlay);
         btnForward = view.findViewById(R.id.btnForward);
@@ -129,10 +122,10 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
         });
 
         txtSongTittle = view.findViewById(R.id.txtSongTittle);
-        txtSongTittle.setText(currentSong.getSongName());
+//        txtSongTittle.setText(currentSong.getSongName());
 
         txtArtist = view.findViewById(R.id.txtArtist);
-        txtArtist.setText(String.valueOf((int) currentSong.getSize() / 1000000) + " MB");
+//        txtArtist.setText(String.valueOf((int) currentSong.getSize() / 1000000) + " MB");
     }
 
     private void setMusicController(View anchor) {
@@ -169,17 +162,17 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
         if(playIntent==null){
             Log.d(TAG, "onStart: create playintent");
             playIntent = new Intent(getActivity(), MusicService.class);
-            getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+//            getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
          //   getContext().startService(playIntent);
         }
 
         if (playIntent != null) {
             //musicService.setCurrentSong(songEntity);
-            if (currentSong == null) {
-                Log.d(TAG, "onCreate: song entity is null");
-            } else {
-                Log.d(TAG, "onCreate: song entity is not null");
-            }
+//            if (currentSong == null) {
+//                Log.d(TAG, "onCreate: song entity is null");
+//            } else {
+//                Log.d(TAG, "onCreate: song entity is not null");
+//            }
         }
         if (musicService == null) {
             Log.d(TAG, "ondestroy: service is null");

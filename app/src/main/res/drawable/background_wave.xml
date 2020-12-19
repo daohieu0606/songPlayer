@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+    <shape>
+        <size android:height="2000dp">
+        </size>
+        <solid android:color="@color/white" />
+    </shape>
+    </item>
+    <item android:drawable="@drawable/waves_header" android:height="170dp"/>
+</layer-list>

@@ -5,10 +5,13 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 
+import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     //DATA
     private static final String TAG = "TESST";
     private Bundle savedInstance;
+    private MutableLiveData<Boolean> menuClosed = new MutableLiveData<>(true);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +151,16 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
 
         getSupportActionBar().setHomeAsUpIndicator(getDrawable(R.drawable.ic_baseline_format_list_bulleted_24));
         this.slidingRootNav = drawerCreater.createDrawer();
+        
+        slidingRootNav.getLayout().setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View view, DragEvent dragEvent) {
+
+                Log.d(TAG, "onDrag: ");
+                return false;
+            }
+        });
+
 
     }
 
