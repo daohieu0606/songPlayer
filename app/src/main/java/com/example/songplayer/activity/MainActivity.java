@@ -181,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     public Bundle getSavedInstance(){
         return this.savedInstance;
     }
-
     public RecyclerView getMenu(){
         return findViewById(R.id.list);
     }

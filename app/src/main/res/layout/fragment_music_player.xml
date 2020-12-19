@@ -35,14 +35,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Forest birds"
+                android:text="Song Name"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Animals"
+                android:text="Artist"
                 android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -88,7 +88,7 @@
             android:id="@+id/txtSongTittle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Forest birds"
+            android:text="Song Name"
             android:textSize="22sp"
             android:textStyle="bold" />
 
@@ -96,7 +96,7 @@
             android:id="@+id/txtArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Animals"
+            android:text="Artist"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -113,25 +113,32 @@
         android:paddingHorizontal="10dp">
 
         <TextView
+            android:id="@+id/txtCurrentPosition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="00:33" />
+            android:text="00:00" />
 
         <SeekBar
+            android:thumbTint="#E91E63"
+            android:progressTint="#E91E63"
+            android:progress="50"
+            android:id="@+id/sbSongProcess"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:progress="10"
             android:contextClickable="false"
             tools:ignore="NestedWeights" />
 
         <TextView
+            android:id="@+id/txtDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="00:59" />
+            android:text="00:00" />
     </LinearLayout>
     <!--        end music time line-->
     <!--        controller section-->
+
+    <!--NEED VOLUME SETTERRRRRRRRRRR-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,74 +1,121 @@
 package com.example.songplayer.fragment;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.MediaController;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.songplayer.R;
 import com.example.songplayer.controller.MusicController;
+import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.service.MusicService;
+import com.example.songplayer.service.MusicService.MusicBinder;
+import com.example.songplayer.utils.SongDbHelper;
+import com.example.songplayer.viewmodel.SongViewModel;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MusicPlayerFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class MusicPlayerFragment extends Fragment implements MediaController.MediaPlayerControl {
+public class MusicPlayerFragment
+        extends Fragment
+        implements MediaController.MediaPlayerControl, View.OnClickListener, Runnable {
 
     private static final String TAG = "MUSIC_FRAG";
+    private final int SEEK_FORWARD_TIME = 5 * 1000;
+    private final int SEEK_BACKWARD_TIME = 5 * 1000;
     // VIEW
     private ToggleButton btnPlay;
     private ImageButton btnForward;
     private ImageButton btnBackward;
-    private ImageButton btnDownload;
-    private ImageButton btnPlay2;
-    private ToggleButton btnLove;
 
     private TextView txtSongTittle;
     private TextView txtArtist;
+    private TextView txtDuration;
+    private TextView txtCurrentPosition;
+
+    private SeekBar sbSongProcess;
 
     private MusicService musicService;
     private Intent playIntent;
     private boolean musicBound = false;
 
     private MusicController musicController;
-//    private SongEntity currentSong;
+    private SongViewModel songViewModel;
+    private SongEntity currentSong;
+    private int currentSongId;
 
     public MusicPlayerFragment() {
         // Required empty public constructor
     }
+    public MusicPlayerFragment(int songId) {
+        currentSongId = songId;
+    }
+    private ServiceConnection musicConnection = new ServiceConnection(){
 
-    public static MusicPlayerFragment newInstance() {
-        MusicPlayerFragment fragment = new MusicPlayerFragment();
-        Bundle args = new Bundle();
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicBinder binder = (MusicBinder)service;
 
-        fragment.setArguments(args);
-        return fragment;
+            musicService = binder.getService();
+            musicBound = true;
+            if (currentSongId != 0) {
+                for (SongEntity song :
+                        songViewModel.getAllSongs().getValue()) {
+                    if (song.getId() == currentSongId) {
+                        setCurrentSong(song);
+                        break;
+                    }
+                }
+            } else if(songViewModel.getAllSongs().getValue().size() > 0) {
+                setCurrentSong(songViewModel.getAllSongs().getValue().get(0));
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            musicBound = false;
+        }
+    };
+    private void setCurrentSong(SongEntity newSong) {
+        currentSong = newSong;
+
+        if (musicService != null) {
+            Log.d(TAG, "setCurrentSong: faskfjlsfjs");
+
+            musicService.setCurrentSong(currentSong);
+            musicService.preparePlay();
+            updateUIContent();
+            musicBound = true;
+        }
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-
-        }
-
-        /*following code for test*/
-//        SongDbHelper songDbHelper = new SongDbHelper(getActivity().getApplication());
-//        currentSong = songDbHelper.getAllSongs().get(0);
-
+        songViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                return (T) new SongViewModel(getActivity().getApplication());
+            }
+        }).get(SongViewModel.class);
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -78,54 +125,54 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
         return view;
     }
 
-//    private ServiceConnection musicConnection = new ServiceConnection(){
-//
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            MusicBinder binder = (MusicBinder)service;
-//
-//            musicService = binder.getService();
-//
-//            //test
-//            musicService.setCurrentSong(currentSong);
-//            musicService.preparePlay();
-//
-//            musicBound = true;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            musicBound = false;
-//        }
-//    };
-//
     private void initUI(View view) {
         btnPlay = view.findViewById(R.id.btnPlay);
         btnForward = view.findViewById(R.id.btnForward);
         btnBackward = view.findViewById(R.id.btnBackward);
-        btnDownload = view.findViewById(R.id.btnDownload);
-        btnPlay2 = view.findViewById(R.id.btnPlay2);
 
-        btnLove = view.findViewById(R.id.btnLove);
-
-        btnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (musicService != null) {
-                    if (btnPlay.isChecked()) {
-                        musicService.go();
-                    } else {
-                        musicService.pausePlayer();
-                    }
-                }
-            }
-        });
+        btnBackward.setOnClickListener(this::onClick);
+        btnForward.setOnClickListener(this::onClick);
+        btnPlay.setOnClickListener(this::onClick);
 
         txtSongTittle = view.findViewById(R.id.txtSongTittle);
-//        txtSongTittle.setText(currentSong.getSongName());
-
         txtArtist = view.findViewById(R.id.txtArtist);
-//        txtArtist.setText(String.valueOf((int) currentSong.getSize() / 1000000) + " MB");
+        txtDuration = view.findViewById(R.id.txtDuration);
+        txtCurrentPosition = view.findViewById(R.id.txtCurrentPosition);
+
+        if (currentSong != null) {
+            updateUIContent();
+        }
+
+        sbSongProcess = view.findViewById(R.id.sbSongProcess);
+        sbSongProcess.setProgress(0);
+        sbSongProcess.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (progress == 0 && musicService != null && !musicService.isPng()) {
+                    //handle when progress = 0 here
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (!isPlayable()) {
+                    sbSongProcess.setProgress(0);
+                    return;
+                }
+                seekTo(sbSongProcess.getProgress());
+            }
+        });
+    }
+
+    private void updateUIContent() {
+        txtArtist.setText(String.valueOf((int) currentSong.getSize() / 1000000) + " MB");
+        txtSongTittle.setText(currentSong.getSongName());
+
     }
 
     private void setMusicController(View anchor) {
@@ -146,6 +193,7 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
         musicController.setMediaPlayer(this);
         musicController.setAnchorView(anchor.findViewById(R.id.timeControlContainer));
         musicController.setEnabled(true);
+
     }
 
     private void playPrev() {
@@ -160,35 +208,15 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
     public void onStart() {
         super.onStart();
         if(playIntent==null){
-            Log.d(TAG, "onStart: create playintent");
             playIntent = new Intent(getActivity(), MusicService.class);
-//            getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
-         //   getContext().startService(playIntent);
+            getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
         }
 
-        if (playIntent != null) {
-            //musicService.setCurrentSong(songEntity);
-//            if (currentSong == null) {
-//                Log.d(TAG, "onCreate: song entity is null");
-//            } else {
-//                Log.d(TAG, "onCreate: song entity is not null");
-//            }
-        }
-        if (musicService == null) {
-            Log.d(TAG, "ondestroy: service is null");
-        } else {
-            Log.d(TAG, "ondestroy: service is not null");
-        }
-        Log.d(TAG, "onStart: is playing" + isPlaying());
-        Log.d(TAG, "onStart: is playing" + canPause());
-        Log.d(TAG, "onStart: is playing" + canSeekBackward());
-        Log.d(TAG, "onStart: is playing" + canSeekForward());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
     }
 
     @Override
@@ -209,9 +237,35 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
 
     }
 
+    private void playSong() {
+        if (!isPlayable()) {
+            return;
+        }
+        musicService.go ();
+        sbSongProcess.setMax(getDuration());
+        String durationTimeStr = getTimeStringFromMilliSeconds(getDuration());
+        txtDuration.setText(durationTimeStr);
+        new Thread(this).start();
+    }
+
+    private boolean isPlayable() {
+        boolean result = true;
+
+        if (currentSong == null) {
+            Toast.makeText(getContext(), "Your device has no song", Toast.LENGTH_LONG).show();
+            btnPlay.setChecked(false);
+            result = false;
+        } else if (musicService == null){
+            Toast.makeText(getContext(), "Your music service haven't connected yet", Toast.LENGTH_LONG).show();
+            btnPlay.setChecked(false);
+            result = false;
+        }
+        return  result;
+    }
+
     @Override
     public int getDuration() {
-        if(musicService!=null && musicBound && musicService.isPng())
+        if(musicService!=null && musicBound && isPlaying())
             return musicService.getDur();
         else return 0;
     }
@@ -225,7 +279,9 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
 
     @Override
     public void seekTo(int pos) {
-
+        if (musicService != null && musicBound) {
+            musicService.seek(pos);
+        }
     }
 
     @Override
@@ -259,4 +315,98 @@ public class MusicPlayerFragment extends Fragment implements MediaController.Med
     public int getAudioSessionId() {
         return 0;
     }
+
+    private void handlePlaySong() {
+        if (musicService != null) {
+            if (btnPlay.isChecked()) {
+                playSong();
+            } else {
+                musicService.pausePlayer();
+            }
+        }
+    }
+
+    private void processForward() {
+        if (!isPlayable()) {
+            return;
+        }
+        Log.d(TAG, "processForward: " + getCurrentPosition());
+        int pos = getCurrentPosition() + SEEK_FORWARD_TIME;
+        seekTo(pos);
+        Log.d(TAG, "processForward: " + getCurrentPosition());
+    }
+
+    private void processBackward() {
+        if (!isPlayable()) {
+            return;
+        }
+        Log.d(TAG, "processBackward: " + getCurrentPosition());
+        int pos = getCurrentPosition() - SEEK_BACKWARD_TIME;
+        seekTo(pos);
+        Log.d(TAG, "processBackward: " + getCurrentPosition());
+    }
+
+    String getTimeStringFromMilliSeconds(int durationInMillis) {
+        long second = (durationInMillis / 1000) % 60;
+        long minute = (durationInMillis / (1000 * 60)) % 60;
+        long hour = (durationInMillis / (1000 * 60 * 60)) % 24;
+
+        String time = "";
+        if (hour <= 0) {
+            time = String.format("%d:%d", minute, second);
+
+        } else {
+            time = String.format("%0d:%2d:%2d", hour, minute, second);
+        }
+        return time;
+    }
+
+    @Override
+    public void run() {
+        int curPos = getCurrentPosition();
+        int songDuration = getDuration();
+
+        while (musicService != null && musicService.isPng() && curPos < songDuration) {
+            try {
+                Thread.sleep(1000);
+                curPos = getCurrentPosition();
+                if (curPos == 0) {
+                    break;
+                }
+            } catch (InterruptedException e) {
+                return;
+            } catch (Exception e) {
+                return;
+            }
+
+            final int process = curPos;
+            final String curPosTimeString = getTimeStringFromMilliSeconds(curPos);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    txtCurrentPosition.setText(String.valueOf(curPosTimeString));
+                    sbSongProcess.setProgress(process);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id) {
+            case R.id.btnBackward:
+                processBackward();
+                break;
+            case R.id.btnDownload:
+                break;
+            case R.id.btnForward:
+                processForward();
+                break;
+            case R.id.btnPlay:
+                handlePlaySong();
+                break;
+        }
+    }
+
 }
