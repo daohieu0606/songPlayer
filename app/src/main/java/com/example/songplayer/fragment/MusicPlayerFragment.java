@@ -4,7 +4,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -12,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,12 +27,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.songplayer.R;
-import com.example.songplayer.controller.MusicController;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.service.MusicService;
 import com.example.songplayer.service.MusicService.MusicBinder;
-import com.example.songplayer.utils.SongDbHelper;
 import com.example.songplayer.viewmodel.SongViewModel;
 
 public class MusicPlayerFragment
@@ -42,11 +46,21 @@ public class MusicPlayerFragment
     private ToggleButton btnPlay;
     private ImageButton btnForward;
     private ImageButton btnBackward;
+    private ImageButton btnPreSong;
+    private ImageButton btnNextSong;
+    private ToggleButton btnMarkFavorite;
+    private ToggleButton btnShuffle;
+    private ImageButton btnRepeat;
 
     private TextView txtSongTittle;
     private TextView txtArtist;
     private TextView txtDuration;
     private TextView txtCurrentPosition;
+    private TextView txtSongName2;
+    private TextView txtArtist2;
+
+    private ImageView imgSongThumbnail2;
+    private ImageView imgCenterSongThumbnail;
 
     private SeekBar sbSongProcess;
 
@@ -54,10 +68,9 @@ public class MusicPlayerFragment
     private Intent playIntent;
     private boolean musicBound = false;
 
-    private MusicController musicController;
     private SongViewModel songViewModel;
-    private SongEntity currentSong;
     private int currentSongId;
+    private RepeatMode currentRepeatMode;
 
     public MusicPlayerFragment() {
         // Required empty public constructor
@@ -72,6 +85,7 @@ public class MusicPlayerFragment
             MusicBinder binder = (MusicBinder)service;
 
             musicService = binder.getService();
+            musicService.setSongList(songViewModel.getAllSongs().getValue());
             musicBound = true;
             if (currentSongId != 0) {
                 for (SongEntity song :
@@ -92,12 +106,9 @@ public class MusicPlayerFragment
         }
     };
     private void setCurrentSong(SongEntity newSong) {
-        currentSong = newSong;
 
         if (musicService != null) {
-            Log.d(TAG, "setCurrentSong: faskfjlsfjs");
-
-            musicService.setCurrentSong(currentSong);
+            musicService.setCurrentSong(newSong);
             musicService.preparePlay();
             updateUIContent();
             musicBound = true;
@@ -108,6 +119,9 @@ public class MusicPlayerFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        currentRepeatMode = RepeatMode.NEVER;
+
         songViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
             @NonNull
             @Override
@@ -121,7 +135,6 @@ public class MusicPlayerFragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_music_player, container, false);
         initUI(view);
-        setMusicController(view);
         return view;
     }
 
@@ -129,19 +142,30 @@ public class MusicPlayerFragment
         btnPlay = view.findViewById(R.id.btnPlay);
         btnForward = view.findViewById(R.id.btnForward);
         btnBackward = view.findViewById(R.id.btnBackward);
+        btnPreSong = view.findViewById(R.id.btnPreSong);
+        btnNextSong = view.findViewById(R.id.btnNextSong);
+        btnMarkFavorite = view.findViewById(R.id.btnMarkFavorite);
+        btnShuffle = view.findViewById(R.id.btnShuffle);
+        btnRepeat = view.findViewById(R.id.btnRepeat);
 
         btnBackward.setOnClickListener(this::onClick);
         btnForward.setOnClickListener(this::onClick);
         btnPlay.setOnClickListener(this::onClick);
+        btnPreSong.setOnClickListener(this::onClick);
+        btnNextSong.setOnClickListener(this::onClick);
+        btnMarkFavorite.setOnClickListener(this::onClick);
+        btnShuffle.setOnClickListener(this::onClick);
+        btnRepeat.setOnClickListener(this::onClick);
 
         txtSongTittle = view.findViewById(R.id.txtSongTittle);
         txtArtist = view.findViewById(R.id.txtArtist);
         txtDuration = view.findViewById(R.id.txtDuration);
         txtCurrentPosition = view.findViewById(R.id.txtCurrentPosition);
+        txtSongName2 = view.findViewById(R.id.txtSongName2);
+        txtArtist2 = view.findViewById(R.id.txtArtist2);
 
-        if (currentSong != null) {
-            updateUIContent();
-        }
+        imgSongThumbnail2 = view.findViewById(R.id.imgSongThumbnail2);
+        imgCenterSongThumbnail = view.findViewById(R.id.imgCenterSongThumbnail);
 
         sbSongProcess = view.findViewById(R.id.sbSongProcess);
         sbSongProcess.setProgress(0);
@@ -170,38 +194,55 @@ public class MusicPlayerFragment
     }
 
     private void updateUIContent() {
-        txtArtist.setText(String.valueOf((int) currentSong.getSize() / 1000000) + " MB");
+        SongEntity currentSong = musicService.getCurrentSong();
+        if (currentSong == null) {
+            return;
+        }
         txtSongTittle.setText(currentSong.getSongName());
+        txtSongName2.setText(currentSong.getSongName());
 
-    }
+        String artist = "Artist";
+        if (!currentSong.getArtist().isEmpty()) {
+            artist = currentSong.getArtist();
+        }
+        txtArtist.setText(artist);
+        txtArtist2.setText(artist);
 
-    private void setMusicController(View anchor) {
-        musicController = new MusicController(getContext());
+        if (currentSong.isFavorite()) {
+            btnMarkFavorite.setChecked(true);
+        }
 
-        musicController.setPrevNextListeners(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playNext();
-            }
-        }, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playPrev();
-            }
-        });
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        byte[] rawArt;
+        Bitmap art;
+        BitmapFactory.Options bfo=new BitmapFactory.Options();
 
-        musicController.setMediaPlayer(this);
-        musicController.setAnchorView(anchor.findViewById(R.id.timeControlContainer));
-        musicController.setEnabled(true);
+        mmr.setDataSource(getContext(), Uri.parse(currentSong.getUriString()));
+        rawArt = mmr.getEmbeddedPicture();
+
+        if (null != rawArt){
+            art = BitmapFactory.decodeByteArray(rawArt, 0, rawArt.length, bfo);
+
+            Glide.with(getContext()).load(art).apply(RequestOptions.circleCropTransform()).into(imgCenterSongThumbnail);
+            imgSongThumbnail2.setImageBitmap(art);
+        } else {
+            // do nothing
+        }
 
     }
 
     private void playPrev() {
-
+        if (musicService.takePreSong()) {
+            updateUIContent();
+            playSong();
+        }
     }
 
     private void playNext() {
-
+        if (musicService.takeNextSong()){
+            updateUIContent();
+            playSong();
+        }
     }
 
     @Override
@@ -241,8 +282,9 @@ public class MusicPlayerFragment
         if (!isPlayable()) {
             return;
         }
-        musicService.go ();
+        musicService.go();
         sbSongProcess.setMax(getDuration());
+        Log.d(TAG, "playSong: duration " + getDuration());
         String durationTimeStr = getTimeStringFromMilliSeconds(getDuration());
         txtDuration.setText(durationTimeStr);
         new Thread(this).start();
@@ -251,7 +293,7 @@ public class MusicPlayerFragment
     private boolean isPlayable() {
         boolean result = true;
 
-        if (currentSong == null) {
+        if (musicService.getCurrentSong() == null) {
             Toast.makeText(getContext(), "Your device has no song", Toast.LENGTH_LONG).show();
             btnPlay.setChecked(false);
             result = false;
@@ -391,6 +433,29 @@ public class MusicPlayerFragment
         }
     }
 
+    private void handleMarkFavorite() {
+        SongEntity currentSong = musicService.getCurrentSong();
+        currentSong.setFavorite(!currentSong.isFavorite());
+        songViewModel.update(currentSong);
+    }
+
+    private void handleChangeShuffle() {
+        musicService.setShuffle(btnShuffle.isChecked());
+    }
+
+    private void changeRepeatMode() {
+        if (currentRepeatMode.equals(RepeatMode.NEVER)) {
+            currentRepeatMode = RepeatMode.ONLY_ONE;
+            btnRepeat.setBackgroundResource(R.drawable.ic_repeat_only_one);
+        } else if (currentRepeatMode.equals(RepeatMode.ONLY_ONE)) {
+            currentRepeatMode = RepeatMode.ALL;
+            btnRepeat.setBackgroundResource(R.drawable.ic_repeat_all);
+        } else if (currentRepeatMode.equals(RepeatMode.ALL)) {
+            currentRepeatMode = RepeatMode.NEVER;
+            btnRepeat.setBackgroundResource(R.drawable.ic_repeat_never);
+        }
+        musicService.setRepeatMode(currentRepeatMode);
+    }
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -398,7 +463,8 @@ public class MusicPlayerFragment
             case R.id.btnBackward:
                 processBackward();
                 break;
-            case R.id.btnDownload:
+            case R.id.btnRepeat:
+                changeRepeatMode();
                 break;
             case R.id.btnForward:
                 processForward();
@@ -406,7 +472,18 @@ public class MusicPlayerFragment
             case R.id.btnPlay:
                 handlePlaySong();
                 break;
+            case R.id.btnPreSong:
+                playPrev();
+                break;
+            case R.id.btnNextSong:
+                playNext();
+                break;
+            case R.id.btnMarkFavorite:
+                handleMarkFavorite();
+                break;
+            case R.id.btnShuffle:
+                handleChangeShuffle();
+                break;
         }
     }
-
 }

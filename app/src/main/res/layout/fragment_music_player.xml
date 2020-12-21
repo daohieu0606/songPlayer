@@ -9,6 +9,7 @@
     android:orientation="vertical">
     <!--        play music-->
     <LinearLayout
+        android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="start"
@@ -16,6 +17,7 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/imgSongThumbnail2"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -33,6 +35,8 @@
             android:orientation="vertical">
 
             <TextView
+                android:maxLines="1"
+                android:id="@+id/txtSongName2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Song Name"
@@ -40,6 +44,8 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:maxLines="1"
+                android:id="@+id/txtArtist2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Artist"
@@ -48,34 +54,49 @@
         </LinearLayout>
 
         <ImageButton
+            android:layout_marginStart="20dp"
+            android:id="@+id/btnPreSong"
             android:background="@android:color/transparent"
+            android:src="@drawable/ic_baseline_skip_previous_24"
+            android:layout_width="25dp"
+            android:layout_height="25dp"/>
 
-            android:scaleType="centerInside"
-            android:id="@+id/btnPlay2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:tag="@string/pause_ic"
-            android:paddingHorizontal="5dp"
-            android:paddingVertical="7dp"
-            android:src="@drawable/pauseic"
-
-            />
+        <ImageButton
+            android:id="@+id/btnNextSong"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_baseline_skip_next_24"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="20dp"/>
 
     </LinearLayout>
     <!--        end play music-->
     <!--        image app-->
     <!--        end image app-->
     <!--        song name-->
-    <ImageView
-        android:id="@+id/imgMusic"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="8"
-        android:background="@color/white"
-        android:padding="100dp"
-        android:src="@drawable/ic_music"
-        app:tint="@color/accent" />
+        android:layout_weight="8">
+        <ToggleButton
+            android:id="@+id/btnMarkFavorite"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_gravity="end|top"
+            android:textOn=""
+            android:textOff=""
+            android:tag="@string/not_love"
+            android:layout_height="25dp"
+            android:background="@drawable/selector_favorite"
+            android:layout_width="25dp" />
+        <ImageView
+            android:id="@+id/imgCenterSongThumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:padding="100dp"
+            android:src="@drawable/ic_music" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -85,6 +106,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:maxLines="1"
             android:id="@+id/txtSongTittle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -140,6 +162,7 @@
 
     <!--NEED VOLUME SETTERRRRRRRRRRR-->
     <LinearLayout
+        android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
@@ -147,20 +170,19 @@
         android:paddingHorizontal="5dp"
         android:paddingVertical="5dp">
 
-        <ToggleButton
-            android:height="25dp"
-            android:width="25dp"
-            android:textOn=""
-            android:textOff=""
-            android:id="@+id/btnLove"
+        <LinearLayout
+            android:gravity="center_horizontal"
             android:layout_width="0dp"
-            android:tag="@string/not_love"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/selector_favorite"
-            android:scaleX="0.6"
-            android:scaleY="0.6"
-            android:scaleType="centerInside"/>
+            android:layout_weight="1">
+            <ImageButton
+                android:layout_width="30dp"
+                android:layout_height="25dp"
+                android:id="@+id/btnRepeat"
+                android:background="@drawable/ic_repeat_never"
+                android:scaleType="centerInside"/>
+        </LinearLayout>
+
 
         <ImageButton
             android:id="@+id/btnBackward"
@@ -199,16 +221,21 @@
             android:scaleType="centerInside"
             android:src="@drawable/forwardic" />
 
-        <ImageButton
-            android:id="@+id/btnDownload"
+        <LinearLayout
+            android:gravity="center_horizontal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:scaleX="0.5"
-            android:scaleY="0.5"
-            android:scaleType="centerInside"
-            android:src="@drawable/newdownload" />
+            android:layout_weight="1">
+            <ToggleButton
+                android:textOn=""
+                android:textOff=""
+                android:id="@+id/btnShuffle"
+                android:background="@drawable/selector_shuffle"
+                android:layout_width="30dp"
+                android:layout_height="25dp"
+                android:scaleType="centerInside"/>
+        </LinearLayout>
+
 
     </LinearLayout>
     <!--        end controller section-->

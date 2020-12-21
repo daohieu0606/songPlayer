@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -23,21 +24,39 @@ import androidx.core.app.NotificationCompat;
 import com.example.songplayer.R;
 import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.fragment.RepeatMode;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class MusicService
         extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
 
     private static final String TAG = "Music service";
-    SongEntity currentSong;
     private MediaPlayer songPlayer;
     private final IBinder musicBind = new MusicBinder();
     private static final int NOTIFY_ID = 1;
     private static final String CHANNEL_ID = "my_chanel";
+
+    private List<SongEntity> songEntities;
+    private SongEntity currentSong;
+    boolean isShuffle;
+
+    private RepeatMode repeatMode;
+
     @Override
     public void onCreate() {
         super.onCreate();
         songPlayer = new MediaPlayer();
+
+        repeatMode = RepeatMode.NEVER;
+
+        if (songEntities == null) {
+            songEntities = new ArrayList<>();
+        }
         initMusicPlayer();
         Log.d(TAG, "onCreate: music service");
     }
@@ -58,10 +77,16 @@ public class MusicService
         songPlayer.setOnErrorListener(this::onError);
     }
 
+    public void setSongList(List<SongEntity> newSongEntities) {
+        songEntities = newSongEntities;
+    }
     public void setCurrentSong(SongEntity newSong) {
         currentSong = newSong;
     }
-
+    public void setShuffle(boolean isNewShuffle) {
+        isShuffle = isNewShuffle;
+    }
+    public void setRepeatMode(RepeatMode newRepeatMode) { repeatMode = newRepeatMode;}
     @Nullable
     @Override
     public IBinder onBind(Intent intent){
@@ -76,9 +101,28 @@ public class MusicService
         return super.onUnbind(intent);
     }
 
+    public void preparePlaySyn(){
+        songPlayer.reset();
+        Uri trackUri = ContentUris.withAppendedId(
+                android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                currentSong.getId());
+
+        try {
+            songPlayer.setDataSource(getApplicationContext(), trackUri);
+        } catch (Exception exception) {
+            Log.d(TAG, "playSong: ", exception);
+        }
+        try{
+            songPlayer.prepare();
+        } catch (IllegalStateException e) {
+
+        } catch (IOException e) {
+
+        }
+    }
+
     public void preparePlay(){
         songPlayer.reset();
-
         Uri trackUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 currentSong.getId());
@@ -128,8 +172,6 @@ public class MusicService
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-//        mp.start();
-
         createNotificationChannel();
 
         Intent notIntent = new Intent(this, MainActivity.class);
@@ -149,20 +191,97 @@ public class MusicService
         startForeground(NOTIFY_ID, not);
     }
     private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.channel_name);
             String description = getString(R.string.channel_description);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
     }
+
+    public boolean takePreSong() {
+        if (!isHasAnySongEntity()) {
+            return false;
+        }
+
+        if (repeatMode == RepeatMode.ONLY_ONE) {
+            songPlayer.stop();
+            preparePlaySyn();
+            return true;
+        } else if (repeatMode == RepeatMode.NEVER) {
+            if (songEntities.indexOf(currentSong)  == 0) {
+                Toast.makeText(getApplicationContext(), "You have just played last song in the list", Toast.LENGTH_LONG).show();
+                songPlayer.stop();
+                return false;
+            }
+        }
+
+        songPlayer.stop();
+        int currentIndex = 0;
+        if (isShuffle) {
+            currentIndex = new Random().nextInt(songEntities.size());
+        } else {
+            currentIndex = songEntities.indexOf(currentSong);
+
+            if (currentIndex <= 0) {
+                currentIndex = songEntities.size() - 1;
+            } else {
+                currentIndex -= 1;
+            }
+        }
+        currentSong = songEntities.get(currentIndex);
+        Log.d(TAG, "takePreSong: " + currentSong.getSongName());
+        preparePlaySyn();
+
+        return true;
+    }
+
+    public boolean takeNextSong() {
+        if (!isHasAnySongEntity()) {
+            return false;
+        }
+
+        if (repeatMode == RepeatMode.ONLY_ONE) {
+            songPlayer.stop();
+            preparePlaySyn();
+            return true;
+        } else if (repeatMode == RepeatMode.NEVER) {
+            if (songEntities.indexOf(currentSong) + 1 == songEntities.size()) {
+                Toast.makeText(getApplicationContext(), "You have just played last song in the list", Toast.LENGTH_LONG).show();
+                songPlayer.stop();
+                return false;
+            }
+        }
+
+        songPlayer.stop();
+        int currentIndex = 0;
+        if (isShuffle) {
+            currentIndex = new Random().nextInt(songEntities.size());
+        } else {
+            currentIndex = songEntities.indexOf(currentSong);
+            if (currentIndex >= songEntities.size() - 1) {
+                currentIndex = 0;
+            } else {
+                currentIndex += 1;
+            }
+        }
+        currentSong = songEntities.get(currentIndex);
+        Log.d(TAG, "takeNextSong: " + currentSong.getSongName());
+        preparePlaySyn();
+
+        return true;
+    }
+
+    public SongEntity getCurrentSong() {
+        return currentSong;
+    }
+    private boolean isHasAnySongEntity() {
+        return songEntities.size() > 0;
+    }
+
     @Override
     public void onDestroy() {
         stopForeground(true);

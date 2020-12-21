@@ -47,6 +47,7 @@ public class SongDbHelper {
             songEntity.setSongName(cursor.getString(1));
             songEntity.setPath(cursor.getString(2));
             songEntity.setSize(cursor.getInt(3));
+            songEntity.setArtist(cursor.getString(5));
 
             Uri contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());
@@ -80,15 +81,12 @@ public class SongDbHelper {
 
         try (ParcelFileDescriptor pfd =
                      resolver.openFileDescriptor(songContentUri, "w", null)) {
-            // Write data into the pending audio file.
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-// Now that we're finished, release the "pending" status, and allow other apps
-// to play the audio track.
         songDetails.clear();
         songDetails.put(MediaStore.Audio.Media.IS_PENDING, 0);
         resolver.update(songContentUri, songDetails, null, null);
