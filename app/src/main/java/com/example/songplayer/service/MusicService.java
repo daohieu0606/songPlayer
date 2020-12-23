@@ -35,7 +35,6 @@ public class MusicService
         extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
 
-    public static final String INTENT_FILTER_ACTION = "SONG_CONTROL";
     private static final String TAG = "Music service";
     private static final int NOTIFY_ID = 1;
 
@@ -44,7 +43,6 @@ public class MusicService
 
     private List<SongEntity> songEntities;
     private MutableLiveData<SongEntity> currentSongLiveData;
-    private BroadcastReceiver songControlReceiver;
 
     boolean isShuffle;
     private RepeatMode repeatMode;
@@ -64,40 +62,6 @@ public class MusicService
         initMusicPlayer();
         Log.d(TAG, "onCreate: music service");
 
-        NotificationHelper.createNotificationChannel(getApplicationContext());
-        songControlReceiver = new NotificationReceiver(){
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                super.onReceive(context, intent);
-                String message = intent.getStringExtra(INTENT_FILTER_ACTION);
-                if (message.equals(NotificationHelper.ACTION_PREVIOUS)){
-                    onTakePreSong();
-                } else if (message.equals(NotificationHelper.ACTION_PLAY)){
-                    onPauseResumeSong();
-                } else if (message.equals(NotificationHelper.ACTION_NEXT)){
-                    onTakeNextSong();
-                }
-            }
-        };
-        registerReceiver(songControlReceiver, new IntentFilter(INTENT_FILTER_ACTION));
-    }
-
-    private void onTakeNextSong() {
-        takeNextSong();
-        go();
-    }
-
-    private void onPauseResumeSong() {
-        if (isPng()) {
-            pausePlayer();
-        } else {
-            go();
-        }
-    }
-
-    private void onTakePreSong() {
-        takePreSong();
-        go();
     }
 
     private void initMusicPlayer() {
@@ -313,7 +277,6 @@ public class MusicService
     @Override
     public void onDestroy() {
         stopForeground(true);
-        unregisterReceiver(songControlReceiver);
         super.onDestroy();
     }
 

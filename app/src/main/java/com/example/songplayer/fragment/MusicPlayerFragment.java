@@ -1,8 +1,10 @@
 package com.example.songplayer.fragment;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,6 +26,8 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -31,14 +35,19 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.notification.NotificationHelper;
+import com.example.songplayer.receiver.NotificationReceiver;
 import com.example.songplayer.service.MusicService;
 import com.example.songplayer.service.MusicService.MusicBinder;
 import com.example.songplayer.viewmodel.SongViewModel;
+
+import java.util.List;
 
 public class MusicPlayerFragment
         extends Fragment
         implements MediaController.MediaPlayerControl, View.OnClickListener, Runnable {
 
+    public static final String INTENT_FILTER_ACTION = "SONG_CONTROL";
     private static final String TAG = "MUSIC_FRAG";
     private final int SEEK_FORWARD_TIME = 5 * 1000;
     private final int SEEK_BACKWARD_TIME = 5 * 1000;
@@ -51,6 +60,7 @@ public class MusicPlayerFragment
     private ToggleButton btnMarkFavorite;
     private ToggleButton btnShuffle;
     private ImageButton btnRepeat;
+    private ToggleButton btnPlay2;
 
     private TextView txtSongTittle;
     private TextView txtArtist;
@@ -69,14 +79,17 @@ public class MusicPlayerFragment
     private boolean musicBound = false;
 
     private SongViewModel songViewModel;
-    private int currentSongId;
+    private MutableLiveData<SongEntity> currentSongLiveData;
     private RepeatMode currentRepeatMode;
+
+    private BroadcastReceiver songControlReceiver;
 
     public MusicPlayerFragment() {
         // Required empty public constructor
     }
-    public MusicPlayerFragment(int songId) {
-        currentSongId = songId;
+    public MusicPlayerFragment(SongEntity songEntity) {
+        currentSongLiveData = new MutableLiveData<>();
+        currentSongLiveData.setValue(songEntity);
     }
     private ServiceConnection musicConnection = new ServiceConnection(){
 
@@ -87,34 +100,17 @@ public class MusicPlayerFragment
             musicService = binder.getService();
             musicService.setSongList(songViewModel.getAllSongs().getValue());
             musicBound = true;
-            if (currentSongId != 0) {
-                for (SongEntity song :
-                        songViewModel.getAllSongs().getValue()) {
-                    if (song.getId() == currentSongId) {
-                        setCurrentSong(song);
-                        break;
-                    }
-                }
-            } else if(songViewModel.getAllSongs().getValue().size() > 0) {
-                setCurrentSong(songViewModel.getAllSongs().getValue().get(0));
+            if(songViewModel.getAllSongs().getValue().size() > 0 && currentSongLiveData.getValue() == null) {
+                currentSongLiveData.setValue(songViewModel.getAllSongs().getValue().get(0));
             }
+            musicService.setCurrentSong(currentSongLiveData.getValue());
+            musicService.preparePlaySyn();
         }
-
         @Override
         public void onServiceDisconnected(ComponentName name) {
             musicBound = false;
         }
     };
-    private void setCurrentSong(SongEntity newSong) {
-
-        if (musicService != null) {
-            musicService.setCurrentSong(newSong);
-            musicService.preparePlay();
-            updateUIContent();
-            musicBound = true;
-        }
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -129,7 +125,73 @@ public class MusicPlayerFragment
                 return (T) new SongViewModel(getActivity().getApplication());
             }
         }).get(SongViewModel.class);
+
+        currentSongLiveData = new MutableLiveData<>();
+
+        currentSongLiveData.observe(getActivity(), new Observer<SongEntity>() {
+            @Override
+            public void onChanged(SongEntity songEntity) {
+                if (songEntity == null) {
+                    setDefaultUI();
+                }
+                updateUIContent();
+            }
+        });
+
+        songViewModel.getAllSongs().observe(getActivity(), new Observer<List<SongEntity>>() {
+            @Override
+            public void onChanged(List<SongEntity> songEntities) {
+                if (!songEntities.contains(currentSongLiveData.getValue())) {
+                    if (songEntities.size() == 0) {
+                        currentSongLiveData.setValue(null);
+                    } else {
+                        currentSongLiveData.setValue(songEntities.get(0));
+                    }
+                }
+            }
+        });
+
+        NotificationHelper.createNotificationChannel(getContext());
+        songControlReceiver = new NotificationReceiver(){
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                super.onReceive(context, intent);
+                String message = intent.getStringExtra(INTENT_FILTER_ACTION);
+                if (message.equals(NotificationHelper.ACTION_PREVIOUS)){
+                    onTakePreSong();
+                } else if (message.equals(NotificationHelper.ACTION_PLAY)){
+                    handlePlaySong();
+                } else if (message.equals(NotificationHelper.ACTION_NEXT)){
+                    onTakeNextSong();
+                }
+            }
+        };
+        getContext().registerReceiver(songControlReceiver, new IntentFilter(INTENT_FILTER_ACTION));
     }
+
+    private void setDefaultUI() {
+        txtSongTittle.setText("Song Name");
+        txtSongName2.setText("Song Name");
+
+        txtArtist.setText("Artist");
+        txtArtist2.setText("Artist");
+
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        byte[] rawArt;
+        Bitmap art;
+        art = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+
+        btnPlay.setChecked(isPlaying());
+    }
+
+    private void onTakeNextSong() {
+        playNext();
+    }
+
+    private void onTakePreSong() {
+        playPrev();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -147,6 +209,7 @@ public class MusicPlayerFragment
         btnMarkFavorite = view.findViewById(R.id.btnMarkFavorite);
         btnShuffle = view.findViewById(R.id.btnShuffle);
         btnRepeat = view.findViewById(R.id.btnRepeat);
+        btnPlay2 = view.findViewById(R.id.btnPlay2);
 
         btnBackward.setOnClickListener(this::onClick);
         btnForward.setOnClickListener(this::onClick);
@@ -156,6 +219,7 @@ public class MusicPlayerFragment
         btnMarkFavorite.setOnClickListener(this::onClick);
         btnShuffle.setOnClickListener(this::onClick);
         btnRepeat.setOnClickListener(this::onClick);
+        btnPlay2.setOnClickListener(this::onClick);
 
         txtSongTittle = view.findViewById(R.id.txtSongTittle);
         txtArtist = view.findViewById(R.id.txtArtist);
@@ -194,7 +258,7 @@ public class MusicPlayerFragment
     }
 
     private void updateUIContent() {
-        SongEntity currentSong = musicService.getCurrentSong();
+        SongEntity currentSong = currentSongLiveData.getValue();
         if (currentSong == null) {
             return;
         }
@@ -229,19 +293,20 @@ public class MusicPlayerFragment
             // do nothing
         }
 
+        btnPlay.setChecked(isPlaying());
     }
 
     private void playPrev() {
         if (musicService.takePreSong()) {
-            updateUIContent();
             playSong();
+            currentSongLiveData.setValue(musicService.getCurrentSong());
         }
     }
 
     private void playNext() {
         if (musicService.takeNextSong()){
-            updateUIContent();
-            //playSong();
+            playSong();
+            currentSongLiveData.setValue(musicService.getCurrentSong());
         }
     }
 
@@ -262,7 +327,7 @@ public class MusicPlayerFragment
 
     @Override
     public void onDestroy() {
-
+        getContext().unregisterReceiver(songControlReceiver);
         getActivity().stopService(playIntent);
         musicService = null;
         super.onDestroy();
@@ -360,12 +425,14 @@ public class MusicPlayerFragment
 
     private void handlePlaySong() {
         if (musicService != null) {
-            if (btnPlay.isChecked()) {
+            if (!isPlaying()) {
                 playSong();
             } else {
                 musicService.pausePlayer();
             }
         }
+        btnPlay.setChecked(isPlaying());
+        btnPlay2.setChecked(isPlaying());
     }
 
     private void processForward() {
@@ -434,9 +501,8 @@ public class MusicPlayerFragment
     }
 
     private void handleMarkFavorite() {
-        SongEntity currentSong = musicService.getCurrentSong();
-        currentSong.setFavorite(!currentSong.isFavorite());
-        songViewModel.update(currentSong);
+        currentSongLiveData.getValue().setFavorite(!currentSongLiveData.getValue().isFavorite());
+        songViewModel.update(currentSongLiveData.getValue());
     }
 
     private void handleChangeShuffle() {
@@ -470,6 +536,7 @@ public class MusicPlayerFragment
                 processForward();
                 break;
             case R.id.btnPlay:
+            case R.id.btnPlay2:
                 handlePlaySong();
                 break;
             case R.id.btnPreSong:
