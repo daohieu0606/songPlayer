@@ -1,12 +1,12 @@
 package com.example.songplayer.service;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -19,12 +19,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.MutableLiveData;
 
-import com.example.songplayer.R;
-import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.RepeatMode;
+import com.example.songplayer.notification.NotificationHelper;
+import com.example.songplayer.receiver.NotificationReceiver;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,16 +35,18 @@ public class MusicService
         extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
 
+    public static final String INTENT_FILTER_ACTION = "SONG_CONTROL";
     private static final String TAG = "Music service";
+    private static final int NOTIFY_ID = 1;
+
     private MediaPlayer songPlayer;
     private final IBinder musicBind = new MusicBinder();
-    private static final int NOTIFY_ID = 1;
-    private static final String CHANNEL_ID = "my_chanel";
 
     private List<SongEntity> songEntities;
-    private SongEntity currentSong;
-    boolean isShuffle;
+    private MutableLiveData<SongEntity> currentSongLiveData;
+    private BroadcastReceiver songControlReceiver;
 
+    boolean isShuffle;
     private RepeatMode repeatMode;
 
     @Override
@@ -53,12 +55,49 @@ public class MusicService
         songPlayer = new MediaPlayer();
 
         repeatMode = RepeatMode.NEVER;
+        currentSongLiveData = new MutableLiveData<>();
+        currentSongLiveData.setValue(null);
 
         if (songEntities == null) {
             songEntities = new ArrayList<>();
         }
         initMusicPlayer();
         Log.d(TAG, "onCreate: music service");
+
+        NotificationHelper.createNotificationChannel(getApplicationContext());
+        songControlReceiver = new NotificationReceiver(){
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                super.onReceive(context, intent);
+                String message = intent.getStringExtra(INTENT_FILTER_ACTION);
+                if (message.equals(NotificationHelper.ACTION_PREVIOUS)){
+                    onTakePreSong();
+                } else if (message.equals(NotificationHelper.ACTION_PLAY)){
+                    onPauseResumeSong();
+                } else if (message.equals(NotificationHelper.ACTION_NEXT)){
+                    onTakeNextSong();
+                }
+            }
+        };
+        registerReceiver(songControlReceiver, new IntentFilter(INTENT_FILTER_ACTION));
+    }
+
+    private void onTakeNextSong() {
+        takeNextSong();
+        go();
+    }
+
+    private void onPauseResumeSong() {
+        if (isPng()) {
+            pausePlayer();
+        } else {
+            go();
+        }
+    }
+
+    private void onTakePreSong() {
+        takePreSong();
+        go();
     }
 
     private void initMusicPlayer() {
@@ -81,7 +120,7 @@ public class MusicService
         songEntities = newSongEntities;
     }
     public void setCurrentSong(SongEntity newSong) {
-        currentSong = newSong;
+        currentSongLiveData.setValue(newSong);
     }
     public void setShuffle(boolean isNewShuffle) {
         isShuffle = isNewShuffle;
@@ -105,7 +144,7 @@ public class MusicService
         songPlayer.reset();
         Uri trackUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                currentSong.getId());
+                currentSongLiveData.getValue().getId());
 
         try {
             songPlayer.setDataSource(getApplicationContext(), trackUri);
@@ -125,7 +164,7 @@ public class MusicService
         songPlayer.reset();
         Uri trackUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                currentSong.getId());
+                currentSongLiveData.getValue().getId());
 
         try {
             songPlayer.setDataSource(getApplicationContext(), trackUri);
@@ -149,6 +188,12 @@ public class MusicService
 
     public void pausePlayer(){
         songPlayer.pause();
+        Notification not = NotificationHelper.createNotification(getApplicationContext()
+                , currentSongLiveData.getValue()
+                , songEntities.indexOf(currentSongLiveData.getValue())
+                , songEntities.size()
+                ,isPng());
+        startForeground(NOTIFY_ID, not);
     }
 
     public void seek(int posn){
@@ -157,6 +202,12 @@ public class MusicService
 
     public void go(){
         songPlayer.start();
+        Notification not = NotificationHelper.createNotification(getApplicationContext()
+                , currentSongLiveData.getValue()
+                , songEntities.indexOf(currentSongLiveData.getValue())
+                , songEntities.size()
+                ,isPng());
+        startForeground(NOTIFY_ID, not);
     }
 
     @Override
@@ -172,34 +223,12 @@ public class MusicService
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        createNotificationChannel();
-
-        Intent notIntent = new Intent(this, MainActivity.class);
-        notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendInt = PendingIntent.getActivity(this, 0,
-                notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
-        builder.setContentIntent(pendInt)
-                .setSmallIcon(R.drawable.selector_pause_resume)
-                .setTicker(currentSong.getSongName())
-                .setOngoing(true)
-                .setContentTitle(currentSong.getUriString())
-                .setContentText(currentSong.getSongName());
-        Notification not = builder.build();
-
+        Notification not = NotificationHelper.createNotification(getApplicationContext()
+                , currentSongLiveData.getValue()
+                , songEntities.indexOf(currentSongLiveData.getValue())
+                , songEntities.size()
+                ,isPng());
         startForeground(NOTIFY_ID, not);
-    }
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
     }
 
     public boolean takePreSong() {
@@ -212,7 +241,7 @@ public class MusicService
             preparePlaySyn();
             return true;
         } else if (repeatMode == RepeatMode.NEVER) {
-            if (songEntities.indexOf(currentSong)  == 0) {
+            if (songEntities.indexOf(currentSongLiveData.getValue())  == 0) {
                 Toast.makeText(getApplicationContext(), "You have just played last song in the list", Toast.LENGTH_LONG).show();
                 songPlayer.stop();
                 return false;
@@ -224,7 +253,7 @@ public class MusicService
         if (isShuffle) {
             currentIndex = new Random().nextInt(songEntities.size());
         } else {
-            currentIndex = songEntities.indexOf(currentSong);
+            currentIndex = songEntities.indexOf(currentSongLiveData.getValue());
 
             if (currentIndex <= 0) {
                 currentIndex = songEntities.size() - 1;
@@ -232,8 +261,8 @@ public class MusicService
                 currentIndex -= 1;
             }
         }
-        currentSong = songEntities.get(currentIndex);
-        Log.d(TAG, "takePreSong: " + currentSong.getSongName());
+        currentSongLiveData.setValue(songEntities.get(currentIndex));
+        Log.d(TAG, "takePreSong: " + currentSongLiveData.getValue().getSongName());
         preparePlaySyn();
 
         return true;
@@ -249,7 +278,7 @@ public class MusicService
             preparePlaySyn();
             return true;
         } else if (repeatMode == RepeatMode.NEVER) {
-            if (songEntities.indexOf(currentSong) + 1 == songEntities.size()) {
+            if (songEntities.indexOf(currentSongLiveData.getValue()) + 1 == songEntities.size()) {
                 Toast.makeText(getApplicationContext(), "You have just played last song in the list", Toast.LENGTH_LONG).show();
                 songPlayer.stop();
                 return false;
@@ -261,30 +290,30 @@ public class MusicService
         if (isShuffle) {
             currentIndex = new Random().nextInt(songEntities.size());
         } else {
-            currentIndex = songEntities.indexOf(currentSong);
+            currentIndex = songEntities.indexOf(currentSongLiveData.getValue());
             if (currentIndex >= songEntities.size() - 1) {
                 currentIndex = 0;
             } else {
                 currentIndex += 1;
             }
         }
-        currentSong = songEntities.get(currentIndex);
-        Log.d(TAG, "takeNextSong: " + currentSong.getSongName());
+        currentSongLiveData.setValue(songEntities.get(currentIndex));
+        Log.d(TAG, "takeNextSong: " + currentSongLiveData.getValue().getSongName());
         preparePlaySyn();
 
         return true;
     }
 
     public SongEntity getCurrentSong() {
-        return currentSong;
+        return currentSongLiveData.getValue();
     }
     private boolean isHasAnySongEntity() {
         return songEntities.size() > 0;
     }
-
     @Override
     public void onDestroy() {
         stopForeground(true);
+        unregisterReceiver(songControlReceiver);
         super.onDestroy();
     }
 

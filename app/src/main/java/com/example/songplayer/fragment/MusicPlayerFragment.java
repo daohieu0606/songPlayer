@@ -241,7 +241,7 @@ public class MusicPlayerFragment
     private void playNext() {
         if (musicService.takeNextSong()){
             updateUIContent();
-            playSong();
+            //playSong();
         }
     }
 
