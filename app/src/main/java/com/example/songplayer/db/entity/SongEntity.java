@@ -6,10 +6,29 @@ import java.util.Random;
 
 public class SongEntity implements MySong {
 
+    private int id;
+    private String songName;
+    private String uriString;
+    private String path;
+    private double size;
+    private String artist;
+    private String singer;
+    private boolean isFavorite;
+    private boolean isOnline;
+
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(boolean online) {
+        isOnline = online;
+    }
+
     public SongEntity() {
         Random random = new Random();
         songName = String.valueOf(random.nextDouble());
         id = random.nextInt();
+        isOnline = false;
     }
 
     public SongEntity(String songName, String uriString, String path, double size, String artist, String singer, boolean isFavorite) {
@@ -23,15 +42,6 @@ public class SongEntity implements MySong {
         this.singer = singer;
         this.isFavorite = isFavorite;
     }
-
-    private int id;
-    private String songName;
-    private String uriString;
-    private String path;
-    private double size;
-    private String artist;
-    private String singer;
-    private boolean isFavorite;
 
     @Override
     public void setSongName(String newName) {

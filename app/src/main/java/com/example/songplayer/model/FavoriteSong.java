@@ -8,5 +8,17 @@ import androidx.room.PrimaryKey;
 public class FavoriteSong {
     @PrimaryKey
     @ColumnInfo(name = "song_id")
-    public int SongId;
+    public int songId;
+
+    public FavoriteSong(int newId) {
+        songId = newId;
+    }
+
+    public int getSongId() {
+        return songId;
+    }
+
+    public void setSongId(int songId) {
+        this.songId = songId;
+    }
 }

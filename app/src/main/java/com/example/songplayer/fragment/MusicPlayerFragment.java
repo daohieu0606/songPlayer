@@ -40,6 +40,8 @@ import com.example.songplayer.receiver.NotificationReceiver;
 import com.example.songplayer.service.MusicService;
 import com.example.songplayer.service.MusicService.MusicBinder;
 import com.example.songplayer.viewmodel.SongViewModel;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -115,7 +117,6 @@ public class MusicPlayerFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         currentRepeatMode = RepeatMode.NEVER;
 
         songViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
@@ -138,7 +139,7 @@ public class MusicPlayerFragment
             }
         });
 
-        songViewModel.getAllSongs().observe(getActivity(), new Observer<List<SongEntity>>() {
+        /*songViewModel.getAllSongs().observe(getActivity(), new Observer<List<SongEntity>>() {
             @Override
             public void onChanged(List<SongEntity> songEntities) {
                 if (!songEntities.contains(currentSongLiveData.getValue())) {
@@ -149,7 +150,7 @@ public class MusicPlayerFragment
                     }
                 }
             }
-        });
+        });*/
 
         NotificationHelper.createNotificationChannel(getContext());
         songControlReceiver = new NotificationReceiver(){
@@ -292,6 +293,8 @@ public class MusicPlayerFragment
         } else {
             // do nothing
         }
+
+        btnMarkFavorite.setChecked(currentSong.isFavorite());
 
         btnPlay.setChecked(isPlaying());
     }
@@ -501,7 +504,6 @@ public class MusicPlayerFragment
     }
 
     private void handleMarkFavorite() {
-        currentSongLiveData.getValue().setFavorite(!currentSongLiveData.getValue().isFavorite());
         songViewModel.update(currentSongLiveData.getValue());
     }
 
@@ -522,6 +524,7 @@ public class MusicPlayerFragment
         }
         musicService.setRepeatMode(currentRepeatMode);
     }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();

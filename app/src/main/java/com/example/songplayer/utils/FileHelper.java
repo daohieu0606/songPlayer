@@ -11,6 +11,11 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class FileHelper {
     private static final int REMOVE_TAG = 101;
 

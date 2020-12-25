@@ -41,7 +41,9 @@ public class OnlSongDAOImp implements SongDAO{
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()){
                     for (DataSnapshot ds:snapshot.getChildren()){
-                        songEntities.add(ds.getValue(SongEntity.class));
+                        SongEntity songEntity = ds.getValue(SongEntity.class);
+                        songEntity.setOnline(true);
+                        songEntities.add(songEntity);
                     }
 
                     listMutableLiveData.setValue(songEntities);
@@ -83,12 +85,10 @@ public class OnlSongDAOImp implements SongDAO{
 
     //thêm một file lên firebase
     public void insert(SongEntity songEntity) {
-
         ref.push().setValue(songEntity);
-
     }
 
-    //update một file trên firebase
+    //update một file lên firebase
     public void update(SongEntity songEntity) {
         Query songDel = ref.orderByChild("id").equalTo(songEntity.getId());
         songDel.addListenerForSingleValueEvent(new ValueEventListener() {
