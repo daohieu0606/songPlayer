@@ -1,4 +1,4 @@
-git package com.example.songplayer.dao;
+package com.example.songplayer.dao;
 
 import android.app.Application;
 
