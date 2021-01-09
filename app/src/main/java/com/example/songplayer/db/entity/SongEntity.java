@@ -2,9 +2,10 @@ package com.example.songplayer.db.entity;
 
 import com.example.songplayer.model.MySong;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class SongEntity implements MySong {
+public class SongEntity implements MySong, Serializable {
 
     private int id;
     private String songName;
@@ -121,5 +122,20 @@ public class SongEntity implements MySong {
     @Override
     public void setFavorite(boolean isFavorite) {
         this.isFavorite = isFavorite;
+    }
+
+    @Override
+    public String toString() {
+        return "SongEntity{" +
+                "id=" + id +
+                ", songName='" + songName + '\'' +
+                ", uriString='" + uriString + '\'' +
+                ", path='" + path + '\'' +
+                ", size=" + size +
+                ", artist='" + artist + '\'' +
+                ", singer='" + singer + '\'' +
+                ", isFavorite=" + isFavorite +
+                ", isOnline=" + isOnline +
+                '}';
     }
 }

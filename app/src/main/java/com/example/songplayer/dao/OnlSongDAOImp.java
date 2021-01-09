@@ -1,51 +1,59 @@
 package com.example.songplayer.dao;
 
 import android.app.Application;
-import android.provider.ContactsContract;
+import android.os.Environment;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
+
 import com.example.songplayer.db.entity.SongEntity;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class OnlSongDAOImp implements SongDAO{
+public class OnlSongDAOImp implements SongDAO {
     private static final String TAG = "TESST";
     private MutableLiveData<List<SongEntity>> listMutableLiveData;
     private Application context;
-
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("SongEntity");
 
     public OnlSongDAOImp(Application newContext) {
         context = newContext;
         listMutableLiveData = new MutableLiveData<>();
         listMutableLiveData.setValue(new ArrayList<>());
-
         loadDefaultSongList();
+
     }
 
     //Lấy tất cả dữ liệu trên firebase rồi gán vào listMutableLiveData
     private void loadDefaultSongList() {
-        ArrayList<SongEntity> songEntities =  new ArrayList<>();
+        ArrayList<SongEntity> songEntities = new ArrayList<>();
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()){
-                    for (DataSnapshot ds:snapshot.getChildren()){
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
                         SongEntity songEntity = ds.getValue(SongEntity.class);
                         songEntity.setOnline(true);
                         songEntities.add(songEntity);
+                        Log.d(TAG, "onDataChange: "+ songEntity);
                     }
-
                     listMutableLiveData.setValue(songEntities);
                 }
             }
@@ -69,8 +77,8 @@ public class OnlSongDAOImp implements SongDAO{
         songDel.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()){
-                    for (DataSnapshot ds:snapshot.getChildren()){
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
                         ds.getRef().removeValue();
                     }
                 }
@@ -94,9 +102,9 @@ public class OnlSongDAOImp implements SongDAO{
         songDel.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()){
-                    for (DataSnapshot ds:snapshot.getChildren()){
-                        HashMap<String,Object> result= new HashMap<>();
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        HashMap<String, Object> result = new HashMap<>();
                         result.put("id", songEntity.getId());
                         result.put("songName", songEntity.getSongName());
                         result.put("uriString", songEntity.getUriString());
@@ -118,9 +126,47 @@ public class OnlSongDAOImp implements SongDAO{
         });
     }
 
+    public void downloadFile(String fileName, UIHandler handler) throws FileNotFoundException {
+
+        File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File musicFile = new File(downloadFolder.getAbsolutePath(),fileName);
+        FileOutputStream fileOutputStream = new FileOutputStream(musicFile);
+
+        // Create a storage reference from our app
+        // Get the default bucket from a custom FirebaseApp
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a reference to a file from a Google Cloud Storage URI
+        StorageReference gsReference = storage.getReferenceFromUrl("gs://testfirebase-b2bcc.appspot.com/"+fileName);
+        final long TWENTY_MEGABYTE = 1024 * 1024*20;
+
+        gsReference.getFile(musicFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                if(handler!=null) handler.success();
+            }
+        }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(@NonNull FileDownloadTask.TaskSnapshot snapshot) {
+                final int percent = (int) (snapshot.getBytesTransferred()*100.0/snapshot.getTotalByteCount());
+                if(handler!=null ) handler.updateProgress(percent);
+
+            }
+        })
+
+        ;
+
+
+
+    }
+
+    public  interface UIHandler{
+        void updateProgress(int percent);
+        void success();
+    }
+
 }
 //Test in activity
-    //        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
 //        DatabaseReference songNode = FirebaseDatabase.getInstance().getReference().child("SongEntity");
 //        for (int i=0; i<7;i++){
 //            DatabaseReference songPush = songNode.push();

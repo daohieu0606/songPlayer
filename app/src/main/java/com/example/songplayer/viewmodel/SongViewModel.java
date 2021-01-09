@@ -5,22 +5,26 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.db.SongRepo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongViewModel extends AndroidViewModel {
 
     private SongRepo repository;
-    private MutableLiveData<List<SongEntity>> allSongs;
+    private MutableLiveData<List<SongEntity>> allOfSongs;
+    private MutableLiveData<List<SongEntity>> onlineSongs;
 
     public SongViewModel(@NonNull Application application) {
         super(application);
         repository = new SongRepo(application);
-        allSongs = repository.getAllSongs();
+        allOfSongs = repository.getAllSongs();
+        onlineSongs = repository.getAllOnlineSongs();
     }
 
     public void insert(SongEntity songEntity) {
@@ -33,14 +37,26 @@ public class SongViewModel extends AndroidViewModel {
 
     public void delete(int ID) {
         repository.delete(ID);
-        allSongs = repository.getAllSongs();
+        allOfSongs = repository.getAllSongs();
     }
 
 /*    public void deleteAllSongs() {
         repository.deleteAllSongs();
     }*/
 
-    public MutableLiveData<List<SongEntity>> getAllSongs(){
-        return allSongs;
+    public MutableLiveData<List<SongEntity>> getAllOfflineSongs() {
+        return allOfSongs;
+    }
+
+    public LiveData<List<SongEntity>> getAllOnlineSongs() {
+        return onlineSongs;
+    }
+
+    public LiveData<List<SongEntity>> getAllSongs(){
+        List<SongEntity> songs = new ArrayList<>();
+        songs.addAll(allOfSongs.getValue());
+        songs.addAll(songs.size(),onlineSongs.getValue());
+
+        return new MutableLiveData<>(songs);
     }
 }

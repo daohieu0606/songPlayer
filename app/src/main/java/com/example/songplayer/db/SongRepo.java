@@ -2,6 +2,7 @@ package com.example.songplayer.db;
 
 import android.app.Application;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -28,6 +29,7 @@ public class SongRepo {
         OnlSongDatabase onlSongDatabase = OnlSongDatabase.getInstance(newApplication);
         onlSongDAOImp = onlSongDatabase.songDAO();
         allOnlineSongs = onlSongDAOImp.getAllSongs();
+        Log.d(TAG, "SongRepo: "+ allOnlineSongs.getValue());
     }
 
     public void insert(SongEntity songEntity) {
@@ -49,6 +51,10 @@ public class SongRepo {
 
     public MutableLiveData<List<SongEntity>> getAllSongs() {
         return allSongs;
+    }
+
+    public MutableLiveData<List<SongEntity>> getAllOnlineSongs(){
+        return allOnlineSongs;
     }
 
     private static class InsertSongAsyncTask extends AsyncTask<SongEntity, Void, Void> {

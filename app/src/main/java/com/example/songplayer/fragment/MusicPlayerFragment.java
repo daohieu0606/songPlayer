@@ -40,10 +40,6 @@ import com.example.songplayer.receiver.NotificationReceiver;
 import com.example.songplayer.service.MusicService;
 import com.example.songplayer.service.MusicService.MusicBinder;
 import com.example.songplayer.viewmodel.SongViewModel;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.List;
 
 public class MusicPlayerFragment
         extends Fragment
@@ -89,25 +85,36 @@ public class MusicPlayerFragment
     public MusicPlayerFragment() {
         // Required empty public constructor
     }
+
     public MusicPlayerFragment(SongEntity songEntity) {
         currentSongLiveData = new MutableLiveData<>();
         currentSongLiveData.setValue(songEntity);
     }
-    private ServiceConnection musicConnection = new ServiceConnection(){
+
+    private ServiceConnection musicConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicBinder binder = (MusicBinder)service;
+            MusicBinder binder = (MusicBinder) service;
 
             musicService = binder.getService();
-            musicService.setSongList(songViewModel.getAllSongs().getValue());
+
+            Bundle data = getArguments();
+
+            if (data != null) {
+                final SongEntity song = (SongEntity) data.getSerializable(getString(R.string.SONG));
+                musicService.setCurrentSong(song);
+            }
+
+            musicService.setSongList(songViewModel.getAllOfflineSongs().getValue());
             musicBound = true;
-            if(songViewModel.getAllSongs().getValue().size() > 0 && currentSongLiveData.getValue() == null) {
-                currentSongLiveData.setValue(songViewModel.getAllSongs().getValue().get(0));
+            if (songViewModel.getAllOfflineSongs().getValue().size() > 0 && currentSongLiveData.getValue() == null) {
+                currentSongLiveData.setValue(songViewModel.getAllOfflineSongs().getValue().get(0));
             }
             musicService.setCurrentSong(currentSongLiveData.getValue());
             musicService.preparePlaySyn();
         }
+
         @Override
         public void onServiceDisconnected(ComponentName name) {
             musicBound = false;
@@ -118,6 +125,8 @@ public class MusicPlayerFragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         currentRepeatMode = RepeatMode.NEVER;
+
+
 
         songViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
             @NonNull
@@ -139,30 +148,18 @@ public class MusicPlayerFragment
             }
         });
 
-        /*songViewModel.getAllSongs().observe(getActivity(), new Observer<List<SongEntity>>() {
-            @Override
-            public void onChanged(List<SongEntity> songEntities) {
-                if (!songEntities.contains(currentSongLiveData.getValue())) {
-                    if (songEntities.size() == 0) {
-                        currentSongLiveData.setValue(null);
-                    } else {
-                        currentSongLiveData.setValue(songEntities.get(0));
-                    }
-                }
-            }
-        });*/
 
         NotificationHelper.createNotificationChannel(getContext());
-        songControlReceiver = new NotificationReceiver(){
+        songControlReceiver = new NotificationReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 super.onReceive(context, intent);
                 String message = intent.getStringExtra(INTENT_FILTER_ACTION);
-                if (message.equals(NotificationHelper.ACTION_PREVIOUS)){
+                if (message.equals(NotificationHelper.ACTION_PREVIOUS)) {
                     onTakePreSong();
-                } else if (message.equals(NotificationHelper.ACTION_PLAY)){
+                } else if (message.equals(NotificationHelper.ACTION_PLAY)) {
                     handlePlaySong();
-                } else if (message.equals(NotificationHelper.ACTION_NEXT)){
+                } else if (message.equals(NotificationHelper.ACTION_NEXT)) {
                     onTakeNextSong();
                 }
             }
@@ -280,12 +277,12 @@ public class MusicPlayerFragment
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         byte[] rawArt;
         Bitmap art;
-        BitmapFactory.Options bfo=new BitmapFactory.Options();
+        BitmapFactory.Options bfo = new BitmapFactory.Options();
 
         mmr.setDataSource(getContext(), Uri.parse(currentSong.getUriString()));
         rawArt = mmr.getEmbeddedPicture();
 
-        if (null != rawArt){
+        if (null != rawArt) {
             art = BitmapFactory.decodeByteArray(rawArt, 0, rawArt.length, bfo);
 
             Glide.with(getContext()).load(art).apply(RequestOptions.circleCropTransform()).into(imgCenterSongThumbnail);
@@ -307,7 +304,7 @@ public class MusicPlayerFragment
     }
 
     private void playNext() {
-        if (musicService.takeNextSong()){
+        if (musicService.takeNextSong()) {
             playSong();
             currentSongLiveData.setValue(musicService.getCurrentSong());
         }
@@ -316,7 +313,7 @@ public class MusicPlayerFragment
     @Override
     public void onStart() {
         super.onStart();
-        if(playIntent==null){
+        if (playIntent == null) {
             playIntent = new Intent(getActivity(), MusicService.class);
             getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
         }
@@ -365,24 +362,24 @@ public class MusicPlayerFragment
             Toast.makeText(getContext(), "Your device has no song", Toast.LENGTH_LONG).show();
             btnPlay.setChecked(false);
             result = false;
-        } else if (musicService == null){
+        } else if (musicService == null) {
             Toast.makeText(getContext(), "Your music service haven't connected yet", Toast.LENGTH_LONG).show();
             btnPlay.setChecked(false);
             result = false;
         }
-        return  result;
+        return result;
     }
 
     @Override
     public int getDuration() {
-        if(musicService!=null && musicBound && isPlaying())
+        if (musicService != null && musicBound && isPlaying())
             return musicService.getDur();
         else return 0;
     }
 
     @Override
     public int getCurrentPosition() {
-        if(musicService!=null &&  musicBound && musicService.isPng())
+        if (musicService != null && musicBound && musicService.isPng())
             return musicService.getPosn();
         else return 0;
     }
@@ -396,7 +393,7 @@ public class MusicPlayerFragment
 
     @Override
     public boolean isPlaying() {
-        if(musicService!=null && musicBound)
+        if (musicService != null && musicBound)
             return musicService.isPng();
         else return false;
     }

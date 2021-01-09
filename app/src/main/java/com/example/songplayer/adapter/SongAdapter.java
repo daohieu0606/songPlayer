@@ -21,9 +21,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     private final List<SongEntity> songs;
     private final List<Integer> gradients;
+    private final SongAdapterCallback callback;
 
-    public SongAdapter(List<SongEntity> songs, List<Integer> gradients) {
+    public SongAdapter(List<SongEntity> songs, List<Integer> gradients, SongAdapterCallback callback) {
         this.songs = songs;
+        this.callback = callback;
         this.gradients = gradients;
     }
 
@@ -32,6 +34,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     public SongAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.item_song, parent, false);
+
         return new ViewHolder(view);
     }
 
@@ -44,17 +47,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull SongAdapter.ViewHolder holder, int position) {
 
         final SongEntity currentSong = songs.get(position);
-        SongAdapterCallback callback = null;
 
-        if (holder.itemView.getContext() instanceof SongAdapterCallback) {
-            callback = (SongAdapterCallback) holder.itemView.getContext();
-        } else {
-            try {
-                throw new Exception("Haven't implemented SongAdapterCallback in activity or fragment yet !!");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+
 
         if (currentSong != null) {
             holder.txtSongName.setText(currentSong.getSongName());
@@ -68,6 +62,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             });
         }
 
+        holder.itemView.setOnClickListener((v)->callback.onClickPlay(songs.get(position)));
         holder.itemView.setBackgroundResource(gradients.get(getItemViewType(position)));
     }
 
@@ -98,7 +93,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         }
     }
 
-    public static interface SongAdapterCallback {
+    public interface SongAdapterCallback {
         void downloadASong(SongEntity song);
 
         void favoriteASong(SongEntity song);
@@ -109,5 +104,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
         void setASongAsAlarm(SongEntity song);
 
+        void onClickPlay(SongEntity songName);
     }
+
 }

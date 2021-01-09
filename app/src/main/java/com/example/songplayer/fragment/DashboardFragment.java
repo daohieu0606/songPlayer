@@ -2,12 +2,14 @@ package com.example.songplayer.fragment;
 
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,6 +23,10 @@ import com.example.songplayer.adapter.SongAdapter;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.viewmodel.AlbumViewModel;
 import com.example.songplayer.viewmodel.ArtistViewModel;
+import com.example.songplayer.viewmodel.SongViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DashboardFragment extends Fragment implements SongAdapter.SongAdapterCallback {
 
@@ -34,6 +40,8 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     private RecyclerView lstAlbums;
     private AlbumAdapter albumAdapter;
     private AlbumViewModel albumViewModel;
+    private SongViewModel songViewModel;
+    private List<SongEntity> songs = new ArrayList<>();
 
     public DashboardFragment() {
     }
@@ -56,7 +64,21 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                 return (T) new ArtistViewModel(getActivity().getApplication());
             }
         }).get(ArtistViewModel.class);
+
+        songViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
+            @NonNull
+            @Override
+            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                return (T) new SongViewModel(getActivity().getApplication());
+            }
+        }).get(SongViewModel.class);
+
+
+
+
+
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,23 +88,16 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         setUpSongListView(result);
         setUpAlbumList(result);
 
-//        albumViewModel.getAllAlbums().observe(getActivity(), new Observer<List<AlbumEntity>>() {
-//            @Override
-//            public void onChanged(List<AlbumEntity> albumEntities) {
-//                albumAdapter.setAlbum(albumEntities);
-//                for (AlbumEntity entity :
-//                        albumEntities) {
-//                    Log.d(TAG, "onChanged: " + entity.getArtUri().toString());
-//                }
-//            }
-//        });
+        songViewModel.getAllSongs().observe(getActivity(), new Observer<List<SongEntity>>() {
+            @Override
+            public void onChanged(List<SongEntity> songEntities) {
+                DashboardFragment.this.songs = songEntities;
+                Log.d("OKE", "onChanged: " + songEntities);
+                setUpSongListView(result);
+            }
+        });
 
-//        artistViewModel.getAllArtists().observe(getActivity(), new Observer<List<ArtistEntity>>() {
-//            @Override
-//            public void onChanged(List<ArtistEntity> artistEntities) {
-//                songAdapter.setArtists(artistEntities);
-//            }
-//        });
+
         return result;
     }
 
@@ -108,7 +123,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     private void setUpSongListView(View view) {
 
         rvSongs = view.findViewById(R.id.rvSongs);
-        songAdapter = new SongAdapter(DummyData.songs,DummyData.gradients);
+        songAdapter = new SongAdapter(songs,DummyData.gradients,this);
         rvSongs.setAdapter(songAdapter);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -149,4 +164,14 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     public void setASongAsAlarm(SongEntity song) {
 
     }
+
+    @Override
+    public void onClickPlay(SongEntity music) {
+        ((DashboardCallback)getContext()).play(music);
+    }
+
+    public interface DashboardCallback{
+        void play(SongEntity music);
+    }
+
 }

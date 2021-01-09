@@ -17,5 +17,6 @@
     <string name="music_app">Music</string>
     <string name="channel_name">my_chanel</string>
     <string name="channel_description">my_chanel_description</string>
+    <string name="SONG">SONG</string>
     <!--    End Drawer Constants-->
 </resources>

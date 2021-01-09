@@ -11,35 +11,37 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
-import androidx.lifecycle.MutableLiveData;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
+import com.example.songplayer.dao.OnlSongDAOImp;
 import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.utils.AlbumDbHelper;
 import com.example.songplayer.utils.ArtistDbHelper;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
 import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
 
-public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnItemSelectedListener, DashboardFragment.DashboardCallback {
 
     //VIEW
     private SearchView searchView;
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                         return (T) new SongViewModel(getApplication());
                     }
                 }).get(SongViewModel.class);
-        songViewModel.getAllSongs().observe(this, new Observer<List<SongEntity>>() {
+        songViewModel.getAllOfflineSongs().observe(this, new Observer<List<SongEntity>>() {
             @Override
             public void onChanged(List<SongEntity> songEntities) {
                 Log.d(TAG, "onCreate: " +  songEntities.size());
@@ -82,6 +84,22 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         Log.d(TAG, "onCreate: so luong album " + albumDbHelper.getAllAlbums().size());
 
         ArtistDbHelper artistDbHelper = new ArtistDbHelper(getApplication());
+        OnlSongDAOImp onlSongDAOImp = new OnlSongDAOImp(getApplication());
+        try {
+            onlSongDAOImp.downloadFile("1-Phut-Andiez.mp3", new OnlSongDAOImp.UIHandler() {
+                @Override
+                public void updateProgress(int percent) {
+                    Log.d(TAG, "updateProgress: "+percent);
+                }
+
+                @Override
+                public void success() {
+                    Log.d(TAG, "success: ");
+                }
+            });
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         Log.d(TAG, "onCreate: so luong ca si " + artistDbHelper.getAllArtists().size());
     }
 
@@ -172,16 +190,26 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         } else if (position == POS_MUSIC){
             navController.navigate(R.id.musicPlayerFragment);
         }
+
         if(slidingRootNav!=null ){
             slidingRootNav.closeMenu();
         }
+
 
     }
 
     public Bundle getSavedInstance(){
         return this.savedInstance;
     }
+
     public RecyclerView getMenu(){
         return findViewById(R.id.list);
+    }
+
+    @Override
+    public void play(SongEntity music) {
+        Bundle data = new Bundle();
+        data.putSerializable(getString(R.string.SONG),music);
+        navController.navigate(R.id.musicPlayerFragment,data);
     }
 }
