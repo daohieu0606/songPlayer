@@ -77,18 +77,14 @@ public class MusicPlayerFragment
     private boolean musicBound = false;
 
     private SongViewModel songViewModel;
-    private MutableLiveData<SongEntity> currentSongLiveData;
+    private MutableLiveData<SongEntity> currentSongLiveData = new MutableLiveData<>();
+
     private RepeatMode currentRepeatMode;
 
     private BroadcastReceiver songControlReceiver;
 
     public MusicPlayerFragment() {
         // Required empty public constructor
-    }
-
-    public MusicPlayerFragment(SongEntity songEntity) {
-        currentSongLiveData = new MutableLiveData<>();
-        currentSongLiveData.setValue(songEntity);
     }
 
     private ServiceConnection musicConnection = new ServiceConnection() {
@@ -99,18 +95,17 @@ public class MusicPlayerFragment
 
             musicService = binder.getService();
 
-            Bundle data = getArguments();
-
-            if (data != null) {
-                final SongEntity song = (SongEntity) data.getSerializable(getString(R.string.SONG));
-                musicService.setCurrentSong(song);
-            }
-
             musicService.setSongList(songViewModel.getAllOfflineSongs().getValue());
             musicBound = true;
             if (songViewModel.getAllOfflineSongs().getValue().size() > 0 && currentSongLiveData.getValue() == null) {
                 currentSongLiveData.setValue(songViewModel.getAllOfflineSongs().getValue().get(0));
             }
+            Bundle data = getArguments();
+            if (data != null) {
+                final SongEntity song = (SongEntity) data.getSerializable(getString(R.string.SONG));
+                currentSongLiveData.setValue(song);
+            }
+
             musicService.setCurrentSong(currentSongLiveData.getValue());
             musicService.preparePlaySyn();
         }
@@ -127,7 +122,6 @@ public class MusicPlayerFragment
         currentRepeatMode = RepeatMode.NEVER;
 
 
-
         songViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
             @NonNull
             @Override
@@ -136,15 +130,15 @@ public class MusicPlayerFragment
             }
         }).get(SongViewModel.class);
 
-        currentSongLiveData = new MutableLiveData<>();
 
         currentSongLiveData.observe(getActivity(), new Observer<SongEntity>() {
             @Override
             public void onChanged(SongEntity songEntity) {
                 if (songEntity == null) {
                     setDefaultUI();
+                } else {
+                    updateUIContent();
                 }
-                updateUIContent();
             }
         });
 
@@ -264,7 +258,7 @@ public class MusicPlayerFragment
         txtSongName2.setText(currentSong.getSongName());
 
         String artist = "Artist";
-        if (!currentSong.getArtist().isEmpty()) {
+        if (!"".equals(currentSong.getArtist())) {
             artist = currentSong.getArtist();
         }
         txtArtist.setText(artist);
