@@ -2,7 +2,6 @@ package com.example.songplayer.service;
 
 import android.app.Notification;
 import android.app.Service;
-import android.content.ContentUris;
 import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -106,12 +105,15 @@ public class MusicService
 
     public void preparePlaySyn() {
         songPlayer.reset();
-        Uri trackUri = ContentUris.withAppendedId(
-                android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                currentSongLiveData.getId());
 
         try {
-            songPlayer.setDataSource(getApplicationContext(), trackUri);
+
+            if( currentSongLiveData.isOnline() ){
+                songPlayer.setDataSource(currentSongLiveData.getUriString());
+            }else{
+                songPlayer.setDataSource(getApplicationContext(), Uri.parse(currentSongLiveData.getUriString()));
+            }
+
             songPlayer.prepare();
 
         } catch (IllegalStateException e) {

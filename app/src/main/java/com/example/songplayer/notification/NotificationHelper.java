@@ -29,11 +29,11 @@ public class NotificationHelper {
     public static final String ACTION_NEXT = "ACTION_NEXT";
 
     public static Notification createNotification(Context context, SongEntity currentSong, int pos, int size, boolean isPlaying) {
-        MediaSessionCompat mediaSessionCompat = new MediaSessionCompat( context, "tag");
+        MediaSessionCompat mediaSessionCompat = new MediaSessionCompat(context, "tag");
 
         PendingIntent pendingIntentPrevious;
         int drw_previous;
-        if (pos == 0){
+        if (pos == 0) {
             pendingIntentPrevious = null;
             drw_previous = 0;
         } else {
@@ -51,7 +51,7 @@ public class NotificationHelper {
 
         PendingIntent pendingIntentNext;
         int drw_next;
-        if (pos == size - 1){
+        if (pos == size - 1) {
             pendingIntentNext = null;
             drw_next = 0;
         } else {
@@ -65,12 +65,18 @@ public class NotificationHelper {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         byte[] rawArt;
         Bitmap art;
-        BitmapFactory.Options bfo=new BitmapFactory.Options();
+        BitmapFactory.Options bfo = new BitmapFactory.Options();
 
-        mmr.setDataSource(context, Uri.parse(currentSong.getUriString()));
+        if (currentSong.isOnline()) {
+            mmr.setDataSource(currentSong.getUriString());
+
+        } else {
+            mmr.setDataSource(context, Uri.parse(currentSong.getUriString()));
+        }
+
         rawArt = mmr.getEmbeddedPicture();
 
-        if (null != rawArt){
+        if (null != rawArt) {
             art = BitmapFactory.decodeByteArray(rawArt, 0, rawArt.length, bfo);
         } else {
             art = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_image);
@@ -95,7 +101,7 @@ public class NotificationHelper {
                 .addAction(drw_previous, "Previous", pendingIntentPrevious)
                 .addAction(btnPlay, "Play", pendingIntentPlay)
                 .addAction(drw_next, "Next", pendingIntentNext)
-                .setStyle( new androidx.media.app.NotificationCompat.MediaStyle()
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(0, 1, 2)
                         .setMediaSession(mediaSessionCompat.getSessionToken()));
         Notification not = builder.build();

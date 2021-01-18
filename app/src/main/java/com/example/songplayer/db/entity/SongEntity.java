@@ -1,20 +1,41 @@
 package com.example.songplayer.db.entity;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.example.songplayer.model.MySong;
 
 import java.io.Serializable;
 import java.util.Random;
-
+@Entity(tableName = "songs")
 public class SongEntity implements MySong, Serializable {
-
+    @ColumnInfo(name = "id")
+    @PrimaryKey
     private int id;
+
+    @ColumnInfo(name="songName")
     private String songName;
+
+    @ColumnInfo(name = "uriString")
     private String uriString;
+
+    @ColumnInfo(name = "path")
     private String path;
+
+    @ColumnInfo(name = "size")
     private double size;
+
+    @ColumnInfo(name = "artist")
     private String artist;
+
+    @ColumnInfo(name = "singer")
     private String singer;
+
+    @ColumnInfo(name = "isFavorite")
     private boolean isFavorite;
+
+    @ColumnInfo(name = "isOnline", defaultValue = "false")
     private boolean isOnline;
 
     public boolean isOnline() {

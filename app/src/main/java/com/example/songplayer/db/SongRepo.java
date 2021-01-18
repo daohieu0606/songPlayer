@@ -4,9 +4,12 @@ import android.app.Application;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.songplayer.dao.OnlSongDAOImp;
+import com.example.songplayer.dao.SongDAO;
 import com.example.songplayer.dao.SongDAOImp;
 import com.example.songplayer.db.entity.SongEntity;
 
@@ -19,9 +22,12 @@ public class SongRepo {
     private OnlSongDAOImp onlSongDAOImp;
     private MutableLiveData<List<SongEntity>> allSongs;
     private MutableLiveData<List<SongEntity>> allOnlineSongs;
+    private SongDAO roomDBSongDao;
+    private MusicAppRoomDatabase roomDatabase;
 
     public SongRepo(Application newApplication) {
         SongDatabase database = SongDatabase.getInstance(newApplication);
+        roomDatabase = MusicAppRoomDatabase.getDatabase(newApplication);
 
         songDAO = database.songDAO();
         allSongs = songDAO.getAllSongs();
@@ -29,7 +35,13 @@ public class SongRepo {
         OnlSongDatabase onlSongDatabase = OnlSongDatabase.getInstance(newApplication);
         onlSongDAOImp = onlSongDatabase.songDAO();
         allOnlineSongs = onlSongDAOImp.getAllSongs();
-        Log.d(TAG, "SongRepo: "+ allOnlineSongs.getValue());
+
+        allOnlineSongs.observe((LifecycleOwner) newApplication.getApplicationContext(), new Observer<List<SongEntity>>() {
+            @Override
+            public void onChanged(List<SongEntity> songEntities) {
+                Log.d(TAG, "SongRepo: "+allOnlineSongs.getValue().size());
+            }
+        });
     }
 
     public void insert(SongEntity songEntity) {
@@ -53,7 +65,7 @@ public class SongRepo {
         return allSongs;
     }
 
-    public MutableLiveData<List<SongEntity>> getAllOnlineSongs(){
+    public MutableLiveData<List<SongEntity>> getAllOnlineSongs() {
         return allOnlineSongs;
     }
 

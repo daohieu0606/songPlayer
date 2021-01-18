@@ -2,9 +2,23 @@ package com.example.songplayer.db.entity;
 
 import android.net.Uri;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+@Entity(tableName = "albums")
+@TypeConverters({UriToString.class})
 public class AlbumEntity {
+
+    @ColumnInfo(name = "id")
+    @PrimaryKey
     private int id;
+
+    @ColumnInfo(name = "albumName")
     private String albumName;
+
+    @ColumnInfo(name = "artUri")
     private Uri artUri;
 
     public AlbumEntity() {
@@ -39,3 +53,4 @@ public class AlbumEntity {
     }
 
 }
+

@@ -7,21 +7,23 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.db.entity.ArtistEntity;
 
 import java.util.List;
-@Dao
-public interface SongDAO {
 
-    @Query("select * from songs")
-    LiveData<List<SongEntity>> getAllSongs();
+@Dao
+public interface ArtistDaoRoom {
+
+    @Query("select * from artists")
+    LiveData<List<ArtistEntity>> getAllArtist();
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(SongEntity songEntity);
+    void insert(ArtistEntity album);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    void update(SongEntity songEntity);
+    void update(ArtistEntity albumEntity);
 
-    @Query("delete from songs where id = :ID")
+    @Query("delete from albums where id = :ID")
     void delete(int ID);
+
 }

@@ -1,10 +1,19 @@
 package com.example.songplayer.db.entity;
 
-public class ArtistEntity {
-    private int id;
-    private String artistName;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
-    public ArtistEntity( String artistName) {
+@Entity(tableName = "artists")
+public class ArtistEntity {
+
+    @ColumnInfo(name = "id")
+    @PrimaryKey
+    private int id;
+
+    @ColumnInfo(name = "artistName")
+    private String artistName;
+    public ArtistEntity(String artistName) {
         this.artistName = artistName;
     }
 

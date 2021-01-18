@@ -40,6 +40,9 @@ import com.example.songplayer.receiver.NotificationReceiver;
 import com.example.songplayer.service.MusicService;
 import com.example.songplayer.service.MusicService.MusicBinder;
 import com.example.songplayer.viewmodel.SongViewModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 public class MusicPlayerFragment
         extends Fragment
@@ -95,19 +98,49 @@ public class MusicPlayerFragment
 
             musicService = binder.getService();
 
-            musicService.setSongList(songViewModel.getAllOfflineSongs().getValue());
             musicBound = true;
-            if (songViewModel.getAllOfflineSongs().getValue().size() > 0 && currentSongLiveData.getValue() == null) {
-                currentSongLiveData.setValue(songViewModel.getAllOfflineSongs().getValue().get(0));
-            }
+
             Bundle data = getArguments();
+
             if (data != null) {
                 final SongEntity song = (SongEntity) data.getSerializable(getString(R.string.SONG));
-                currentSongLiveData.setValue(song);
+
+                if (song.isOnline()) {
+                    FirebaseStorage storage = FirebaseStorage.getInstance();
+                    storage.getReference().child(song.getSongName()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+
+                            song.setUriString(uri.toString());
+                            currentSongLiveData.setValue(song);
+                            musicService.setCurrentSong(song);
+                            musicService.preparePlaySyn();
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure: ");
+                        }
+                    });
+
+                } else {
+
+                    currentSongLiveData.setValue(song);
+                    musicService.setCurrentSong(currentSongLiveData.getValue());
+                    musicService.preparePlaySyn();
+
+                }
+
+
+            } else {
+                currentSongLiveData.setValue(songViewModel.getAllSongs().getValue().get(0));
+                musicService.setCurrentSong(currentSongLiveData.getValue());
+                musicService.preparePlaySyn();
+
             }
 
-            musicService.setCurrentSong(currentSongLiveData.getValue());
-            musicService.preparePlaySyn();
+
         }
 
         @Override
@@ -137,7 +170,11 @@ public class MusicPlayerFragment
                 if (songEntity == null) {
                     setDefaultUI();
                 } else {
-                    updateUIContent();
+                    try {
+                        updateUIContent();
+                    } catch (Exception e) {
+                        //TODO: HANDLE
+                    }
                 }
             }
         });
@@ -249,7 +286,7 @@ public class MusicPlayerFragment
         });
     }
 
-    private void updateUIContent() {
+    private void updateUIContent() throws Exception {
         SongEntity currentSong = currentSongLiveData.getValue();
         if (currentSong == null) {
             return;
@@ -268,14 +305,20 @@ public class MusicPlayerFragment
             btnMarkFavorite.setChecked(true);
         }
 
+
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         byte[] rawArt;
         Bitmap art;
         BitmapFactory.Options bfo = new BitmapFactory.Options();
 
-        mmr.setDataSource(getContext(), Uri.parse(currentSong.getUriString()));
-        rawArt = mmr.getEmbeddedPicture();
+        if (currentSong.isOnline()) {
+            mmr.setDataSource(currentSong.getUriString());
 
+        } else {
+            mmr.setDataSource(getContext(), Uri.parse(currentSong.getUriString()));
+        }
+
+        rawArt = mmr.getEmbeddedPicture();
         if (null != rawArt) {
             art = BitmapFactory.decodeByteArray(rawArt, 0, rawArt.length, bfo);
 
@@ -284,6 +327,7 @@ public class MusicPlayerFragment
         } else {
             // do nothing
         }
+
 
         btnMarkFavorite.setChecked(currentSong.isFavorite());
 
@@ -309,7 +353,10 @@ public class MusicPlayerFragment
         super.onStart();
         if (playIntent == null) {
             playIntent = new Intent(getActivity(), MusicService.class);
-            getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+
+            if(getActivity()!=null){
+                getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            }
         }
 
     }

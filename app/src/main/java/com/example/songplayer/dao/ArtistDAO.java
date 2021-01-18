@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArtistDAO {
+
     private MutableLiveData<List<ArtistEntity>> artistMutableLiveData;
     private Application application;
     private ArtistDbHelper artistDbHelper;
