@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.songplayer.dao.AlbumDAO;
 import com.example.songplayer.db.entity.AlbumEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AlbumViewModel extends AndroidViewModel {
@@ -17,11 +18,18 @@ public class AlbumViewModel extends AndroidViewModel {
 
     public AlbumViewModel(@NonNull Application application) {
         super(application);
-
-        albumDAO = new AlbumDAO(application);
     }
 
     public MutableLiveData<List<AlbumEntity>> getAllAlbums() {
-        return albumDAO.getAllAlbums();
+
+        MutableLiveData<List<AlbumEntity>> albums = new MutableLiveData<>(new ArrayList<>());
+
+        Thread thread = new Thread(() -> {
+            albumDAO = new AlbumDAO(getApplication());
+            albums.postValue(albumDAO.getLoadedAlbums());
+        });
+
+        thread.start();
+        return albums;
     }
 }
