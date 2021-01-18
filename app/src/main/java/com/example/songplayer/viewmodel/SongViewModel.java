@@ -40,11 +40,15 @@ public class SongViewModel extends AndroidViewModel {
         allOfSongs = repository.getAllSongs();
     }
 
-/*    public void deleteAllSongs() {
-        repository.deleteAllSongs();
-    }*/
-
     public MutableLiveData<List<SongEntity>> getAllOfflineSongs() {
+        MutableLiveData<List<SongEntity>> songs = new MutableLiveData<>();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        }).start();
         return allOfSongs;
     }
 

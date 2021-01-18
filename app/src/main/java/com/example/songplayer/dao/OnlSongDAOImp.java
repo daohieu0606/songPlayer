@@ -91,6 +91,11 @@ public class OnlSongDAOImp implements SongDAO {
         });
     }
 
+    @Override
+    public List<SongEntity> getAllSongs(boolean pure) {
+        return new ArrayList<>();
+    }
+
     //thêm một file lên firebase
     public void insert(SongEntity songEntity) {
         ref.push().setValue(songEntity);

@@ -24,4 +24,5 @@ public interface SongDAO {
 
     @Query("delete from songs where id = :ID")
     void delete(int ID);
+    public List<SongEntity> getAllSongs(boolean pure);
 }

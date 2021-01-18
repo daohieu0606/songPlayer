@@ -20,8 +20,8 @@ public class SongRepo {
 
     private SongDAOImp songDAO;
     private OnlSongDAOImp onlSongDAOImp;
-    private MutableLiveData<List<SongEntity>> allSongs;
-    private MutableLiveData<List<SongEntity>> allOnlineSongs;
+    private List<SongEntity> allSongs;
+    private List<SongEntity> allOnlineSongs;
     private SongDAO roomDBSongDao;
     private MusicAppRoomDatabase roomDatabase;
 
@@ -36,12 +36,6 @@ public class SongRepo {
         onlSongDAOImp = onlSongDatabase.songDAO();
         allOnlineSongs = onlSongDAOImp.getAllSongs();
 
-        allOnlineSongs.observe((LifecycleOwner) newApplication.getApplicationContext(), new Observer<List<SongEntity>>() {
-            @Override
-            public void onChanged(List<SongEntity> songEntities) {
-                Log.d(TAG, "SongRepo: "+allOnlineSongs.getValue().size());
-            }
-        });
     }
 
     public void insert(SongEntity songEntity) {
