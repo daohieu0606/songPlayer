@@ -2,10 +2,6 @@ package com.example.songplayer.dao.daoimpl;
 
 import android.app.Application;
 
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
-
-import com.example.songplayer.MyApplication;
 import com.example.songplayer.dao.daoimpl.callback.Callback;
 import com.example.songplayer.dao.daointerface.SongDAO;
 import com.example.songplayer.db.entity.SongEntity;
@@ -29,24 +25,19 @@ public class SongDAOImp implements SongDAO {
 
     public void scanSongList(Callback callback) {
         List<SongEntity> songEntityList = songDbHelper.getAllSongs();
-        listMutableLiveData.addAll(songEntityList);
+
         if(callback!=null){
             callback.done((ArrayList<SongEntity>) songEntityList);
         }
     }
 
     public void scanSongList(){
-        MyApplication.database.songDao().getAllSongs().observe((LifecycleOwner) MyApplication.getContext(), new Observer<List<SongEntity>>() {
-            @Override
-            public void onChanged(List<SongEntity> songEntities) {
-                SongDAOImp.this.listMutableLiveData = songEntities;
-            }
-        });
+        listMutableLiveData = getAllSongs();
     }
 
     @Override
     public List<SongEntity> getAllSongs() {
-        return listMutableLiveData;
+        return songDbHelper.getAllSongs();
     }
 
     @Override

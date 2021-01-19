@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.Data.DummyData;
 import com.example.songplayer.R;
-import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.adapter.AlbumAdapter;
 import com.example.songplayer.adapter.SongAdapter;
 import com.example.songplayer.db.entity.AlbumEntity;
@@ -31,9 +30,7 @@ import java.util.List;
 
 public class DashboardFragment extends Fragment implements SongAdapter.SongAdapterCallback {
 
-    private static final String TAG = "DASHBOARD";
-    private MainActivity mainActivity;
-
+    private static final String TAG = "TESST";
     private RecyclerView rvSongs;
     private SongAdapter songAdapter;
     private ArtistViewModel artistViewModel;
@@ -42,7 +39,6 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     private AlbumAdapter albumAdapter;
     private AlbumViewModel albumViewModel;
     private SongViewModel songViewModel;
-    private List<SongEntity> songs = new ArrayList<>();
 
     public DashboardFragment() {
     }
@@ -83,7 +79,6 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View result = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        Log.d(TAG, "onCreateView: fjhsạkfdáhklf");
         setUpSongListView(result);
         setUpAlbumList(result);
         return result;
@@ -93,7 +88,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         lstAlbums = view.findViewById(R.id.rvAlbums);
 
 //        albumAdapter = new AlbumAdapter(DummyData.albums);
-        albumAdapter = new AlbumAdapter(new ArrayList<>());
+        albumAdapter = new AlbumAdapter(new ArrayList<>(), this);
 
         lstAlbums.setAdapter(albumAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -121,7 +116,8 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     private void setUpSongListView(View view) {
 
         rvSongs = view.findViewById(R.id.rvSongs);
-        songAdapter = new SongAdapter(songs, DummyData.gradients, this);
+
+        songAdapter = new SongAdapter(new ArrayList<>(), DummyData.gradients, this);
         rvSongs.setAdapter(songAdapter);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -179,6 +175,17 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
 
     public interface DashboardCallback {
         void play(SongEntity music);
+    }
+
+    public void displayListSongOfAlbum(AlbumEntity album){
+        songViewModel.getAllSongOfAlbum(album).observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
+            @Override
+            public void onChanged(List<SongEntity> songEntities) {
+                songAdapter.setSongs(songEntities);
+                Log.d(TAG, "onChanged: "+ songEntities);
+            }
+        });
+
     }
 
 }

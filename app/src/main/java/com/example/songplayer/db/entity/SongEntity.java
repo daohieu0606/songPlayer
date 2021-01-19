@@ -9,7 +9,6 @@ import com.example.songplayer.model.MySong;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.Random;
 @Entity(tableName = "songs"
 )
 public class SongEntity implements MySong, Serializable {
@@ -48,14 +47,7 @@ public class SongEntity implements MySong, Serializable {
     public void setOnline(boolean online) {
         isOnline = online;
     }
-
-    public SongEntity() {
-        Random random = new Random();
-        songName = String.valueOf(random.nextDouble());
-        id = random.nextInt();
-        isOnline = false;
-    }
-
+    public SongEntity(){}
     public SongEntity(int id, String songName, String uriString, String path, double size, String artist, String singer, boolean isFavorite ) {
         this.id = id;
         this.songName = songName;
@@ -66,18 +58,6 @@ public class SongEntity implements MySong, Serializable {
         this.singer = singer;
         this.isFavorite = isFavorite;
         this.isOnline = false;
-    }
-
-    public SongEntity(String songName, String uriString, String path, double size, String artist, String singer, boolean isFavorite) {
-        Random random = new Random();
-        this.id = random.nextInt();
-        this.songName = songName;
-        this.uriString = uriString;
-        this.path = path;
-        this.size = size;
-        this.artist = artist;
-        this.singer = singer;
-        this.isFavorite = isFavorite;
     }
 
     @Override

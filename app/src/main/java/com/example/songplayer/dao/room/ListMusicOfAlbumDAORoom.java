@@ -11,9 +11,9 @@ import com.example.songplayer.db.entity.ListMusicOfAlbum;
 public interface ListMusicOfAlbumDAORoom {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(ListMusicOfAlbum genre);
+    void insert(ListMusicOfAlbum album);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    void update(ListMusicOfAlbum genre);
+    void update(ListMusicOfAlbum album);
 
 }

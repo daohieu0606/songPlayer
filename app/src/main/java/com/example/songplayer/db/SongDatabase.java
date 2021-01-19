@@ -2,8 +2,11 @@ package com.example.songplayer.db;
 
 import android.app.Application;
 
-import com.example.songplayer.MyApplication;
 import com.example.songplayer.dao.daoimpl.SongDAOImp;
+import com.example.songplayer.db.entity.SongEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SongDatabase {
     private static final String TAG = "TESST";
@@ -21,21 +24,24 @@ public class SongDatabase {
     public SongDAOImp songDAO() {
         return songDAOImp;
     }
-
-    public void scanOfflineSong(boolean firstLoad) throws Exception {
-        if (songDAOImp != null) {
-            new Thread(() -> {
-                if (firstLoad) {
-                    songDAOImp.scanSongList(data -> {
-                        data.forEach(MyApplication.database.songDao()::insert);
-                    });
-
-                } else {
-                    songDAOImp.scanSongList();
-                }
-            }).start();
-        } else {
-            throw new Exception("not implement");
-        }
+    public List<SongEntity> scanOfflineSongs(){
+        List<SongEntity> songs = new ArrayList<>();
+        songDAOImp.getAllSongs();
+        return  songs;
     }
+//    public void scanOfflineSong(boolean firstLoad) throws Exception {
+//        if (songDAOImp != null) {
+//            new Thread(() -> {
+//                if (firstLoad) {
+//                    songDAOImp.scanSongList(data -> {
+//                        data.forEach(MyApplication.database.songDao()::insert);
+//                    });
+//                } else {
+//                    songDAOImp.scanSongList();
+//                }
+//            }).start();
+//        } else {
+//            throw new Exception("not implement");
+//        }
+//    }
 }

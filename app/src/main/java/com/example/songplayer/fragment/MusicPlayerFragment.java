@@ -44,6 +44,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.util.List;
+
 public class MusicPlayerFragment
         extends Fragment
         implements MediaController.MediaPlayerControl, View.OnClickListener, Runnable {
@@ -134,10 +136,17 @@ public class MusicPlayerFragment
 
 
             } else {
-                currentSongLiveData.setValue(songViewModel.getAllSongs().getValue().get(0));
-                musicService.setCurrentSong(currentSongLiveData.getValue());
-                musicService.preparePlaySyn();
+                songViewModel.getAllSongs().observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
+                    @Override
+                    public void onChanged(List<SongEntity> songEntities) {
+                        if (songEntities != null) {
+                            currentSongLiveData.setValue(songEntities.get(0));
+                            musicService.setCurrentSong(currentSongLiveData.getValue());
+                            musicService.preparePlaySyn();
+                        }
 
+                    }
+                });
             }
 
 
@@ -354,7 +363,7 @@ public class MusicPlayerFragment
         if (playIntent == null) {
             playIntent = new Intent(getActivity(), MusicService.class);
 
-            if(getActivity()!=null){
+            if (getActivity() != null) {
                 getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             }
         }
@@ -542,6 +551,12 @@ public class MusicPlayerFragment
     }
 
     private void handleMarkFavorite() {
+        SongEntity currentSong = currentSongLiveData.getValue();
+        if (currentSong == null) {
+            return;
+        }
+        currentSong.setFavorite(!currentSong.isFavorite());
+        btnMarkFavorite.setChecked(currentSong.isFavorite());
         songViewModel.update(currentSongLiveData.getValue());
     }
 

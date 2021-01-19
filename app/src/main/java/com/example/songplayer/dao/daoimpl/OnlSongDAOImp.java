@@ -52,7 +52,6 @@ public class OnlSongDAOImp implements SongDAO {
                         SongEntity songEntity = ds.getValue(SongEntity.class);
                         songEntity.setOnline(true);
                         songEntities.add(songEntity);
-                        Log.d(TAG, "onDataChange: "+ songEntity);
                     }
                     listSongEntities = songEntities;
 

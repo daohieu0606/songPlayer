@@ -10,14 +10,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.AlbumEntity;
+import com.example.songplayer.fragment.DashboardFragment;
 
 import java.util.List;
 
 public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> {
 
     private List<AlbumEntity> albums;
-
-    public AlbumAdapter(List<AlbumEntity> newItemList) {
+    private DashboardFragment fragment;
+    public AlbumAdapter(List<AlbumEntity> newItemList, DashboardFragment fragment) {
+        this.fragment = fragment;
         this.albums = newItemList;
     }
 
@@ -35,6 +37,9 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull AlbumAdapter.ViewHolder holder, int position) {
 
         holder.txtAlbumName.setText(albums.get(position).getAlbumName());
+        holder.itemView.setOnClickListener((v)->{
+            fragment.displayListSongOfAlbum(albums.get(position));
+        });
 
     }
 

@@ -24,12 +24,12 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
-import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
+import com.example.songplayer.db.entity.ListMusicOfAlbum;
 import com.example.songplayer.db.entity.SongEntity;
-import com.example.songplayer.utils.AlbumDbHelper;
-import com.example.songplayer.utils.ArtistDbHelper;
+import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
@@ -40,7 +40,7 @@ import static com.example.songplayer.utils.DrawerCreater.POS_CATEGORY;
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
 import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
 
-public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnItemSelectedListener, DashboardFragment.DashboardCallback {
 
     //VIEW
     private SearchView searchView;
@@ -73,33 +73,14 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                         return (T) new SongViewModel(getApplication());
                     }
                 }).get(SongViewModel.class);
-        songViewModel.getAllOfflineSongs().observe(this, new Observer<List<SongEntity>>() {
+
+        MyApplication.database.songDao().getAllMusicOfAlbum().observe(this, new Observer<List<ListMusicOfAlbum>>() {
             @Override
-            public void onChanged(List<SongEntity> songEntities) {
-                Log.d(TAG, "onCreate: " +  songEntities.size());
+            public void onChanged(List<ListMusicOfAlbum> listMusicOfAlbums) {
+                Log.d(TAG, "onChanged: "+ listMusicOfAlbums);
             }
         });
-        AlbumDbHelper albumDbHelper = new AlbumDbHelper(getApplication());
-        Log.d(TAG, "onCreate: so luong album " + albumDbHelper.getAllAlbums().size());
 
-        ArtistDbHelper artistDbHelper = new ArtistDbHelper(getApplication());
-        OnlSongDAOImp onlSongDAOImp = new OnlSongDAOImp();
-//        try {
-//            onlSongDAOImp.downloadFile("1-Phut-Andiez.mp3", new OnlSongDAOImp.UIHandler() {
-//                @Override
-//                public void updateProgress(int percent) {
-//                    Log.d(TAG, "updateProgress: "+percent);
-//                }
-//
-//                @Override
-//                public void success() {
-//                    Log.d(TAG, "success: ");
-//                }
-//            });
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-        Log.d(TAG, "onCreate: so luong ca si " + artistDbHelper.getAllArtists().size());
     }
 
     private void checkAndRequestPermission() {
@@ -211,4 +192,11 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         return findViewById(R.id.list);
     }
 
+    @Override
+    public void play(SongEntity music) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(getString(R.string.SONG),music);
+        navController.navigate(R.id.musicPlayerFragment,bundle);
+
+    }
 }

@@ -3,11 +3,10 @@ package com.example.songplayer.utils;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
+
 import com.example.songplayer.db.entity.AlbumEntity;
 
 import java.util.ArrayList;
@@ -32,8 +31,6 @@ public class AlbumDbHelper {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            /*Log.d(TAG, "getAllAlbums: " + cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums._ID)));
-            Log.d(TAG, "getAllAlbums: " + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)));*/
 
             AlbumEntity albumEntity = new AlbumEntity();
             albumEntity.setId(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums._ID)));

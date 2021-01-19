@@ -12,6 +12,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -68,6 +69,7 @@ public class NotificationHelper {
         BitmapFactory.Options bfo = new BitmapFactory.Options();
 
         if (currentSong.isOnline()) {
+            Log.d("TESST", "createNotification: "+currentSong.getUriString());
             mmr.setDataSource(currentSong.getUriString());
 
         } else {

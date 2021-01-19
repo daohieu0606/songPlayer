@@ -14,9 +14,8 @@ import org.jetbrains.annotations.NotNull;
 @Entity(tableName = "albums")
 @TypeConverters({UriToString.class})
 public class AlbumEntity {
-
     @ColumnInfo(name = "id")
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     private int id;
 
     @ColumnInfo(name = "albumName")

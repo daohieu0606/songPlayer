@@ -19,5 +19,7 @@
     <string name="channel_description">my_chanel_description</string>
     <string name="SONG">SONG</string>
     <string name="category_text">CATEGORY</string>
+    <string name="prev">PREV</string>
+    <string name="first_load">FIRST_LOAD</string>
     <!--    End Drawer Constants-->
 </resources>
