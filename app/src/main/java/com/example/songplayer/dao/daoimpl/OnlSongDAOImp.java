@@ -5,7 +5,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.example.songplayer.dao.daoimpl.callback.Callback;
 import com.example.songplayer.dao.daointerface.SongDAO;
 import com.example.songplayer.db.entity.SongEntity;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -22,26 +21,26 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class OnlSongDAOImp implements SongDAO {
 
 
 
     private static final String TAG = "TESST";
-    private List<SongEntity> listSongEntities;
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("SongEntity");
 
 
     public OnlSongDAOImp() {
-        listSongEntities = new ArrayList<>();
     }
 
     //Lấy tất cả dữ liệu trên firebase rồi gán vào listMutableLiveData
-    public void fetchOnlineSongs(Callback callback) {
+    public List<SongEntity> fetchOnlineSongs() {
+        final CountDownLatch latch = new CountDownLatch(1);
         ArrayList<SongEntity> songEntities = new ArrayList<>();
 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -53,33 +52,25 @@ public class OnlSongDAOImp implements SongDAO {
                         songEntity.setOnline(true);
                         songEntities.add(songEntity);
                     }
-                    listSongEntities = songEntities;
-
-                    if(callback!=null){
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                callback.done(songEntities);
-                            }
-                        }).start();
-                    }
                 }
-            }
+                latch.countDown();
 
+            }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                latch.countDown();
             }
         });
+        try {
+            latch.await(10, TimeUnit.SECONDS);
+//            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return songEntities;
 
+    }
 
-    }
-    private void fetchOnlineSongs(){
-        fetchOnlineSongs(null);
-    }
-    public List<SongEntity> getAllSongs() {
-        return listSongEntities;
-    }
 
     // Xóa một file trên firebase dựa trên id
     public void delete(int ID) {
@@ -101,6 +92,11 @@ public class OnlSongDAOImp implements SongDAO {
         });
     }
 
+
+    @Override
+    public List<SongEntity> getAllSongs() {
+        return fetchOnlineSongs();
+    }
 
     //thêm một file lên firebase
     public void insert(SongEntity songEntity) {
@@ -139,9 +135,8 @@ public class OnlSongDAOImp implements SongDAO {
 
     public void downloadFile(String fileName, UIHandler handler) throws FileNotFoundException {
 
-        File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File downloadFolder =new File( Environment.getExternalStorageDirectory().toString()+"/Download");
         File musicFile = new File(downloadFolder.getAbsolutePath(),fileName);
-        FileOutputStream fileOutputStream = new FileOutputStream(musicFile);
 
         // Create a storage reference from our app
         // Get the default bucket from a custom FirebaseApp
@@ -169,7 +164,6 @@ public class OnlSongDAOImp implements SongDAO {
 
 
     }
-
     public  interface UIHandler{
         void updateProgress(int percent);
         void success();

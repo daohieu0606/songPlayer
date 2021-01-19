@@ -29,7 +29,7 @@ public class SongRepo {
         songDAO = localDatabase.songDAO();
 
         allSongs = songDAO.getAllSongs();
-        onlSongDAOImp = onlSongDatabase.songDAO();
+        onlSongDAOImp = onlSongDatabase.onlSongDao();
         allOnlineSongs = onlSongDAOImp.getAllSongs();
 
     }

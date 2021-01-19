@@ -47,7 +47,11 @@ public class SongViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<SongEntity>> getAllOnlineSongs() {
-        return onlineSongs;
+        MutableLiveData<List<SongEntity>> songs = new MutableLiveData<>(new ArrayList<>());
+        new Thread(()->{
+            songs.postValue(MyApplication.onlSongDatabase.fetchOnlineSongs());
+        }).start();
+        return songs;
     }
 
     public LiveData<List<SongEntity>> getAllSongs() {
@@ -56,5 +60,10 @@ public class SongViewModel extends AndroidViewModel {
 
     public LiveData<List<SongEntity>> getAllSongOfAlbum(AlbumEntity album){
         return MyApplication.database.songDao().getAllSongsOfAlbum(album.getId());
+    }
+
+    public void downloadASong(){
+
+
     }
 }

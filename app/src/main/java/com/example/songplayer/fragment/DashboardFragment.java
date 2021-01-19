@@ -1,7 +1,9 @@
 package com.example.songplayer.fragment;
 
+import android.app.ProgressDialog;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +17,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.Data.DummyData;
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.AlbumAdapter;
 import com.example.songplayer.adapter.SongAdapter;
+import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
 import com.example.songplayer.db.entity.AlbumEntity;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.viewmodel.AlbumViewModel;
 import com.example.songplayer.viewmodel.ArtistViewModel;
 import com.example.songplayer.viewmodel.SongViewModel;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,12 +144,47 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                 }
             }
         });
+
+        songViewModel.getAllOnlineSongs().observe(getViewLifecycleOwner(), (songs)->{
+            if(songs!=null && songs.size()>0){
+                Log.d(TAG, "Onl songs"+ songs);
+                songAdapter.appendWithOnlineSongs(songs);
+            }
+        });
     }
 
 
     @Override
     public void downloadASong(SongEntity song) {
 
+
+        final ProgressDialog dialog = ProgressDialog.show(
+                getContext(), "Downloading", "Loading...please wait");
+
+        new Thread(() -> {
+
+            try {
+                MyApplication.onlSongDatabase.onlSongDao().downloadFile(song.getSongName(), new OnlSongDAOImp.UIHandler() {
+                    @Override
+                    public void updateProgress(int percent) {
+                        dialog.setMessage("Downloaded "+ percent+"%");
+                    }
+
+                    @Override
+                    public void success() {
+                        dialog.setMessage("Download completed");
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        dialog.dismiss();
+                    }
+                });
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Override

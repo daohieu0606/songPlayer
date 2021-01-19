@@ -2,12 +2,10 @@ package com.example.songplayer.db;
 
 import android.app.Application;
 
-import com.example.songplayer.MyApplication;
 import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
-import com.example.songplayer.dao.daoimpl.callback.Callback;
 import com.example.songplayer.db.entity.SongEntity;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class OnlSongDatabase {
     private static final String TAG = "TESST";
@@ -22,18 +20,11 @@ public class OnlSongDatabase {
         return instance;
     }
 
-    public OnlSongDAOImp songDAO() {
+    public OnlSongDAOImp onlSongDao() {
         return onlSongDAOImp;
     }
 
-    public void fetchOnlineSongs() {
-        onlSongDAOImp.fetchOnlineSongs(
-                new Callback() {
-                    @Override
-                    public void done(ArrayList<SongEntity> songs) {
-                        songs.forEach(MyApplication.database.songDao()::insert);
-                    }
-                }
-        );
+    public List<SongEntity> fetchOnlineSongs() {
+        return onlSongDAOImp.fetchOnlineSongs();
     }
 }

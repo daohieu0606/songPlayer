@@ -34,6 +34,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         notifyDataSetChanged();
     }
 
+    public void appendWithOnlineSongs(List<SongEntity> onlSongs){
+        this.songs.addAll(onlSongs);
+    }
+
     @NonNull
     @Override
     public SongAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -58,9 +62,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         if (currentSong != null) {
             holder.txtSongName.setText(currentSong.getSongName());
             SongAdapterCallback finalCallback = callback;
-            holder.btnDownloadSong.setOnClickListener((view) -> {
-                finalCallback.downloadASong(currentSong);
-            });
+
+            if(!currentSong.isOnline()){
+                holder.btnDownloadSong.setVisibility(View.GONE);
+            }else{
+                holder.btnDownloadSong.setOnClickListener((view) -> {
+                    finalCallback.downloadASong(currentSong);
+                });
+            }
 
             holder.btnMarkFavoriteSong.setOnClickListener((view)->{
                 finalCallback.favoriteASong(currentSong);
