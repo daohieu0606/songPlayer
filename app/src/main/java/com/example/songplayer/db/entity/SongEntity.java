@@ -6,9 +6,12 @@ import androidx.room.PrimaryKey;
 
 import com.example.songplayer.model.MySong;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 import java.util.Random;
-@Entity(tableName = "songs")
+@Entity(tableName = "songs"
+)
 public class SongEntity implements MySong, Serializable {
     @ColumnInfo(name = "id")
     @PrimaryKey
@@ -51,6 +54,18 @@ public class SongEntity implements MySong, Serializable {
         songName = String.valueOf(random.nextDouble());
         id = random.nextInt();
         isOnline = false;
+    }
+
+    public SongEntity(int id, String songName, String uriString, String path, double size, String artist, String singer, boolean isFavorite ) {
+        this.id = id;
+        this.songName = songName;
+        this.uriString = uriString;
+        this.path = path;
+        this.size = size;
+        this.artist = artist;
+        this.singer = singer;
+        this.isFavorite = isFavorite;
+        this.isOnline = false;
     }
 
     public SongEntity(String songName, String uriString, String path, double size, String artist, String singer, boolean isFavorite) {
@@ -145,6 +160,7 @@ public class SongEntity implements MySong, Serializable {
         this.isFavorite = isFavorite;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "SongEntity{" +

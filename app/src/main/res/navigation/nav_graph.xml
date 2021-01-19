@@ -8,13 +8,20 @@
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="com.example.songplayer.fragment.DashboardFragment"
-        android:label="DashboardFragment" >
+        android:label="DashboardFragment">
         <action
             android:id="@+id/action_play_music"
             app:destination="@id/musicPlayerFragment" />
+        <action
+            android:id="@+id/action_category"
+            app:destination="@id/categoryFragment" />
     </fragment>
     <fragment
         android:id="@+id/musicPlayerFragment"
         android:name="com.example.songplayer.fragment.MusicPlayerFragment"
         android:label="MusicPlayerFragment" />
+    <fragment
+        android:id="@+id/categoryFragment"
+        android:name="com.example.songplayer.fragment.CategoryFragment"
+        android:label="CategoryFragment" />
 </navigation>

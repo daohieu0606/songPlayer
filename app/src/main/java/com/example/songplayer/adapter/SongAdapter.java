@@ -19,7 +19,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
 
 
-    private final List<SongEntity> songs;
+    private List<SongEntity> songs;
     private final List<Integer> gradients;
     private final SongAdapterCallback callback;
 
@@ -27,6 +27,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         this.songs = songs;
         this.callback = callback;
         this.gradients = gradients;
+    }
+
+    public void setSongs(List<SongEntity> songs){
+        this.songs = songs;
+        notifyDataSetChanged();
     }
 
     @NonNull

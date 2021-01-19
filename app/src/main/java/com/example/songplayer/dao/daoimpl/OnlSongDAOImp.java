@@ -1,12 +1,12 @@
-package com.example.songplayer.dao;
+package com.example.songplayer.dao.daoimpl;
 
-import android.app.Application;
 import android.os.Environment;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 
+import com.example.songplayer.dao.daoimpl.callback.Callback;
+import com.example.songplayer.dao.daointerface.SongDAO;
 import com.example.songplayer.db.entity.SongEntity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -28,22 +28,22 @@ import java.util.HashMap;
 import java.util.List;
 
 public class OnlSongDAOImp implements SongDAO {
+
+
+
     private static final String TAG = "TESST";
-    private MutableLiveData<List<SongEntity>> listMutableLiveData;
-    private Application context;
+    private List<SongEntity> listSongEntities;
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("SongEntity");
 
-    public OnlSongDAOImp(Application newContext) {
-        context = newContext;
-        listMutableLiveData = new MutableLiveData<>();
-        listMutableLiveData.setValue(new ArrayList<>());
-        loadDefaultSongList();
 
+    public OnlSongDAOImp() {
+        listSongEntities = new ArrayList<>();
     }
 
     //Lấy tất cả dữ liệu trên firebase rồi gán vào listMutableLiveData
-    private void loadDefaultSongList() {
+    public void fetchOnlineSongs(Callback callback) {
         ArrayList<SongEntity> songEntities = new ArrayList<>();
+
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -54,7 +54,16 @@ public class OnlSongDAOImp implements SongDAO {
                         songEntities.add(songEntity);
                         Log.d(TAG, "onDataChange: "+ songEntity);
                     }
-                    listMutableLiveData.setValue(songEntities);
+                    listSongEntities = songEntities;
+
+                    if(callback!=null){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.done(songEntities);
+                            }
+                        }).start();
+                    }
                 }
             }
 
@@ -66,9 +75,11 @@ public class OnlSongDAOImp implements SongDAO {
 
 
     }
-
-    public MutableLiveData<List<SongEntity>> getAllSongs() {
-        return listMutableLiveData;
+    private void fetchOnlineSongs(){
+        fetchOnlineSongs(null);
+    }
+    public List<SongEntity> getAllSongs() {
+        return listSongEntities;
     }
 
     // Xóa một file trên firebase dựa trên id
@@ -91,10 +102,6 @@ public class OnlSongDAOImp implements SongDAO {
         });
     }
 
-    @Override
-    public List<SongEntity> getAllSongs(boolean pure) {
-        return new ArrayList<>();
-    }
 
     //thêm một file lên firebase
     public void insert(SongEntity songEntity) {
@@ -170,74 +177,3 @@ public class OnlSongDAOImp implements SongDAO {
     }
 
 }
-//Test in activity
-//        FirebaseDatabase database = FirebaseDatabase.getInstance();
-//        DatabaseReference songNode = FirebaseDatabase.getInstance().getReference().child("SongEntity");
-//        for (int i=0; i<7;i++){
-//            DatabaseReference songPush = songNode.push();
-//            String ID = songPush.getKey();
-//            SongEntity songEntity =new SongEntity("SongName","uriString",
-//                    "PathString",1.2,"Artist","Singer",false);
-//
-//            songPush.setValue(songEntity);
-//        }
-//
-//
-//        DatabaseReference artistNode =FirebaseDatabase.getInstance().getReference().child("ArtistEntity");
-//        DatabaseReference artistPush = artistNode.push();
-//        artistPush.setValue(new ArtistEntity("Artist"));
-//
-//        DatabaseReference albumNode =FirebaseDatabase.getInstance().getReference().child("AlbumEntity");
-//        DatabaseReference albumPush = albumNode.push();
-//        albumPush.setValue(new AlbumEntity("Love and Heavy"));
-//    List<SongEntity> songEntityList = new ArrayList<>();
-//    ArrayList<SongEntity> songEntities =  new ArrayList<>();
-//    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("SongEntity");
-//        ref.addValueEventListener(new ValueEventListener() {
-//@Override
-//public void onDataChange(@NonNull DataSnapshot snapshot) {
-//        if (snapshot.exists()){
-//        for (DataSnapshot ds:snapshot.getChildren()){
-//        songEntities.add(ds.getValue(SongEntity.class));
-//        }
-//        songEntityList.addAll(songEntities);
-//        }
-//        }
-//
-//@Override
-//public void onCancelled(@NonNull DatabaseError error) {
-//
-//        }
-//        });
-//
-//        Query songDel = ref.orderByChild("id").equalTo(570734123);
-//        songDel.addListenerForSingleValueEvent(new ValueEventListener() {
-//@Override
-//public void onDataChange(@NonNull DataSnapshot snapshot) {
-//        if (snapshot.exists()){
-//        for (DataSnapshot ds:snapshot.getChildren()){
-//        DatabaseReference a = ds.getRef();
-//        a.removeValue();
-//        }
-//        }
-//
-//        }
-//
-//@Override
-//public void onCancelled(@NonNull DatabaseError error) {
-//
-//        }
-//        });
-
-//        myRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                String value = snapshot.getValue(String.class);
-//                Log.d("Data","Value is: " + value);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });

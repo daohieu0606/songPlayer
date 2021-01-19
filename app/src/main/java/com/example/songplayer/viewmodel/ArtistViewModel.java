@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.songplayer.dao.ArtistDAO;
+import com.example.songplayer.dao.daointerface.ArtistDAO;
 import com.example.songplayer.db.entity.ArtistEntity;
 
 import java.util.ArrayList;

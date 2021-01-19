@@ -1,7 +1,7 @@
 package com.example.songplayer.db;
 
 import android.app.Application;
-import com.example.songplayer.dao.AlbumDAO;
+import com.example.songplayer.dao.daointerface.AlbumDAO;
 
 public class AlbumDatabase {
     private static final String TAG = "TESST";

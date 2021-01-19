@@ -1,4 +1,4 @@
-package com.example.songplayer.dao;
+package com.example.songplayer.dao.room;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -17,7 +17,7 @@ public interface ArtistDaoRoom {
     @Query("select * from artists")
     LiveData<List<ArtistEntity>> getAllArtist();
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(ArtistEntity album);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)

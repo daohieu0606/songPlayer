@@ -43,7 +43,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ArtistAdapter.ViewHolder holder, int position) {
         if (0 <= position && artistEntityList.size() > position) {
-            holder.txtSinger.setText(artistEntityList.get(position).getArtistName());
+            holder.txtSinger.setText(artistEntityList.get(position).getComposerName());
         }
     }
 

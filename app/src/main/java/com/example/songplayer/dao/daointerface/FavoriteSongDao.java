@@ -1,8 +1,6 @@
-package com.example.songplayer.dao;
+package com.example.songplayer.dao.daointerface;
 
 import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
 import androidx.room.Query;
 
 import com.example.songplayer.model.FavoriteSong;

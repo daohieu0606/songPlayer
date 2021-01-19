@@ -1,4 +1,4 @@
-package com.example.songplayer.dao;
+package com.example.songplayer.dao.daointerface;
 
 import android.app.Application;
 

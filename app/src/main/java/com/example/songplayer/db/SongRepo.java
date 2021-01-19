@@ -2,15 +2,10 @@ package com.example.songplayer.db;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
-
-import com.example.songplayer.dao.OnlSongDAOImp;
-import com.example.songplayer.dao.SongDAO;
-import com.example.songplayer.dao.SongDAOImp;
+import com.example.songplayer.MyApplication;
+import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
+import com.example.songplayer.dao.daoimpl.SongDAOImp;
 import com.example.songplayer.db.entity.SongEntity;
 
 import java.util.List;
@@ -20,22 +15,27 @@ public class SongRepo {
 
     private SongDAOImp songDAO;
     private OnlSongDAOImp onlSongDAOImp;
+
     private List<SongEntity> allSongs;
     private List<SongEntity> allOnlineSongs;
-    private SongDAO roomDBSongDao;
+
     private MusicAppRoomDatabase roomDatabase;
 
+
     public SongRepo(Application newApplication) {
-        SongDatabase database = SongDatabase.getInstance(newApplication);
-        roomDatabase = MusicAppRoomDatabase.getDatabase(newApplication);
+        SongDatabase localDatabase = MyApplication.songDatabase;
+        roomDatabase = MyApplication.database;
+        OnlSongDatabase onlSongDatabase = MyApplication.onlSongDatabase;
+        songDAO = localDatabase.songDAO();
 
-        songDAO = database.songDAO();
         allSongs = songDAO.getAllSongs();
-
-        OnlSongDatabase onlSongDatabase = OnlSongDatabase.getInstance(newApplication);
         onlSongDAOImp = onlSongDatabase.songDAO();
         allOnlineSongs = onlSongDAOImp.getAllSongs();
 
+    }
+
+    public MusicAppRoomDatabase getRoomDatabase() {
+        return roomDatabase;
     }
 
     public void insert(SongEntity songEntity) {
@@ -55,11 +55,11 @@ public class SongRepo {
         new DeleteAllSongsAsyncTask(songDAO).execute();
     }
 
-    public MutableLiveData<List<SongEntity>> getAllSongs() {
+    public List<SongEntity> getAllSongs() {
         return allSongs;
     }
 
-    public MutableLiveData<List<SongEntity>> getAllOnlineSongs() {
+    public List<SongEntity> getAllOnlineSongs() {
         return allOnlineSongs;
     }
 

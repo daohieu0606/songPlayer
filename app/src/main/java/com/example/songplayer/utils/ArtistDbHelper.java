@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import com.example.songplayer.db.entity.ArtistEntity;
 
@@ -35,7 +34,7 @@ public class ArtistDbHelper {
 
             ArtistEntity artistEntity = new ArtistEntity();
             artistEntity.setId(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists._ID)));
-            artistEntity.setArtistName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
+            artistEntity.setComposerName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
 
             artistEntities.add(artistEntity);
             cursor.moveToNext();

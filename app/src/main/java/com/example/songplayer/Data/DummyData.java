@@ -20,24 +20,24 @@ public class DummyData {
     );
 
     public static final List<SongEntity> songs = Arrays.asList(
-            new SongEntity("Bollywood", "", "", 0, "", "", false),
-            new SongEntity(
+            new SongEntity(1,"Bollywood", "", "", 0, "", "", false),
+            new SongEntity(2,
                     "Turkish", "", "", 0, "", "", true),
-            new SongEntity("Worlds and the nations", "", "", 0, "", "", false),
-            new SongEntity("Alarm soft", "", "", 0, "", "", false),
-            new SongEntity("Love me like you do", "", "", 0, "", "", false),
-            new SongEntity("Latin hope", "", "", 0, "", "", false),
-            new SongEntity("Cool tone", "", "", 0, "", "", false),
-            new SongEntity("Animal sound", "", "", 0, "", "", false),
-            new SongEntity("Forest bird", "", "", 0, "", "", false),
-            new SongEntity("Willy willy", "", "", 0, "", "", false),
-            new SongEntity("Senorita", "", "", 0, "", "", false),
-            new SongEntity("I miss you", "", "", 0, "", "", false),
-            new SongEntity("Royal french", "", "", 0, "", "", false),
-            new SongEntity("Some thing like that", "", "", 0, "", "", false),
-            new SongEntity("Brazil", "", "", 0, "", "", false),
-            new SongEntity("Nokia tune", "", "", 0, "", "", false),
-            new SongEntity("Notification", "", "", 0, "", "", false)
+            new SongEntity(3,"Worlds and the nations", "", "", 0, "", "", false),
+            new SongEntity(4,"Alarm soft", "", "", 0, "", "", false),
+            new SongEntity(5,"Love me like you do", "", "", 0, "", "", false),
+            new SongEntity(6,"Latin hope", "", "", 0, "", "", false),
+            new SongEntity(7,"Cool tone", "", "", 0, "", "", false),
+            new SongEntity(8,"Animal sound", "", "", 0, "", "", false)
+//            new SongEntity("Forest bird", "", "", 0, "", "", false),
+//            new SongEntity("Willy willy", "", "", 0, "", "", false),
+//            new SongEntity("Senorita", "", "", 0, "", "", false),
+//            new SongEntity("I miss you", "", "", 0, "", "", false),
+//            new SongEntity("Royal french", "", "", 0, "", "", false),
+//            new SongEntity("Some thing like that", "", "", 0, "", "", false),
+//            new SongEntity("Brazil", "", "", 0, "", "", false),
+//            new SongEntity("Nokia tune", "", "", 0, "", "", false),
+//            new SongEntity("Notification", "", "", 0, "", "", false)
             );
 
     public static List<Integer> gradients = Arrays.asList(

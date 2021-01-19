@@ -7,12 +7,16 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.example.songplayer.utils.UriToString;
+
+import org.jetbrains.annotations.NotNull;
+
 @Entity(tableName = "albums")
 @TypeConverters({UriToString.class})
 public class AlbumEntity {
 
     @ColumnInfo(name = "id")
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int id;
 
     @ColumnInfo(name = "albumName")
@@ -27,6 +31,12 @@ public class AlbumEntity {
     public AlbumEntity(String albumName) {
         this.albumName = albumName;
     }
+
+    public AlbumEntity(int id, String albumName) {
+        this.albumName = albumName;
+        this.id = id;
+    }
+
 
     public Uri getArtUri() {
         return artUri;
@@ -52,5 +62,14 @@ public class AlbumEntity {
         this.albumName = albumName;
     }
 
+    @NotNull
+    @Override
+    public String toString() {
+        return "AlbumEntity{" +
+                "id=" + id +
+                ", albumName='" + albumName + '\'' +
+                ", artUri=" + artUri +
+                '}';
+    }
 }
 

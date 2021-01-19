@@ -2,7 +2,7 @@ package com.example.songplayer.db;
 
 import android.app.Application;
 
-import com.example.songplayer.dao.ArtistDAO;
+import com.example.songplayer.dao.daointerface.ArtistDAO;
 
 public class ArtistDatabase {
     private static final String TAG = "TESST";

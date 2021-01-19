@@ -6,7 +6,7 @@
     <string name="not_love">!love</string>
     <string name="play_ic">play_ic</string>
     <string name="love">love</string>
-<!--    Drawer Constants-->
+    <!--    Drawer Constants-->
     <string name="home">Home</string>
     <string name="category">Category</string>
     <string name="favorite">Favorite</string>
@@ -18,5 +18,6 @@
     <string name="channel_name">my_chanel</string>
     <string name="channel_description">my_chanel_description</string>
     <string name="SONG">SONG</string>
+    <string name="category_text">CATEGORY</string>
     <!--    End Drawer Constants-->
 </resources>
