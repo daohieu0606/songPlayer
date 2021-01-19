@@ -10,7 +10,7 @@ import com.example.songplayer.db.entity.ListMusicOfAlbum;
 @Dao
 public interface ListMusicOfAlbumDAORoom {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(ListMusicOfAlbum album);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)

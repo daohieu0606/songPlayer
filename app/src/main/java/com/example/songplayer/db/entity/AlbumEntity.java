@@ -26,10 +26,10 @@ public class AlbumEntity {
 
     public AlbumEntity() {
     }
-
-    public AlbumEntity(String albumName) {
-        this.albumName = albumName;
-    }
+//
+//    public AlbumEntity(String albumName) {
+//        this.albumName = albumName;
+//    }
 
     public AlbumEntity(int id, String albumName) {
         this.albumName = albumName;

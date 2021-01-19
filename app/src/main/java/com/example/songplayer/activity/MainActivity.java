@@ -17,24 +17,19 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
-import com.example.songplayer.db.entity.ListMusicOfAlbum;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
-
-import java.util.List;
 
 import static com.example.songplayer.utils.DrawerCreater.POS_CATEGORY;
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
@@ -74,12 +69,6 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                     }
                 }).get(SongViewModel.class);
 
-        MyApplication.database.songDao().getAllMusicOfAlbum().observe(this, new Observer<List<ListMusicOfAlbum>>() {
-            @Override
-            public void onChanged(List<ListMusicOfAlbum> listMusicOfAlbums) {
-                Log.d(TAG, "onChanged: "+ listMusicOfAlbums);
-            }
-        });
 
     }
 

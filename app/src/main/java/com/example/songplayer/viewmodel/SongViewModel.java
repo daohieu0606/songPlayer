@@ -55,6 +55,6 @@ public class SongViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<SongEntity>> getAllSongOfAlbum(AlbumEntity album){
-        return MyApplication.database.songDao().getAllSongsOfAlbum();
+        return MyApplication.database.songDao().getAllSongsOfAlbum(album.getId());
     }
 }

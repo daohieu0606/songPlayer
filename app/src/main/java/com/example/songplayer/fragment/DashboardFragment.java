@@ -2,7 +2,6 @@ package com.example.songplayer.fragment;
 
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -182,7 +181,6 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
             @Override
             public void onChanged(List<SongEntity> songEntities) {
                 songAdapter.setSongs(songEntities);
-                Log.d(TAG, "onChanged: "+ songEntities);
             }
         });
 

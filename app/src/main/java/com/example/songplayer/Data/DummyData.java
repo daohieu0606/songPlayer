@@ -1,23 +1,22 @@
 package com.example.songplayer.Data;
 
 import com.example.songplayer.R;
-import com.example.songplayer.db.entity.AlbumEntity;
 import com.example.songplayer.db.entity.SongEntity;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class DummyData {
-    public static final List<AlbumEntity> albums = Arrays.asList(
-            new AlbumEntity("Love"),
-            new AlbumEntity("Animals"),
-            new AlbumEntity("Bollywoods"),
-            new AlbumEntity("Electronics"),
-            new AlbumEntity("Latin"),
-            new AlbumEntity("Notification"),
-            new AlbumEntity("World")
-
-    );
+//    public static final List<AlbumEntity> albums = Arrays.asList(
+//            new AlbumEntity("Love"),
+//            new AlbumEntity("Animals"),
+//            new AlbumEntity("Bollywoods"),
+//            new AlbumEntity("Electronics"),
+//            new AlbumEntity("Latin"),
+//            new AlbumEntity("Notification"),
+//            new AlbumEntity("World")
+//
+//    );
 
     public static final List<SongEntity> songs = Arrays.asList(
             new SongEntity(1,"Bollywood", "", "", 0, "", "", false),

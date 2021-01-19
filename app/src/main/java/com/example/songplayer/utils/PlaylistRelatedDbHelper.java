@@ -118,7 +118,9 @@ public class PlaylistRelatedDbHelper {
 
             songEntities.add(songEntity);
 
-            AlbumEntity album = new AlbumEntity(cursor.getInt(7),cursor.getString(6));
+            AlbumEntity album = new AlbumEntity(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)));
 
             if(!result.containsKey(album)) {
                 result.put(album, new ArrayList<>());

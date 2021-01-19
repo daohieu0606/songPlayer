@@ -18,7 +18,7 @@ public class Genre {
     @ColumnInfo(name = "genreID")
     private int genreID;
 
-    @ColumnInfo(name = "genreName")
+    @ColumnInfo(name = "genreName", defaultValue = "")
     @NonNull
     private String genreName;
 

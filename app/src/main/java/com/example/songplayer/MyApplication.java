@@ -8,7 +8,6 @@ import com.example.songplayer.db.MusicAppRoomDatabase;
 import com.example.songplayer.db.OnlSongDatabase;
 import com.example.songplayer.db.SongDatabase;
 import com.example.songplayer.db.entity.AlbumEntity;
-import com.example.songplayer.db.entity.Genre;
 import com.example.songplayer.db.entity.ListMusicOfAlbum;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.utils.PlaylistRelatedDbHelper;
@@ -64,18 +63,18 @@ public class MyApplication extends Application {
                 database.albumDAORoom().insert(album);
 
                 songs.forEach((song) -> {
-                    database.listMusicOfAlbumDAORoom().insert(new ListMusicOfAlbum(song.getId(), album.getId()));
+                   database.listMusicOfAlbumDAORoom().insert(new ListMusicOfAlbum(song.getId(), album.getId()));
                 });
 
             });
 
 
 
-            HashMap<Genre, List<SongEntity>> genres = listDBHelper.scanAllGenres();
-            genres.forEach((genre, songs) -> {
-                database.genreDAORoom().insert(genre);
-                songs.forEach(database.songDao()::insert);
-            });
+//            HashMap<Genre, List<SongEntity>> genres = listDBHelper.scanAllGenres();
+//            genres.forEach((genre, songs) -> {
+//                database.genreDAORoom().insert(genre);
+//                songs.forEach(database.songDao()::insert);
+//            });
         }).start();
 
 

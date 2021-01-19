@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.example.songplayer.db.entity.ListMusicOfAlbum;
 import com.example.songplayer.db.entity.SongEntity;
 
 import java.util.List;
@@ -35,14 +34,10 @@ public interface SongDAORoom {
     @Query("delete from listMusicOfPlaylist where songID= :songID and playlistID= :playlistID")
     void deleteFromPlayList(int songID,int playlistID);
 
-//    @Query("select s.* from listMusicOfAlbum l join songs s on l.songID = s.id where albumID=:albumID")
-//    LiveData<List<SongEntity>> getAllSongsOfAlbum(int albumID);
+    @Query("select s.* from listMusicOfAlbum l join songs s on l.songID = s.id where albumID=:albumID")
+    LiveData<List<SongEntity>> getAllSongsOfAlbum(int albumID);
 
-    @Query("select s.* from listMusicOfAlbum l join songs s on l.songID = s.id")
-    LiveData<List<SongEntity>> getAllSongsOfAlbum();
 
-    @Query("select * from listMusicOfAlbum")
-    LiveData<List<ListMusicOfAlbum>> getAllMusicOfAlbum();
 
     @Query("delete from listMusicOfAlbum where songID= :songID and albumID=:albumID")
     void deleteFromAlbum(int songID,int albumID);
