@@ -31,27 +31,26 @@ public class SongDbHelper {
     public List<SongEntity> getAllSongs() {
         List<SongEntity> songEntities = new ArrayList<>();
 
-        String []songProjection = {
+        String[] songProjection = {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.DISPLAY_NAME,
-                MediaStore.Audio.Media.RELATIVE_PATH,
+//                MediaStore.Audio.Media.RELATIVE_PATH,
                 MediaStore.Audio.Media.SIZE,
-                MediaStore.Audio.Media.DATE_TAKEN,
                 MediaStore.Audio.Artists.ARTIST,
                 MediaStore.Audio.Albums.ALBUM
-               };
+        };
         ContentResolver resolver = application.getContentResolver();
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), songProjection,null,null);
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), songProjection, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             SongEntity songEntity = new SongEntity();
 
-            songEntity.setId(cursor.getInt(0));
-            songEntity.setSongName(cursor.getString(1));
-            songEntity.setPath(cursor.getString(2));
-            songEntity.setSize(cursor.getInt(3));
-            songEntity.setArtist(cursor.getString(5));
+            songEntity.setId(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)));
+            songEntity.setSongName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
+//            songEntity.setPath(cursor.getString(2));
+            songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow( MediaStore.Audio.Media.SIZE)));
+            songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
 
             if (favoriteSongDbHelper.isExistFavoriteSong(songEntity.getId())) {
                 songEntity.setFavorite(true);

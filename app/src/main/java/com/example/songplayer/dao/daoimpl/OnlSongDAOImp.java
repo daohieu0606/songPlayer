@@ -2,9 +2,11 @@ package com.example.songplayer.dao.daoimpl;
 
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.dao.daointerface.SongDAO;
 import com.example.songplayer.db.entity.SongEntity;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -135,7 +137,12 @@ public class OnlSongDAOImp implements SongDAO {
 
     public void downloadFile(String fileName, UIHandler handler) throws FileNotFoundException {
 
-        File downloadFolder =new File( Environment.getExternalStorageDirectory().toString()+"/Download");
+        File downloadFolder =new File( Environment.getExternalStorageDirectory().toString()+"/Music");
+        if(!downloadFolder.exists()){
+            if(downloadFolder.mkdirs()){
+                Toast.makeText(MyApplication.getContext(), "Created folder", Toast.LENGTH_SHORT).show();
+            }
+        }
         File musicFile = new File(downloadFolder.getAbsolutePath(),fileName);
 
         // Create a storage reference from our app

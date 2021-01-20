@@ -21,6 +21,8 @@ import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.receiver.NotificationReceiver;
 
+import java.util.HashMap;
+
 public class NotificationHelper {
 
     private static final String CHANNEL_ID = "my_chanel";
@@ -70,7 +72,7 @@ public class NotificationHelper {
 
         if (currentSong.isOnline()) {
             Log.d("TESST", "createNotification: "+currentSong.getUriString());
-            mmr.setDataSource(currentSong.getUriString());
+            mmr.setDataSource(currentSong.getUriString(), new HashMap<String,String>());
 
         } else {
             mmr.setDataSource(context, Uri.parse(currentSong.getUriString()));

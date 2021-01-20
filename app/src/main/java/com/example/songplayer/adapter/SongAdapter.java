@@ -36,6 +36,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     public void appendWithOnlineSongs(List<SongEntity> onlSongs){
         this.songs.addAll(onlSongs);
+        this.notifyDataSetChanged();
     }
 
     @NonNull
