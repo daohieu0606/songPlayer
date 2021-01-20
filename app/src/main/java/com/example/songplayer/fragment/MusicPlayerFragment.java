@@ -139,7 +139,7 @@ public class MusicPlayerFragment
                 songViewModel.getAllSongs().observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
                     @Override
                     public void onChanged(List<SongEntity> songEntities) {
-                        if (songEntities != null) {
+                        if (songEntities != null && songEntities.size()>0) {
                             currentSongLiveData.setValue(songEntities.get(0));
                             musicService.setCurrentSong(currentSongLiveData.getValue());
                             musicService.preparePlaySyn();

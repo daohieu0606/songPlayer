@@ -1,6 +1,10 @@
 package com.example.songplayer.activity;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,11 +14,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -23,6 +29,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
 import com.example.songplayer.db.entity.SongEntity;
@@ -41,12 +48,14 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     private SearchView searchView;
     private SongViewModel songViewModel;
     private SlidingRootNav slidingRootNav;
-    private NavHostFragment navHostFragment ;
+    private NavHostFragment navHostFragment;
     private NavController navController;
     //DATA
     private static final String TAG = "TESST";
     private Bundle savedInstance;
     private MutableLiveData<Boolean> menuClosed = new MutableLiveData<>(true);
+
+    // File Observer
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +63,16 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         setContentView(R.layout.activity_main);
         this.savedInstance = savedInstanceState;
 
+        if (checkPermissionREAD_EXTERNAL_STORAGE(this)) {
+            runIfHasPermission();
+        }
 
-        checkAndRequestPermission();
+
+
+    }
+    private void runIfHasPermission(){
+
+        MyApplication.semaphore.release();
         bindViews();
         setUp();
 
@@ -68,16 +85,33 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                         return (T) new SongViewModel(getApplication());
                     }
                 }).get(SongViewModel.class);
+    }
+    private boolean checkAndRequestPermission() {
 
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                checkSelfPermission(Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WAKE_LOCK}, 7003);
+            return false;
+        }
+        return true;
 
     }
 
-    private void checkAndRequestPermission() {
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 7003);
-        }
-        if (checkSelfPermission(Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] { Manifest.permission.WAKE_LOCK}, 7004);
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    runIfHasPermission();
+                } else {
+                    Toast.makeText(MainActivity.this, "Denied",
+                            Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions,
+                        grantResults);
         }
     }
 
@@ -94,11 +128,11 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
 
-        searchView = (SearchView) menu.findItem( R.id.mi_search ).getActionView(); // get my MenuItem with placeholder submenu
+        searchView = (SearchView) menu.findItem(R.id.mi_search).getActionView(); // get my MenuItem with placeholder submenu
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return  true;
+                return true;
             }
 
             @Override
@@ -124,9 +158,9 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     private void handleSearch() {
     }
 
-    private void bindViews(){
+    private void bindViews() {
         //Set up nav controller
-        this.navHostFragment=(NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        this.navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
         navController = navHostFragment.getNavController();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -134,11 +168,11 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //Creating Drawer
-        final DrawerCreater drawerCreater = new DrawerCreater(this,toolbar);
+        final DrawerCreater drawerCreater = new DrawerCreater(this, toolbar);
 
         getSupportActionBar().setHomeAsUpIndicator(getDrawable(R.drawable.ic_baseline_format_list_bulleted_24));
         this.slidingRootNav = drawerCreater.createDrawer();
-        
+
         slidingRootNav.getLayout().setOnDragListener(new View.OnDragListener() {
             @Override
             public boolean onDrag(View view, DragEvent dragEvent) {
@@ -166,26 +200,75 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                 break;
         }
 
-        if(slidingRootNav!=null ){
+        if (slidingRootNav != null) {
             slidingRootNav.closeMenu();
         }
 
 
     }
 
-    public Bundle getSavedInstance(){
+    public Bundle getSavedInstance() {
         return this.savedInstance;
     }
 
-    public RecyclerView getMenu(){
+    public RecyclerView getMenu() {
         return findViewById(R.id.list);
     }
 
     @Override
     public void play(SongEntity music) {
         Bundle bundle = new Bundle();
-        bundle.putSerializable(getString(R.string.SONG),music);
-        navController.navigate(R.id.musicPlayerFragment,bundle);
+        bundle.putSerializable(getString(R.string.SONG), music);
+        navController.navigate(R.id.musicPlayerFragment, bundle);
 
+    }
+
+    public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
+
+    public boolean checkPermissionREAD_EXTERNAL_STORAGE(
+            final Context context) {
+        int currentAPIVersion = Build.VERSION.SDK_INT;
+        if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(
+                        (Activity) context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    showDialog("External storage", context,
+                            Manifest.permission.READ_EXTERNAL_STORAGE);
+
+                } else {
+                    ActivityCompat
+                            .requestPermissions(
+                                    (Activity) context,
+                                    new String[] { Manifest.permission.READ_EXTERNAL_STORAGE },
+                                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                }
+                return false;
+            } else {
+                return true;
+            }
+
+        } else {
+            return true;
+        }
+    }
+
+    public void showDialog(final String msg, final Context context,
+                           final String permission) {
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+        alertBuilder.setCancelable(true);
+        alertBuilder.setTitle("Permission necessary");
+        alertBuilder.setMessage(msg + " permission is necessary");
+        alertBuilder.setPositiveButton(android.R.string.yes,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions((Activity) context,
+                                new String[] { permission },
+                                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                    }
+                });
+        AlertDialog alert = alertBuilder.create();
+        alert.show();
     }
 }

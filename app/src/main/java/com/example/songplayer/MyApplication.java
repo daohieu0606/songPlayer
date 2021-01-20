@@ -1,8 +1,11 @@
 package com.example.songplayer;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
+import android.util.Log;
 
 import com.example.songplayer.db.MusicAppRoomDatabase;
 import com.example.songplayer.db.OnlSongDatabase;
@@ -10,20 +13,24 @@ import com.example.songplayer.db.SongDatabase;
 import com.example.songplayer.db.entity.AlbumEntity;
 import com.example.songplayer.db.entity.ListMusicOfAlbum;
 import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.sdcardobserver.SDCardObserver;
 import com.example.songplayer.utils.PlaylistRelatedDbHelper;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MyApplication extends Application {
     public static MusicAppRoomDatabase database;
     public static SongDatabase songDatabase;
     public static OnlSongDatabase onlSongDatabase;
     public static PlaylistRelatedDbHelper listDBHelper;
-
+    public static Semaphore semaphore = new Semaphore(0);
     private static Context context;
     public String TAG = "TESST";
-
+    public SDCardObserver sdCardObserver = new SDCardObserver(Environment.getExternalStorageDirectory().getPath());
     @Override
     public void onCreate() {
 
@@ -38,11 +45,19 @@ public class MyApplication extends Application {
         SharedPreferences.Editor editor = preferences.edit();
         final boolean firstLoad = preferences.getBoolean(getString(R.string.first_load), true);
 //        if(firstLoad){
+
         fistLoadAction();
         editor.putBoolean(getString(R.string.first_load), false);
         editor.apply();
 //        }
+
+        sdCardObserver.startWatching();
+
+
+
+
     }
+
 
     public static Context getContext() {
         return MyApplication.context;
@@ -56,6 +71,14 @@ public class MyApplication extends Application {
     public void fistLoadAction() {
 
         new Thread(() -> {
+            if(checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)!=PERMISSION_GRANTED){
+                try {
+                    semaphore.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.d(TAG, "fistLoadAction: continue run " );
             songDatabase.songDAO().getAllSongs().forEach(database.songDao()::insert);
 
             HashMap<AlbumEntity, List<SongEntity>> albums = listDBHelper.scanAllAlbums();
@@ -79,4 +102,12 @@ public class MyApplication extends Application {
 
 
     }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        sdCardObserver.stopWatching();
+        Log.d(TAG, "onTerminate: ");
+    }
+
 }
