@@ -5,21 +5,32 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.songplayer.MyApplication;
+
 public class SDCardObserver extends FileObserver {
+    String path;
     public SDCardObserver(String path){
         super(path);
+        this.path = path;
     }
+    String TAG = "TESST";
+
+
     @Override
-    public void onEvent(int i, @Nullable String s) {
-        switch (i){
-            case FileObserver.ALL_EVENTS:
-                Log.d("TESST", "Change" );
-                break;
-            case FileObserver.CREATE:
-                Log.d("TESST", "onEvent: "+ "Create");
-                break;
+    public void onEvent(int i, @Nullable String file) {
+
+        Log.d(TAG, "onEvent: "+file);
+
+        if(i == 1073741840){
+            new Thread(() -> {
+                MyApplication.songDatabase.scanOfflineSongs()
+                        .forEach(MyApplication.database.songDao()::insert);
+            }).start();
         }
     }
+
+
+
 
 
 }

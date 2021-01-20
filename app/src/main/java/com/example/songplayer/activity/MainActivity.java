@@ -2,9 +2,11 @@ package com.example.songplayer.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +36,8 @@ import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.DashboardFragment;
+import com.example.songplayer.service.Restarter;
+import com.example.songplayer.service.YourService;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
@@ -56,6 +60,31 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
     private MutableLiveData<Boolean> menuClosed = new MutableLiveData<>(true);
 
     // File Observer
+    Intent mServiceIntent;
+    private YourService mYourService;
+
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                Log.i ("Service status", "Running");
+                return true;
+            }
+        }
+        Log.i ("Service status", "Not running");
+        return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        //stopService(mServiceIntent);
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction("restartservice");
+        broadcastIntent.setClass(this, Restarter.class);
+        this.sendBroadcast(broadcastIntent);
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +100,13 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
 
     }
     private void runIfHasPermission(){
+
+        mYourService = new YourService();
+        mServiceIntent = new Intent(this, mYourService.getClass());
+
+        if (!isMyServiceRunning(mYourService.getClass())) {
+            startService(mServiceIntent);
+        }
 
         MyApplication.semaphore.release();
         bindViews();

@@ -41,7 +41,18 @@
 
         <receiver android:name=".receiver.NotificationReceiver" />
 
-        <service android:name=".service.MusicService" />
+        <service android:name=".service.MusicService" android:enabled="true" />
+        <service android:name=".service.YourService" />
+
+        <receiver
+            android:name=".service.Restarter"
+            android:enabled="true"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="restartservice" />
+            </intent-filter>
+        </receiver>
 
         <meta-data
             android:name="preloaded_fonts"
