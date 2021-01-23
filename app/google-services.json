@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "560803783758",
-    "project_id": "testfirebase-b2bcc",
-    "storage_bucket": "testfirebase-b2bcc.appspot.com"
+    "project_number": "522490018490",
+    "project_id": "songplayer-82ff0",
+    "storage_bucket": "songplayer-82ff0.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:560803783758:android:c9cf84c2d27cdb5f218f1f",
+        "mobilesdk_app_id": "1:522490018490:android:04556d2fb22c5ee7012083",
         "android_client_info": {
           "package_name": "com.example.songplayer"
         }
       },
       "oauth_client": [
         {
-          "client_id": "560803783758-trtikvgq2nfka7rn5fvikh86ogqj6m8a.apps.googleusercontent.com",
+          "client_id": "522490018490-lc65tkt57ckhk1in8f72pudtjne3i63n.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBwmtERw95SPPXVl9Kr-FfBv4NcMeB-wL4"
+          "current_key": "AIzaSyCRXyA6MKCDI-_TCB0rCm1b3v3BqRXnTzo"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "560803783758-trtikvgq2nfka7rn5fvikh86ogqj6m8a.apps.googleusercontent.com",
+              "client_id": "522490018490-lc65tkt57ckhk1in8f72pudtjne3i63n.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

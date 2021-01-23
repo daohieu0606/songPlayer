@@ -19,15 +19,15 @@ public class DummyData {
 //    );
 
     public static final List<SongEntity> songs = Arrays.asList(
-            new SongEntity(1,"Bollywood", "", "", 0, "", "", false),
-            new SongEntity(2,
-                    "Turkish", "", "", 0, "", "", true),
-            new SongEntity(3,"Worlds and the nations", "", "", 0, "", "", false),
-            new SongEntity(4,"Alarm soft", "", "", 0, "", "", false),
-            new SongEntity(5,"Love me like you do", "", "", 0, "", "", false),
-            new SongEntity(6,"Latin hope", "", "", 0, "", "", false),
-            new SongEntity(7,"Cool tone", "", "", 0, "", "", false),
-            new SongEntity(8,"Animal sound", "", "", 0, "", "", false)
+//            new SongEntity(1,"Bollywood", "", "", 0, "", "", false),
+//            new SongEntity(2,
+//                    "Turkish", "", "", 0, "", "", true),
+//            new SongEntity(3,"Worlds and the nations", "", "", 0, "", "", false),
+//            new SongEntity(4,"Alarm soft", "", "", 0, "", "", false),
+//            new SongEntity(5,"Love me like you do", "", "", 0, "", "", false),
+//            new SongEntity(6,"Latin hope", "", "", 0, "", "", false),
+//            new SongEntity(7,"Cool tone", "", "", 0, "", "", false),
+//            new SongEntity(8,"Animal sound", "", "", 0, "", "", false)
 //            new SongEntity("Forest bird", "", "", 0, "", "", false),
 //            new SongEntity("Willy willy", "", "", 0, "", "", false),
 //            new SongEntity("Senorita", "", "", 0, "", "", false),
