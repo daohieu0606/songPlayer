@@ -21,5 +21,6 @@
     <string name="category_text">CATEGORY</string>
     <string name="prev">PREV</string>
     <string name="first_load">FIRST_LOAD</string>
+    <string name="MUSIC_SERVICE">MUSIC_SERVICE</string>
     <!--    End Drawer Constants-->
 </resources>

@@ -113,12 +113,9 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         });
         albumAdapter.notifyDataSetChanged();
 
-        albumViewModel.getAllAlbums().observe(getViewLifecycleOwner(), new Observer<List<AlbumEntity>>() {
-            @Override
-            public void onChanged(List<AlbumEntity> albumEntities) {
-                if (albumEntities != null) {
-                    albumAdapter.setAlbum(albumEntities);
-                }
+        albumViewModel.getAllAlbums().observe(getViewLifecycleOwner(), albumEntities -> {
+            if (albumEntities != null) {
+                albumAdapter.setAlbum(albumEntities);
             }
         });
     }
@@ -142,12 +139,9 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
 
         songAdapter.notifyDataSetChanged();
 
-        songViewModel.getAllOfflineSongs().observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
-            @Override
-            public void onChanged(List<SongEntity> songEntities) {
-                if (songEntities != null) {
-                    songAdapter.setSongs(songEntities);
-                }
+        songViewModel.getAllOfflineSongs().observe(getViewLifecycleOwner(), songEntities -> {
+            if(songEntities!=null){
+                songAdapter.setSongs(songEntities);
             }
         });
 

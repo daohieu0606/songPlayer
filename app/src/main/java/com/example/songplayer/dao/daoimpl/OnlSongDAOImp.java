@@ -133,7 +133,8 @@ public class OnlSongDAOImp implements SongDAO {
 
 
         File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File musicFile = new File(downloadFolder.getAbsolutePath(), fileName);
+
+        File musicFile = new File(downloadFolder.toString(), fileName);
 
         // Create a storage reference from our app
         // Get the default bucket from a custom FirebaseApp
