@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
-import com.example.songplayer.db.FavoriteSongDbHelper;
 import com.example.songplayer.db.entity.AlbumEntity;
 import com.example.songplayer.db.entity.Genre;
 import com.example.songplayer.db.entity.SongEntity;
@@ -19,11 +18,9 @@ import java.util.List;
 public class PlaylistRelatedDbHelper {
     private static final String TAG = "TESST";
     private Application application;
-    private FavoriteSongDbHelper favoriteSongDbHelper;
 
     public PlaylistRelatedDbHelper(Application newApplication) {
         application = newApplication;
-        favoriteSongDbHelper = new FavoriteSongDbHelper(newApplication);
     }
 
     public HashMap<Genre, List<SongEntity>> scanAllGenres() {
@@ -60,9 +57,6 @@ public class PlaylistRelatedDbHelper {
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
 
 
-            if (favoriteSongDbHelper.isExistFavoriteSong(songEntity.getId())) {
-                songEntity.setFavorite(true);
-            }
 
             Uri contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());
@@ -111,9 +105,6 @@ public class PlaylistRelatedDbHelper {
             songEntity.setSongName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
             songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)));
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
-            if (favoriteSongDbHelper.isExistFavoriteSong(songEntity.getId())) {
-                songEntity.setFavorite(true);
-            }
 
             Uri contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());

@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 
-import com.example.songplayer.db.FavoriteSongDbHelper;
 import com.example.songplayer.db.entity.SongEntity;
 
 import java.io.FileNotFoundException;
@@ -21,11 +20,10 @@ import java.util.List;
 public class SongDbHelper {
     private static final String TAG = "TESST";
     private Application application;
-    private FavoriteSongDbHelper favoriteSongDbHelper;
+
 
     public SongDbHelper(Application newApplication) {
         application = newApplication;
-        favoriteSongDbHelper = new FavoriteSongDbHelper(newApplication);
     }
 
     public List<SongEntity> getAllSongs() {
@@ -42,7 +40,9 @@ public class SongDbHelper {
 
         };
         ContentResolver resolver = application.getContentResolver();
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), songProjection, null, null);
+//        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), songProjection, null, null);
+
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songProjection, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -61,9 +61,7 @@ public class SongDbHelper {
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
             songEntity.setGenre(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.GENRE)));
 
-            if (favoriteSongDbHelper.isExistFavoriteSong(songEntity.getId())) {
-                songEntity.setFavorite(true);
-            }
+
 
             Uri contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());
@@ -107,24 +105,16 @@ public class SongDbHelper {
         songDetails.put(MediaStore.Audio.Media.IS_PENDING, 0);
         resolver.update(songContentUri, songDetails, null, null);
 
-        if (songEntity.isFavorite()) {
-            favoriteSongDbHelper.insert(songEntity.getId());
-        }
+
     }
 
     public void delete(SongEntity songEntity) {
-        if (favoriteSongDbHelper.isExistFavoriteSong(songEntity.getId())) {
-            favoriteSongDbHelper.deleteFavoriteSongByID(songEntity.getId());
-        }
+
         FileHelper.removeFile(application, songEntity.getUriString());
     }
 
     public void updateSong(SongEntity songEntity) {
-        if (songEntity.isFavorite()) {
-            favoriteSongDbHelper.deleteFavoriteSongByID(songEntity.getId());
-        } else {
-            favoriteSongDbHelper.insert(songEntity.getId());
-        }
+
         songEntity.setFavorite(!songEntity.isFavorite());
     }
 

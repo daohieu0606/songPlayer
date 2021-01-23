@@ -178,6 +178,8 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
+
+
                         dialog.dismiss();
                     }
                 });
