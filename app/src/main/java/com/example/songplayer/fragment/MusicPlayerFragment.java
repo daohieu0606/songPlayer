@@ -1,17 +1,15 @@
 package com.example.songplayer.fragment;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,13 +36,7 @@ import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.notification.NotificationHelper;
 import com.example.songplayer.receiver.NotificationReceiver;
 import com.example.songplayer.service.MusicService;
-import com.example.songplayer.service.MusicService.MusicBinder;
 import com.example.songplayer.viewmodel.SongViewModel;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-
-import java.util.List;
 
 public class MusicPlayerFragment
         extends Fragment
@@ -79,7 +71,7 @@ public class MusicPlayerFragment
 
     private MusicService musicService;
     private Intent playIntent;
-    private boolean musicBound = false;
+//    private boolean musicBound = false;
 
     private SongViewModel songViewModel;
     private MutableLiveData<SongEntity> currentSongLiveData = new MutableLiveData<>();
@@ -92,71 +84,6 @@ public class MusicPlayerFragment
         // Required empty public constructor
     }
 
-    private ServiceConnection musicConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicBinder binder = (MusicBinder) service;
-
-            musicService = binder.getService();
-
-            musicBound = true;
-
-            Bundle data = getArguments();
-
-            if (data != null) {
-                final SongEntity song = (SongEntity) data.getSerializable(getString(R.string.SONG));
-
-                if (song.isOnline()) {
-                    FirebaseStorage storage = FirebaseStorage.getInstance();
-                    storage.getReference().child(song.getSongName()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-
-                            song.setUriString(uri.toString());
-                            currentSongLiveData.setValue(song);
-                            musicService.setCurrentSong(song);
-                            musicService.preparePlaySyn();
-
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "onFailure: ");
-                        }
-                    });
-
-                } else {
-
-                    currentSongLiveData.setValue(song);
-                    musicService.setCurrentSong(currentSongLiveData.getValue());
-                    musicService.preparePlaySyn();
-
-                }
-
-
-            } else {
-                songViewModel.getAllSongs().observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
-                    @Override
-                    public void onChanged(List<SongEntity> songEntities) {
-                        if (songEntities != null) {
-                            currentSongLiveData.setValue(songEntities.get(0));
-                            musicService.setCurrentSong(currentSongLiveData.getValue());
-                            musicService.preparePlaySyn();
-                        }
-
-                    }
-                });
-            }
-
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicBound = false;
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -360,15 +287,36 @@ public class MusicPlayerFragment
     @Override
     public void onStart() {
         super.onStart();
+        if (getArguments() == null) {
+            setArguments(new Bundle());
+        }
         if (playIntent == null) {
             playIntent = new Intent(getActivity(), MusicService.class);
+            Bundle bundle = getArguments();
+            Object song = bundle.getSerializable(getString(R.string.SONG));
 
-            if (getActivity() != null) {
-                getContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            if (song != null && getActivity() != null) {
+                currentSongLiveData.setValue((SongEntity) song);
+                playIntent.putExtra(getString(R.string.SONG), (SongEntity) song);
+                getContext().startService(playIntent);
+
+                Handler handler = new android.os.Handler();
+                Runnable runnable = () -> {
+                    musicService = MusicService.getInstance();
+                    if (musicService == null) {
+                        handler.postDelayed(this, 0);
+                    }
+                };
+
+                handler.postDelayed(runnable, 0);
+
+
             }
+
         }
 
     }
+
 
     @Override
     public void onResume() {
@@ -378,7 +326,6 @@ public class MusicPlayerFragment
     @Override
     public void onDestroy() {
         getContext().unregisterReceiver(songControlReceiver);
-        getActivity().stopService(playIntent);
         musicService = null;
         super.onDestroy();
     }
@@ -422,28 +369,28 @@ public class MusicPlayerFragment
 
     @Override
     public int getDuration() {
-        if (musicService != null && musicBound && isPlaying())
+        if (musicService != null && isPlaying())
             return musicService.getDur();
         else return 0;
     }
 
     @Override
     public int getCurrentPosition() {
-        if (musicService != null && musicBound && musicService.isPng())
+        if (musicService != null && musicService.isPng())
             return musicService.getPosn();
         else return 0;
     }
 
     @Override
     public void seekTo(int pos) {
-        if (musicService != null && musicBound) {
+        if (musicService != null) {
             musicService.seek(pos);
         }
     }
 
     @Override
     public boolean isPlaying() {
-        if (musicService != null && musicBound)
+        if (musicService != null)
             return musicService.isPng();
         else return false;
     }

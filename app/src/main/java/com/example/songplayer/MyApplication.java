@@ -1,8 +1,10 @@
 package com.example.songplayer;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.example.songplayer.db.MusicAppRoomDatabase;
 import com.example.songplayer.db.OnlSongDatabase;
@@ -14,13 +16,16 @@ import com.example.songplayer.utils.PlaylistRelatedDbHelper;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MyApplication extends Application {
     public static MusicAppRoomDatabase database;
     public static SongDatabase songDatabase;
     public static OnlSongDatabase onlSongDatabase;
     public static PlaylistRelatedDbHelper listDBHelper;
-
+    public static Semaphore semaphore = new Semaphore(0);
     private static Context context;
     public String TAG = "TESST";
 
@@ -37,12 +42,16 @@ public class MyApplication extends Application {
         SharedPreferences preferences = getSharedPreferences(getString(R.string.prev), MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         final boolean firstLoad = preferences.getBoolean(getString(R.string.first_load), true);
-//        if(firstLoad){
-        fistLoadAction();
-        editor.putBoolean(getString(R.string.first_load), false);
-        editor.apply();
-//        }
+        if (firstLoad) {
+
+            fistLoadAction();
+            editor.putBoolean(getString(R.string.first_load), false);
+            editor.apply();
+        }
+
+
     }
+
 
     public static Context getContext() {
         return MyApplication.context;
@@ -56,6 +65,15 @@ public class MyApplication extends Application {
     public void fistLoadAction() {
 
         new Thread(() -> {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+
+                try {
+                    semaphore.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.d(TAG, "fistLoadAction: continue run ");
             songDatabase.songDAO().getAllSongs().forEach(database.songDao()::insert);
 
             HashMap<AlbumEntity, List<SongEntity>> albums = listDBHelper.scanAllAlbums();
@@ -63,11 +81,10 @@ public class MyApplication extends Application {
                 database.albumDAORoom().insert(album);
 
                 songs.forEach((song) -> {
-                   database.listMusicOfAlbumDAORoom().insert(new ListMusicOfAlbum(song.getId(), album.getId()));
+                    database.listMusicOfAlbumDAORoom().insert(new ListMusicOfAlbum(song.getId(), album.getId()));
                 });
 
             });
-
 
 
 //            HashMap<Genre, List<SongEntity>> genres = listDBHelper.scanAllGenres();
@@ -79,4 +96,12 @@ public class MyApplication extends Application {
 
 
     }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+//        sdCardObserver.stopWatching();
+        Log.d(TAG, "onTerminate: ");
+    }
+
 }

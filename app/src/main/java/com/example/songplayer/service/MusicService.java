@@ -19,19 +19,23 @@ import androidx.annotation.Nullable;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.RepeatMode;
 import com.example.songplayer.notification.NotificationHelper;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class MusicService
         extends Service
-        implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+        implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, Serializable {
 
     private static final String TAG = "Music service";
     private static final int NOTIFY_ID = 1;
 
+    private static MusicService INSTANCE;
     private MediaPlayer songPlayer;
     private final IBinder musicBind = new MusicBinder();
 
@@ -41,6 +45,12 @@ public class MusicService
     boolean isShuffle;
     private RepeatMode repeatMode;
 
+    public MusicService() {
+        if (INSTANCE == null) {
+            INSTANCE = this;
+        }
+    }
+    public static MusicService getInstance() {return INSTANCE;}
     @Override
     public void onCreate() {
         super.onCreate();
@@ -53,8 +63,6 @@ public class MusicService
         }
         initMusicPlayer();
         Log.d(TAG, "onCreate: music service");
-
-
     }
 
     private void initMusicPlayer() {
@@ -108,9 +116,9 @@ public class MusicService
 
         try {
 
-            if( currentSongLiveData.isOnline() ){
+            if (currentSongLiveData.isOnline()) {
                 songPlayer.setDataSource(currentSongLiveData.getUriString());
-            }else{
+            } else {
                 songPlayer.setDataSource(getApplicationContext(), Uri.parse(currentSongLiveData.getUriString()));
             }
 
@@ -150,6 +158,40 @@ public class MusicService
 
     public void seek(int posn) {
         songPlayer.seekTo(posn);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        SongEntity song = (SongEntity) intent.getSerializableExtra("SONG");
+        musicConnection(song);
+
+        return Service.START_STICKY;
+    }
+
+    public void musicConnection(SongEntity song) {
+
+        if (song.isOnline()) {
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            storage.getReference().child(song.getSongName()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+
+                    song.setUriString(uri.toString());
+                    setCurrentSong(song);
+                    preparePlaySyn();
+
+                }
+            }).addOnFailureListener(e -> Log.d(TAG, "onFailure: "));
+
+        } else {
+
+            setCurrentSong(song);
+            preparePlaySyn();
+
+        }
+
+
     }
 
     public void go() {
@@ -269,6 +311,7 @@ public class MusicService
         stopForeground(true);
         super.onDestroy();
     }
+
 
     public class MusicBinder extends Binder {
         public MusicService getService() {

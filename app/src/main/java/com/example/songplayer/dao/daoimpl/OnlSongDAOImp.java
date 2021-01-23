@@ -7,16 +7,13 @@ import androidx.annotation.NonNull;
 
 import com.example.songplayer.dao.daointerface.SongDAO;
 import com.example.songplayer.db.entity.SongEntity;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -24,8 +21,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Semaphore;
 
 public class OnlSongDAOImp implements SongDAO {
 
@@ -40,7 +36,7 @@ public class OnlSongDAOImp implements SongDAO {
 
     //Lấy tất cả dữ liệu trên firebase rồi gán vào listMutableLiveData
     public List<SongEntity> fetchOnlineSongs() {
-        final CountDownLatch latch = new CountDownLatch(1);
+        Semaphore semaphore = new Semaphore(0);
         ArrayList<SongEntity> songEntities = new ArrayList<>();
 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -51,19 +47,18 @@ public class OnlSongDAOImp implements SongDAO {
                         SongEntity songEntity = ds.getValue(SongEntity.class);
                         songEntity.setOnline(true);
                         songEntities.add(songEntity);
+                        semaphore.release();
                     }
                 }
-                latch.countDown();
 
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                latch.countDown();
+                semaphore.release();
             }
         });
         try {
-            latch.await(10, TimeUnit.SECONDS);
-//            latch.await();
+            semaphore.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -135,7 +130,7 @@ public class OnlSongDAOImp implements SongDAO {
 
     public void downloadFile(String fileName, UIHandler handler) throws FileNotFoundException {
 
-        File downloadFolder =new File( Environment.getExternalStorageDirectory().toString()+"/Download");
+        File downloadFolder =new File( Environment.getExternalStorageDirectory(), "Download");
         File musicFile = new File(downloadFolder.getAbsolutePath(),fileName);
 
         // Create a storage reference from our app
@@ -143,23 +138,13 @@ public class OnlSongDAOImp implements SongDAO {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a reference to a file from a Google Cloud Storage URI
         StorageReference gsReference = storage.getReferenceFromUrl("gs://testfirebase-b2bcc.appspot.com/"+fileName);
-        final long TWENTY_MEGABYTE = 1024 * 1024*20;
 
-        gsReference.getFile(musicFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                if(handler!=null) handler.success();
-            }
-        }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(@NonNull FileDownloadTask.TaskSnapshot snapshot) {
-                final int percent = (int) (snapshot.getBytesTransferred()*100.0/snapshot.getTotalByteCount());
-                if(handler!=null ) handler.updateProgress(percent);
-
-            }
-        })
-
-        ;
+        gsReference.getFile(musicFile).addOnSuccessListener(taskSnapshot -> {
+            if(handler!=null) handler.success();
+        }).addOnProgressListener(snapshot -> {
+            final int percent = (int) (snapshot.getBytesTransferred()*100.0/snapshot.getTotalByteCount());
+            if(handler!=null ) handler.updateProgress(percent);
+        });
 
 
 

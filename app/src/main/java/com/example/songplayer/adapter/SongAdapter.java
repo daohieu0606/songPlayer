@@ -36,6 +36,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     public void appendWithOnlineSongs(List<SongEntity> onlSongs){
         this.songs.addAll(onlSongs);
+        this.notifyDataSetChanged();
     }
 
     @NonNull
@@ -64,7 +65,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             SongAdapterCallback finalCallback = callback;
 
             if(!currentSong.isOnline()){
-                holder.btnDownloadSong.setVisibility(View.GONE);
+//                holder.btnDownloadSong.setVisibility(View.GONE);
             }else{
                 holder.btnDownloadSong.setOnClickListener((view) -> {
                     finalCallback.downloadASong(currentSong);
