@@ -40,7 +40,9 @@ public class SongDbHelper {
                 MediaStore.Audio.Albums.ALBUM
         };
         ContentResolver resolver = application.getContentResolver();
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), songProjection, null, null);
+        Cursor cursor = resolver.query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                songProjection, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {

@@ -22,11 +22,12 @@ import com.example.songplayer.notification.NotificationHelper;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MusicService
         extends Service
@@ -44,13 +45,18 @@ public class MusicService
 
     boolean isShuffle;
     private RepeatMode repeatMode;
+    private ExecutorService executorService;
 
     public MusicService() {
         if (INSTANCE == null) {
             INSTANCE = this;
         }
     }
-    public static MusicService getInstance() {return INSTANCE;}
+
+    public static MusicService getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -83,6 +89,9 @@ public class MusicService
 
     public void setSongList(List<SongEntity> newSongEntities) {
         songEntities = newSongEntities;
+        if (songEntities.size() > 0) {
+            setCurrentSong(songEntities.get(0));
+        }
     }
 
     public void setCurrentSong(SongEntity newSong) {
@@ -104,6 +113,8 @@ public class MusicService
         return musicBind;
     }
 
+
+
     @Override
     public boolean onUnbind(Intent intent) {
         songPlayer.stop();
@@ -112,25 +123,21 @@ public class MusicService
     }
 
     public void preparePlaySyn() {
-        songPlayer.reset();
+        executorService.execute(() -> {
+            songPlayer.reset();
+            try {
 
-        try {
+                if (currentSongLiveData.isOnline()) {
+                    songPlayer.setDataSource(currentSongLiveData.getUriString());
+                } else {
+                    songPlayer.setDataSource(getApplicationContext(), Uri.parse(currentSongLiveData.getUriString()));
+                }
 
-            if (currentSongLiveData.isOnline()) {
-                songPlayer.setDataSource(currentSongLiveData.getUriString());
-            } else {
-                songPlayer.setDataSource(getApplicationContext(), Uri.parse(currentSongLiveData.getUriString()));
+                songPlayer.prepareAsync();
+            } catch (Exception exception) {
+                Log.d(TAG, "playSong: ", exception);
             }
-
-            songPlayer.prepare();
-
-        } catch (IllegalStateException e) {
-
-        } catch (IOException e) {
-
-        } catch (Exception exception) {
-            Log.d(TAG, "playSong: ", exception);
-        }
+        });
     }
 
 
@@ -163,11 +170,16 @@ public class MusicService
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        SongEntity song = (SongEntity) intent.getSerializableExtra("SONG");
-        musicConnection(song);
+        executorService = Executors.newFixedThreadPool(2);
+        executorService.execute(()->{
+            SongEntity song = (SongEntity) intent.getSerializableExtra("SONG");
+            musicConnection(song);
+        });
+
 
         return Service.START_STICKY;
     }
+
 
     public void musicConnection(SongEntity song) {
 
@@ -176,7 +188,6 @@ public class MusicService
             storage.getReference().child(song.getSongName()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
                 public void onSuccess(Uri uri) {
-
                     song.setUriString(uri.toString());
                     setCurrentSong(song);
                     preparePlaySyn();
@@ -188,10 +199,7 @@ public class MusicService
 
             setCurrentSong(song);
             preparePlaySyn();
-
         }
-
-
     }
 
     public void go() {
@@ -309,6 +317,8 @@ public class MusicService
     @Override
     public void onDestroy() {
         stopForeground(true);
+        executorService.shutdown();
+
         super.onDestroy();
     }
 

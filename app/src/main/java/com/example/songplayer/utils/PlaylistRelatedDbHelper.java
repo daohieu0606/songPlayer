@@ -93,7 +93,6 @@ public class PlaylistRelatedDbHelper {
         String[] songProjection = {
                 MediaStore.Audio.Media._ID, //0
                 MediaStore.Audio.Media.DISPLAY_NAME, // 1
-//                MediaStore.Audio.Media.RELATIVE_PATH, // 2
                 MediaStore.Audio.Media.SIZE, // 3
                 MediaStore.Audio.Artists.ARTIST, // 5
                 MediaStore.Audio.Albums.ALBUM, //6,
@@ -106,15 +105,9 @@ public class PlaylistRelatedDbHelper {
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             SongEntity songEntity = new SongEntity();
-//            songEntity.setId(cursor.getInt(0));
-//            songEntity.setSongName(cursor.getString(1));
-//            songEntity.setPath(cursor.getString(2));
-//            songEntity.setSize(cursor.getInt(3));
-//            songEntity.setArtist(cursor.getString(5));
 
             songEntity.setId(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)));
             songEntity.setSongName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
-//            songEntity.setPath(cursor.getString(2));
             songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)));
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
 

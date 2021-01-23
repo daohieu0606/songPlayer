@@ -25,12 +25,12 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.notification.NotificationHelper;
@@ -80,6 +80,17 @@ public class MusicPlayerFragment
 
     private BroadcastReceiver songControlReceiver;
 
+    private final Handler handler = new Handler();
+    private final Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            musicService = MusicService.getInstance();
+            if(musicService == null){
+                handler.postDelayed(this, 20);
+            }
+        }
+    };
+
     public MusicPlayerFragment() {
         // Required empty public constructor
     }
@@ -100,19 +111,26 @@ public class MusicPlayerFragment
         }).get(SongViewModel.class);
 
 
-        currentSongLiveData.observe(getActivity(), new Observer<SongEntity>() {
-            @Override
-            public void onChanged(SongEntity songEntity) {
-                if (songEntity == null) {
-                    setDefaultUI();
-                } else {
-                    try {
-                        updateUIContent();
-                    } catch (Exception e) {
-                        //TODO: HANDLE
-                    }
+        currentSongLiveData.observe(getActivity(), songEntity -> {
+            if (songEntity == null) {
+                setDefaultUI();
+            } else {
+                try {
+                    updateUIContent();
+                } catch (Exception e) {
+                    //TODO: HANDLE
                 }
             }
+        });
+
+        MyApplication.database.songDao().getAllSongs().observe(this, songEntities -> {
+            if (musicService == null) return;
+            if (songEntities.size() > 0) {
+                currentSongLiveData.setValue(songEntities.get(0));
+            }
+            musicService.setSongList(songEntities);
+            musicService.preparePlaySyn();
+            handlePlaySong();
         });
 
 
@@ -300,13 +318,6 @@ public class MusicPlayerFragment
                 playIntent.putExtra(getString(R.string.SONG), (SongEntity) song);
                 getContext().startService(playIntent);
 
-                Handler handler = new android.os.Handler();
-                Runnable runnable = () -> {
-                    musicService = MusicService.getInstance();
-                    if (musicService == null) {
-                        handler.postDelayed(this, 0);
-                    }
-                };
 
                 handler.postDelayed(runnable, 0);
 

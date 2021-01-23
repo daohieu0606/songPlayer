@@ -10,13 +10,14 @@ import androidx.room.Update;
 import com.example.songplayer.db.entity.SongEntity;
 
 import java.util.List;
+
 @Dao
 public interface SongDAORoom {
 
     @Query("select * from songs")
     LiveData<List<SongEntity>> getAllSongs();
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(SongEntity songEntity);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
@@ -32,13 +33,12 @@ public interface SongDAORoom {
     LiveData<List<SongEntity>> getAllSongsOfPlaylist(int playlistID);
 
     @Query("delete from listMusicOfPlaylist where songID= :songID and playlistID= :playlistID")
-    void deleteFromPlayList(int songID,int playlistID);
+    void deleteFromPlayList(int songID, int playlistID);
 
     @Query("select s.* from listMusicOfAlbum l join songs s on l.songID = s.id where albumID=:albumID")
     LiveData<List<SongEntity>> getAllSongsOfAlbum(int albumID);
 
 
-
     @Query("delete from listMusicOfAlbum where songID= :songID and albumID=:albumID")
-    void deleteFromAlbum(int songID,int albumID);
+    void deleteFromAlbum(int songID, int albumID);
 }
