@@ -9,6 +9,7 @@ import com.example.songplayer.model.MySong;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
+
 @Entity(tableName = "songs"
 )
 public class SongEntity implements MySong, Serializable {
@@ -16,7 +17,7 @@ public class SongEntity implements MySong, Serializable {
     @PrimaryKey
     private int id;
 
-    @ColumnInfo(name="songName")
+    @ColumnInfo(name = "songName")
     private String songName;
 
     @ColumnInfo(name = "uriString")
@@ -34,6 +35,9 @@ public class SongEntity implements MySong, Serializable {
     @ColumnInfo(name = "singer")
     private String singer;
 
+//    @ColumnInfo(name = "genre")
+//    private String genre;
+
     @ColumnInfo(name = "isFavorite")
     private boolean isFavorite;
 
@@ -47,8 +51,11 @@ public class SongEntity implements MySong, Serializable {
     public void setOnline(boolean online) {
         isOnline = online;
     }
-    public SongEntity(){}
-    public SongEntity(int id, String songName, String uriString, String path, double size, String artist, String singer, boolean isFavorite ) {
+
+    public SongEntity() {
+    }
+
+    public SongEntity(int id, String songName, String uriString, String path, double size, String artist, String singer,  boolean isFavorite) {
         this.id = id;
         this.songName = songName;
         this.uriString = uriString;
@@ -56,6 +63,7 @@ public class SongEntity implements MySong, Serializable {
         this.size = size;
         this.artist = artist;
         this.singer = singer;
+//        this.genre = genre;
         this.isFavorite = isFavorite;
         this.isOnline = false;
     }
@@ -140,7 +148,14 @@ public class SongEntity implements MySong, Serializable {
         this.isFavorite = isFavorite;
     }
 
-    @NotNull
+//    public String getGenre() {
+//        return genre;
+//    }
+//
+//    public void setGenre(String genre) {
+//        this.genre = genre;
+//    }
+
     @Override
     public String toString() {
         return "SongEntity{" +
