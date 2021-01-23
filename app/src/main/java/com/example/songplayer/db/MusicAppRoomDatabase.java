@@ -34,7 +34,7 @@ import com.example.songplayer.db.entity.SongEntity;
         ListMusicOfPlaylist.class,
         Performer.class,
         Playlist.class
-},version = 4,exportSchema = false)
+},version = 5,exportSchema = false)
 public abstract class MusicAppRoomDatabase  extends RoomDatabase{
     private static MusicAppRoomDatabase INSTANCE = null;
     public abstract AlbumDAORoom albumDAORoom();
@@ -56,6 +56,7 @@ public abstract class MusicAppRoomDatabase  extends RoomDatabase{
 //            db.execSQL("DELETE from performers");
 //            db.execSQL("DELETE from genres");
 //            db.execSQL("DELETE from artists");
+
 
         }
     };

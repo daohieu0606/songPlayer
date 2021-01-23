@@ -27,8 +27,8 @@ public class DrawerCreater {
     public static final int POS_CATEGORY = 1;
     public static final int POS_FAVORITE = 2;
     public static final int POS_DOWNLOAD = 3;
-    public static final int POS_SHARE_APP = 4;
-    public static final int POS_RATE_APP = 5;
+    public static final int POS_PLAYLIST = 4;
+    public static final int POS_ALBUM = 5;
     public static final int POS_MORE_APP = 6;
     public static final int POS_MUSIC = 7;
 
@@ -104,10 +104,10 @@ public class DrawerCreater {
                 createItemFor(POS_CATEGORY),
                 createItemFor(POS_FAVORITE),
                 createItemFor(POS_DOWNLOAD),
-                createItemFor(POS_SHARE_APP,"Communicate"),
-                createItemFor(POS_RATE_APP),
+                createItemFor(POS_PLAYLIST,"List"),
+                createItemFor(POS_ALBUM),
                 createItemFor(POS_MORE_APP),
-                createItemFor(POS_MUSIC,"Developer")
+                createItemFor(POS_MUSIC,"Music player")
 
         ));
 

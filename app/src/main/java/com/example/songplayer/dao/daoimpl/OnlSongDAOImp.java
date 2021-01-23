@@ -26,7 +26,6 @@ import java.util.concurrent.Semaphore;
 public class OnlSongDAOImp implements SongDAO {
 
 
-
     private static final String TAG = "TESST";
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("SongEntity");
 
@@ -47,21 +46,23 @@ public class OnlSongDAOImp implements SongDAO {
                         SongEntity songEntity = ds.getValue(SongEntity.class);
                         songEntity.setOnline(true);
                         songEntities.add(songEntity);
-                        semaphore.release();
                     }
                 }
-
+                semaphore.release();
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 semaphore.release();
             }
         });
+
         try {
             semaphore.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         return songEntities;
 
     }
@@ -130,27 +131,29 @@ public class OnlSongDAOImp implements SongDAO {
 
     public void downloadFile(String fileName, UIHandler handler) throws FileNotFoundException {
 
-        File downloadFolder =new File( Environment.getExternalStorageDirectory(), "Download");
-        File musicFile = new File(downloadFolder.getAbsolutePath(),fileName);
+
+        File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File musicFile = new File(downloadFolder.getAbsolutePath(), fileName);
 
         // Create a storage reference from our app
         // Get the default bucket from a custom FirebaseApp
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a reference to a file from a Google Cloud Storage URI
-        StorageReference gsReference = storage.getReferenceFromUrl("gs://songplayer-82ff0.appspot.com/"+fileName);
+        StorageReference gsReference = storage.getReferenceFromUrl("gs://songplayer-82ff0.appspot.com/" + fileName);
 
         gsReference.getFile(musicFile).addOnSuccessListener(taskSnapshot -> {
-            if(handler!=null) handler.success();
+            if (handler != null) handler.success();
         }).addOnProgressListener(snapshot -> {
-            final int percent = (int) (snapshot.getBytesTransferred()*100.0/snapshot.getTotalByteCount());
-            if(handler!=null ) handler.updateProgress(percent);
+            final int percent = (int) (snapshot.getBytesTransferred() * 100.0 / snapshot.getTotalByteCount());
+            if (handler != null) handler.updateProgress(percent);
         });
 
 
-
     }
-    public  interface UIHandler{
+
+    public interface UIHandler {
         void updateProgress(int percent);
+
         void success();
     }
 

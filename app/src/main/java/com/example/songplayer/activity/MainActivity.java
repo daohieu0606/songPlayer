@@ -34,13 +34,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
+import com.example.songplayer.db.entity.AlbumEntity;
+import com.example.songplayer.db.entity.ArtistEntity;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.service.Restarter;
 import com.example.songplayer.service.YourService;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.songplayer.utils.DrawerCreater.POS_CATEGORY;
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
@@ -68,11 +79,11 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
-                Log.i ("Service status", "Running");
+                Log.i("Service status", "Running");
                 return true;
             }
         }
-        Log.i ("Service status", "Not running");
+        Log.i("Service status", "Not running");
         return false;
     }
 
@@ -96,10 +107,69 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
             runIfHasPermission();
         }
 
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        DatabaseReference songNode = FirebaseDatabase.getInstance().getReference().child("SongEntity");
+//        for (int i = 0; i < 10; i++) {
+//            DatabaseReference songPush = songNode.push();
+//            String ID = songPush.getKey();
+//            SongEntity songEntity = new SongEntity("SongName", "song-name", "uriString",
+//                    "PathString", 1.2, "Artist", "Singer", "Genre", false, true);
+//
+//            songPush.setValue(songEntity);
+//        }
+
+
+        DatabaseReference artistNode = FirebaseDatabase.getInstance().getReference().child("ArtistEntity");
+        DatabaseReference artistPush = artistNode.push();
+        artistPush.setValue(new ArtistEntity("Artist"));
+
+        DatabaseReference albumNode = FirebaseDatabase.getInstance().getReference().child("AlbumEntity");
+        DatabaseReference albumPush = albumNode.push();
+        albumPush.setValue(new AlbumEntity("Love and Heavy"));
+        List<SongEntity> songEntityList = new ArrayList<>();
+        ArrayList<SongEntity> songEntities = new ArrayList<>();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("SongEntity");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        songEntities.add(ds.getValue(SongEntity.class));
+                    }
+                    songEntityList.addAll(songEntities);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        Query songDel = ref.orderByChild("id").equalTo(570734123);
+        songDel.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        DatabaseReference a = ds.getRef();
+                        a.removeValue();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
 
 
     }
-    private void runIfHasPermission(){
+
+    private void runIfHasPermission() {
 
         mYourService = new YourService();
         mServiceIntent = new Intent(this, mYourService.getClass());
@@ -122,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                     }
                 }).get(SongViewModel.class);
     }
+
     private boolean checkAndRequestPermission() {
 
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
@@ -277,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                     ActivityCompat
                             .requestPermissions(
                                     (Activity) context,
-                                    new String[] { Manifest.permission.READ_EXTERNAL_STORAGE },
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                                     MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
                 }
                 return false;
@@ -300,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         ActivityCompat.requestPermissions((Activity) context,
-                                new String[] { permission },
+                                new String[]{permission},
                                 MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
                     }
                 });

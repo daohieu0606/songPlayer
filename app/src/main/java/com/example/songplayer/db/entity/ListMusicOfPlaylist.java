@@ -47,4 +47,17 @@ class ListMusicOfPlaylist {
     public void setSongID(int songID) {
         this.songID = songID;
     }
+
+    public ListMusicOfPlaylist(int playlistID, int songID) {
+        this.playlistID = playlistID;
+        this.songID = songID;
+    }
+
+    @Override
+    public String toString() {
+        return "ListMusicOfPlaylist{" +
+                "playlistID=" + playlistID +
+                ", songID=" + songID +
+                '}';
+    }
 }

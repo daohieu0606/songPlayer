@@ -65,7 +65,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             SongAdapterCallback finalCallback = callback;
 
             if(!currentSong.isOnline()){
-//                holder.btnDownloadSong.setVisibility(View.GONE);
+                holder.btnDownloadSong.setVisibility(View.GONE);
             }else{
                 holder.btnDownloadSong.setOnClickListener((view) -> {
                     finalCallback.downloadASong(currentSong);
@@ -74,6 +74,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
             holder.btnMarkFavoriteSong.setOnClickListener((view)->{
                 finalCallback.favoriteASong(currentSong);
+            });
+
+            holder.btnMoreSongOptions.setOnClickListener((v)->{
+                callback.addToPlaylist(currentSong);
             });
         }
 
@@ -103,8 +107,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             txtSongName = view.findViewById(R.id.txtSongName);
             imgSongThumbnail = view.findViewById(R.id.imgSongThumbnail);
 
-
-
         }
     }
 
@@ -113,7 +115,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
         void favoriteASong(SongEntity song);
 
-        void setASongAsRingTone(SongEntity song);
+        void addToPlaylist(SongEntity song);
 
         void setASongAsNotification(SongEntity song);
 

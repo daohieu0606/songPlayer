@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Random;
+
 @Entity(tableName = "playlists")
 public class Playlist {
 
@@ -13,6 +15,14 @@ public class Playlist {
 
     @ColumnInfo(name = "playlistName")
     private String playListName;
+
+    public Playlist(){}
+
+    public Playlist(String name){
+        playlistID = new Random(System.currentTimeMillis()).nextInt();
+        this.playListName = name;
+
+    }
 
     public int getPlaylistID() {
         return playlistID;

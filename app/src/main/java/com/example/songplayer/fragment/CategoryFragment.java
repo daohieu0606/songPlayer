@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.CategoryAdapter;
 import com.example.songplayer.db.entity.Genre;
+import com.example.songplayer.viewmodel.AlbumViewModel;
 import com.example.songplayer.viewmodel.GenreViewModel;
 
 import java.util.ArrayList;
@@ -72,7 +73,8 @@ public class CategoryFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_category, container, false);
         recyclerView = view.findViewById(R.id.rvCategories);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter= new CategoryAdapter(new ArrayList<>());
+        GenreViewModel genreViewModel = new GenreViewModel(getActivity().getApplication());
+        adapter= new CategoryAdapter(genreViewModel.getAllGenres().getValue()==null?new ArrayList():genreViewModel.getAllGenres().getValue());
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override

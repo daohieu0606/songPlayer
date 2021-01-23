@@ -9,6 +9,7 @@ import com.example.songplayer.model.MySong;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
+import java.util.Random;
 
 @Entity(tableName = "songs"
 )
@@ -19,6 +20,9 @@ public class SongEntity implements MySong, Serializable {
 
     @ColumnInfo(name = "songName")
     private String songName;
+
+    @ColumnInfo(name = "songNameURL")
+    private String songNameURL;
 
     @ColumnInfo(name = "uriString")
     private String uriString;
@@ -35,8 +39,8 @@ public class SongEntity implements MySong, Serializable {
     @ColumnInfo(name = "singer")
     private String singer;
 
-//    @ColumnInfo(name = "genre")
-//    private String genre;
+    @ColumnInfo(name = "genre")
+    private String genre;
 
     @ColumnInfo(name = "isFavorite")
     private boolean isFavorite;
@@ -52,20 +56,24 @@ public class SongEntity implements MySong, Serializable {
         isOnline = online;
     }
 
-    public SongEntity() {
-    }
 
-    public SongEntity(int id, String songName, String uriString, String path, double size, String artist, String singer,  boolean isFavorite) {
-        this.id = id;
+    public SongEntity( String songName, String songNameURL, String uriString, String path,
+                      double size, String artist, String singer, String genre,
+                      boolean isFavorite, boolean isOnline) {
+        this.id = Math.abs(new Random(System.currentTimeMillis()).nextInt());
         this.songName = songName;
+        this.songNameURL = songNameURL;
         this.uriString = uriString;
         this.path = path;
         this.size = size;
         this.artist = artist;
         this.singer = singer;
-//        this.genre = genre;
+        this.genre = genre;
         this.isFavorite = isFavorite;
-        this.isOnline = false;
+        this.isOnline = isOnline;
+    }
+
+    public SongEntity() {
     }
 
     @Override
@@ -148,14 +156,21 @@ public class SongEntity implements MySong, Serializable {
         this.isFavorite = isFavorite;
     }
 
-//    public String getGenre() {
-//        return genre;
-//    }
-//
-//    public void setGenre(String genre) {
-//        this.genre = genre;
-//    }
+    public String getGenre() {
+        return genre;
+    }
 
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getSongNameURL() {
+        return songNameURL;
+    }
+
+    public void setSongNameURL(String songNameURL) {
+        this.songNameURL = songNameURL;
+    }
     @Override
     public String toString() {
         return "SongEntity{" +
@@ -166,6 +181,7 @@ public class SongEntity implements MySong, Serializable {
                 ", size=" + size +
                 ", artist='" + artist + '\'' +
                 ", singer='" + singer + '\'' +
+                ", genre='" + genre + '\'' +
                 ", isFavorite=" + isFavorite +
                 ", isOnline=" + isOnline +
                 '}';

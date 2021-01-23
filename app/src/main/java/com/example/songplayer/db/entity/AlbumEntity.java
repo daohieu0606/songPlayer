@@ -11,6 +11,8 @@ import com.example.songplayer.utils.UriToString;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Random;
+
 @Entity(tableName = "albums")
 @TypeConverters({UriToString.class})
 public class AlbumEntity {
@@ -31,9 +33,13 @@ public class AlbumEntity {
 //        this.albumName = albumName;
 //    }
 
+    public AlbumEntity( String albumName) {
+        this.albumName = albumName;
+        this.id = Math.abs(new Random(System.currentTimeMillis()).nextInt());;
+    }
     public AlbumEntity(int id, String albumName) {
         this.albumName = albumName;
-        this.id = id;
+        this.id =id;
     }
 
 

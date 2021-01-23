@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -23,7 +24,9 @@ import com.example.songplayer.adapter.AlbumAdapter;
 import com.example.songplayer.adapter.SongAdapter;
 import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
 import com.example.songplayer.db.entity.AlbumEntity;
+import com.example.songplayer.db.entity.Playlist;
 import com.example.songplayer.db.entity.SongEntity;
+import com.example.songplayer.utils.MyDialog;
 import com.example.songplayer.viewmodel.AlbumViewModel;
 import com.example.songplayer.viewmodel.ArtistViewModel;
 import com.example.songplayer.viewmodel.SongViewModel;
@@ -43,6 +46,8 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     private AlbumAdapter albumAdapter;
     private AlbumViewModel albumViewModel;
     private SongViewModel songViewModel;
+
+    private MyDialog dialog;
 
     public DashboardFragment() {
     }
@@ -85,6 +90,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         View result = inflater.inflate(R.layout.fragment_dashboard, container, false);
         setUpSongListView(result);
         setUpAlbumList(result);
+
         return result;
     }
 
@@ -139,15 +145,15 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         songViewModel.getAllOfflineSongs().observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
             @Override
             public void onChanged(List<SongEntity> songEntities) {
-                if(songEntities!=null){
+                if (songEntities != null) {
                     songAdapter.setSongs(songEntities);
                 }
             }
         });
 
-        songViewModel.getAllOnlineSongs().observe(getViewLifecycleOwner(), (songs)->{
-            if(songs!=null && songs.size()>0){
-                Log.d(TAG, "Onl songs"+ songs);
+        songViewModel.getAllOnlineSongs().observe(getViewLifecycleOwner(), (songs) -> {
+            if (songs != null && songs.size() > 0) {
+                Log.d(TAG, "Onl songs" + songs);
                 songAdapter.appendWithOnlineSongs(songs);
             }
         });
@@ -167,7 +173,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                 MyApplication.onlSongDatabase.onlSongDao().downloadFile(song.getSongName(), new OnlSongDAOImp.UIHandler() {
                     @Override
                     public void updateProgress(int percent) {
-                        dialog.setMessage("Downloaded "+ percent+"%");
+                        dialog.setMessage("Downloaded " + percent + "%");
                     }
 
                     @Override
@@ -193,9 +199,26 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     }
 
     @Override
-    public void setASongAsRingTone(SongEntity song) {
+    public void addToPlaylist(SongEntity song) {
+        MyApplication.database.playlistDAORoom().getAllPlaylist().observe(getViewLifecycleOwner(), new Observer<List<Playlist>>() {
+            @Override
+            public void onChanged(List<Playlist> playlists) {
+                if (playlists != null) {
+                    if (dialog != null) {
+                        dialog.hide();
+                    }
+
+                    dialog = new MyDialog(getContext(), "Hello", song, (ArrayList<Playlist>) playlists);
+                    dialog.show();
+                } else {
+                    Toast.makeText(getContext(), "There are no playlist in your phone", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
 
     }
+
 
     @Override
     public void setASongAsNotification(SongEntity song) {
@@ -216,7 +239,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         void play(SongEntity music);
     }
 
-    public void displayListSongOfAlbum(AlbumEntity album){
+    public void displayListSongOfAlbum(AlbumEntity album) {
         songViewModel.getAllSongOfAlbum(album).observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
             @Override
             public void onChanged(List<SongEntity> songEntities) {

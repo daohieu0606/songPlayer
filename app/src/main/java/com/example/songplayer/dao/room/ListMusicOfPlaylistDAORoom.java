@@ -5,15 +5,17 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Update;
 
-import com.example.songplayer.db.entity.ListMusicOfAlbum;
+import com.example.songplayer.db.entity.ListMusicOfPlaylist;
 
 @Dao
 public interface ListMusicOfPlaylistDAORoom {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(ListMusicOfAlbum genre);
+    void insert(ListMusicOfPlaylist genre);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    void update(ListMusicOfAlbum genre);
+    void update(ListMusicOfPlaylist genre);
+
+
 
 }

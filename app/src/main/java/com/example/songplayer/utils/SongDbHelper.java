@@ -37,20 +37,29 @@ public class SongDbHelper {
 //                MediaStore.Audio.Media.RELATIVE_PATH,
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Artists.ARTIST,
-                MediaStore.Audio.Albums.ALBUM
+                MediaStore.Audio.Albums.ALBUM,
+                MediaStore.Audio.Media.GENRE,
+
         };
         ContentResolver resolver = application.getContentResolver();
-        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), songProjection, null, null);
+        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), songProjection, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
+
+            if(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)).endsWith(".ogg")){
+                continue;
+            }
+
             SongEntity songEntity = new SongEntity();
 
             songEntity.setId(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)));
+
             songEntity.setSongName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
 //            songEntity.setPath(cursor.getString(2));
-            songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow( MediaStore.Audio.Media.SIZE)));
+            songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)));
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
+            songEntity.setGenre(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.GENRE)));
 
             if (favoriteSongDbHelper.isExistFavoriteSong(songEntity.getId())) {
                 songEntity.setFavorite(true);
@@ -118,4 +127,7 @@ public class SongDbHelper {
         }
         songEntity.setFavorite(!songEntity.isFavorite());
     }
+
+
+
 }

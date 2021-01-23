@@ -99,6 +99,7 @@ public class PlaylistRelatedDbHelper {
                 MediaStore.Audio.Albums.ALBUM, //6,
                 MediaStore.Audio.Albums._ID // 7
 
+
         };
         ContentResolver resolver = application.getContentResolver();
         Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL), songProjection, null, null);
@@ -117,7 +118,6 @@ public class PlaylistRelatedDbHelper {
 //            songEntity.setPath(cursor.getString(2));
             songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)));
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
-
             if (favoriteSongDbHelper.isExistFavoriteSong(songEntity.getId())) {
                 songEntity.setFavorite(true);
             }

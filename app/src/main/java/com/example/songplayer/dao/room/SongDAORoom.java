@@ -16,7 +16,7 @@ public interface SongDAORoom {
     @Query("select * from songs")
     LiveData<List<SongEntity>> getAllSongs();
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(SongEntity songEntity);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)

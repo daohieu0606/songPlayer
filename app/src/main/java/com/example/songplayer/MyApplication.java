@@ -42,12 +42,12 @@ public class MyApplication extends Application {
         SharedPreferences preferences = getSharedPreferences(getString(R.string.prev), MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         final boolean firstLoad = preferences.getBoolean(getString(R.string.first_load), true);
-        if (firstLoad) {
+//        if (firstLoad) {
 
             fistLoadAction();
             editor.putBoolean(getString(R.string.first_load), false);
             editor.apply();
-        }
+//        }
 
 
     }
@@ -83,6 +83,8 @@ public class MyApplication extends Application {
                 songs.forEach((song) -> {
                     database.listMusicOfAlbumDAORoom().insert(new ListMusicOfAlbum(song.getId(), album.getId()));
                 });
+
+
 
             });
 

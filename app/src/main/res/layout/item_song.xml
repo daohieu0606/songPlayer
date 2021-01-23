@@ -52,7 +52,7 @@
             android:layout_marginStart="5dp"
             android:id="@+id/btnMoreSongOptions"
             android:backgroundTint="@color/white"
-            android:background="@drawable/ic_baseline_more_vert_24"
+            android:background="@drawable/add_playlist"
             android:layout_width="24dp"
             android:layout_height="24dp"/>
         <Button
