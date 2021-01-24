@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.songplayer.R;
+import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.notification.NotificationHelper;
 import com.example.songplayer.receiver.NotificationReceiver;
@@ -38,6 +39,7 @@ import com.example.songplayer.service.MusicService;
 import com.example.songplayer.viewmodel.SongViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MusicPlayerFragment
         extends Fragment
@@ -72,8 +74,7 @@ public class MusicPlayerFragment
 
     private MusicService musicService;
     private Intent playIntent;
-//    private boolean musicBound = false;
-
+    private List<SongEntity> songs;
     private SongViewModel songViewModel;
     private MutableLiveData<SongEntity> currentSongLiveData = new MutableLiveData<>();
 
@@ -88,12 +89,64 @@ public class MusicPlayerFragment
             musicService = MusicService.getInstance();
             if (musicService == null) {
                 handler.postDelayed(this, 20);
+            }else{
+                getActivity().runOnUiThread(() -> {
+                    try {
+                        updateUIContent();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             }
         }
     };
 
     public MusicPlayerFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (getArguments() == null) {
+            setArguments(new Bundle());
+        }
+        if (playIntent == null) {
+            playIntent = new Intent(getActivity(), MusicService.class);
+            Bundle bundle = getArguments();
+            Object song = bundle.getSerializable(getString(R.string.SONG));
+            if (song == null) {
+                Object listSongsObj = bundle.getSerializable(getString(R.string.list_song));
+                if (listSongsObj != null) {
+                    this.songs = (ArrayList) listSongsObj;
+                    ;
+                    ArrayList<SongEntity> data = (ArrayList<SongEntity>) this.songs;
+
+                    playIntent.putExtra(getString(R.string.list_song), data);
+
+                    if (data.size() > 0) {
+                        currentSongLiveData.setValue(data.get(0));
+                    } else {
+                        Toast.makeText(getContext(), "There is no songs", Toast.LENGTH_SHORT).show();
+                    }
+                    getContext().startService(playIntent);
+                    handler.postDelayed(runnable, 0);
+
+                } else {
+                    Toast.makeText(getContext(), "There is no songs", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                if (getActivity() != null) {
+                    currentSongLiveData.setValue((SongEntity) song);
+                    playIntent.putExtra(getString(R.string.SONG), (SongEntity) song);
+                    getContext().startService(playIntent);
+                    handler.postDelayed(runnable, 0);
+                }
+            }
+
+
+        }
+
     }
 
 
@@ -296,47 +349,6 @@ public class MusicPlayerFragment
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (getArguments() == null) {
-            setArguments(new Bundle());
-        }
-        if (playIntent == null) {
-            playIntent = new Intent(getActivity(), MusicService.class);
-            Bundle bundle = getArguments();
-            Object song = bundle.getSerializable(getString(R.string.SONG));
-            if (song == null) {
-                Object listSongsObj = bundle.getSerializable(getString(R.string.list_song));
-                if (listSongsObj != null) {
-                    ArrayList<SongEntity> data = (ArrayList)listSongsObj;
-                    playIntent.putExtra(getString(R.string.list_song), data);
-
-                    if(data.size()>0){
-                        currentSongLiveData.setValue(data.get(0));
-                    }else{
-                        Toast.makeText(getContext(), "There is no songs", Toast.LENGTH_SHORT).show();
-                    }
-                    getContext().startService(playIntent);
-                    handler.postDelayed(runnable, 0);
-
-                } else {
-                    Toast.makeText(getContext(), "There is no songs", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                if (getActivity() != null) {
-                    currentSongLiveData.setValue((SongEntity) song);
-                    playIntent.putExtra(getString(R.string.SONG), (SongEntity) song);
-                    getContext().startService(playIntent);
-                    handler.postDelayed(runnable, 0);
-                }
-            }
-
-
-        }
-
-    }
-
 
     @Override
     public void onResume() {
@@ -443,6 +455,7 @@ public class MusicPlayerFragment
     }
 
     private void handlePlaySong() {
+
         if (musicService != null) {
             if (!isPlaying()) {
                 playSong();
@@ -450,6 +463,7 @@ public class MusicPlayerFragment
                 musicService.pausePlayer();
             }
         }
+
         btnPlay.setChecked(isPlaying());
         btnPlay2.setChecked(isPlaying());
     }
@@ -509,13 +523,14 @@ public class MusicPlayerFragment
 
             final int process = curPos;
             final String curPosTimeString = getTimeStringFromMilliSeconds(curPos);
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    txtCurrentPosition.setText(String.valueOf(curPosTimeString));
-                    sbSongProcess.setProgress(process);
-                }
+            getActivity().runOnUiThread(() -> {
+                txtCurrentPosition.setText(String.valueOf(curPosTimeString));
+                sbSongProcess.setProgress(process);
             });
+        }
+
+        if (curPos == songDuration && musicService != null && !musicService.isPng() && this.songs != null) {
+            playNext();
         }
     }
 
@@ -524,6 +539,9 @@ public class MusicPlayerFragment
         if (currentSong == null) {
             return;
         }
+
+        ((MainActivity)getActivity()).toggleFavorite(currentSong);
+
         currentSong.setFavorite(!currentSong.isFavorite());
         btnMarkFavorite.setChecked(currentSong.isFavorite());
         songViewModel.update(currentSongLiveData.getValue());

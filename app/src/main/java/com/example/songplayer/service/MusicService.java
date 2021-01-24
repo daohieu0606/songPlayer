@@ -19,14 +19,11 @@ import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.RepeatMode;
 import com.example.songplayer.notification.NotificationHelper;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MusicService
         extends Service
@@ -42,7 +39,6 @@ public class MusicService
 
     boolean isShuffle;
     private RepeatMode repeatMode;
-    private ExecutorService executorService;
 
     public MusicService() {
         if (INSTANCE == null) {
@@ -114,20 +110,18 @@ public class MusicService
     }
 
     public void preparePlayASyn() {
-        executorService.execute(() -> {
-            songPlayer.reset();
-            try {
-                if (currentSong.isOnline()) {
-                    Log.d(TAG, "preparePlayASyn: "+currentSong.getUriString());
-                    songPlayer.setDataSource(currentSong.getUriString());
-                } else {
-                    songPlayer.setDataSource(getApplicationContext(), Uri.parse(currentSong.getUriString()));
-                }
-                songPlayer.prepareAsync();
-            } catch (Exception exception) {
-                Log.d(TAG, "playSong: ", exception);
+        songPlayer.reset();
+        try {
+            if (currentSong.isOnline()) {
+                Log.d(TAG, "preparePlayASyn: " + currentSong.getUriString());
+                songPlayer.setDataSource(currentSong.getUriString());
+            } else {
+                songPlayer.setDataSource(getApplicationContext(), Uri.parse(currentSong.getUriString()));
             }
-        });
+            songPlayer.prepare();
+        } catch (Exception exception) {
+            Log.d(TAG, "playSong: ", exception);
+        }
     }
 
 
@@ -161,11 +155,11 @@ public class MusicService
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Object object = intent.getSerializableExtra(getString(R.string.SONG));
-        executorService = Executors.newFixedThreadPool(2);
+
+
         if (object != null) {
             SongEntity song = (SongEntity) object;
             prepareSourceForPlaying(song);
-
             playMusic();
 
         } else {
@@ -186,35 +180,22 @@ public class MusicService
 
 
     public void prepareSourceForPlaying(SongEntity song) {
-
-        if (song.isOnline()) {
-
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            storage.getReference().child(song.getSongName()).getDownloadUrl().addOnSuccessListener(uri -> {
-                setCurrentSong(song) ;
-            song.setUriString(uri.toString());
-                preparePlayASyn();
-            }).addOnFailureListener(e -> Log.d(TAG, "onFailure: "+e));
-
-        } else {
-            setCurrentSong(song);
-            preparePlayASyn();
-        }
+        setCurrentSong(song);
+        preparePlayASyn();
     }
 
     public void playMusic() {
-        try{
-        songPlayer.start();
+        try {
+            songPlayer.start();
+            Notification not = NotificationHelper.createNotification(getApplicationContext()
+                    , currentSong
+                    , songEntities.indexOf(currentSong)
+                    , songEntities.size()
+                    , isPng());
 
+            startForeground(NOTIFY_ID, not);
 
-        Notification not = NotificationHelper.createNotification(getApplicationContext()
-                , currentSong
-                , songEntities.indexOf(currentSong)
-                , songEntities.size()
-                , isPng());
-
-        startForeground(NOTIFY_ID, not);
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
 
@@ -329,7 +310,6 @@ public class MusicService
     @Override
     public void onDestroy() {
         stopForeground(true);
-        executorService.shutdown();
 
         super.onDestroy();
     }
