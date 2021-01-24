@@ -57,7 +57,6 @@ public class PlaylistRelatedDbHelper {
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
 
 
-
             Uri contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());
             songEntity.setUriString(contentUri.toString());
@@ -73,6 +72,33 @@ public class PlaylistRelatedDbHelper {
 
             result.get(genre).add(songEntity);
 
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+        return result;
+    }
+
+    public HashMap<Integer, Genre> scanAllGenresV2() {
+        HashMap<Integer, Genre> result = new HashMap<>();
+        String[] songProjection = {
+                MediaStore.Audio.Genres.Members.AUDIO_ID,
+                MediaStore.Audio.Genres.Members.GENRE_ID,
+                MediaStore.Audio.Genres.Members.DISPLAY_NAME
+        };
+
+        ContentResolver resolver = application.getContentResolver();
+
+        Cursor cursor = resolver.query(Uri.parse("content://media/external/audio/genres/all/members"), songProjection, null, null);
+        Integer id = null;
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.AUDIO_ID));
+
+            Genre genre = new Genre(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.GENRE_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.DISPLAY_NAME)));
+
+            result.put(id, genre);
             cursor.moveToNext();
         }
 

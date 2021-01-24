@@ -7,5 +7,6 @@ public class Constants {
     public static String DASH_BOARD = "DASH_BOARD";
     public static String SCREEN_TYPE = "SCREEN_TYPE";
     public static String DOWNLOAD_SCREEN = "DOWNLOAD_SCREEN";
+    public static String FAVORITE_SCREEN= "FAV_SCREEN";
 
 }

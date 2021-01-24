@@ -37,18 +37,18 @@ public class SongDbHelper {
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Artists.ARTIST,
                 MediaStore.Audio.Albums.ALBUM,
-                MediaStore.Audio.Media.GENRE,
 
         };
         ContentResolver resolver = application.getContentResolver();
 //        Cursor cursor = resolver.query(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), songProjection, null, null);
-
+//        Uri uri = Uri.parse("content://media/external/audio/media");
         Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songProjection, null, null);
+//        Cursor cursor = resolver.query(uri, songProjection, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
 
-            if(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)).endsWith(".ogg")){
+            if (cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)).endsWith(".ogg")) {
                 continue;
             }
 
@@ -59,9 +59,6 @@ public class SongDbHelper {
             songEntity.setSongName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
             songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)));
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
-            songEntity.setGenre(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.GENRE)));
-
-
 
             Uri contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());
@@ -76,7 +73,7 @@ public class SongDbHelper {
         return songEntities;
     }
 
-//    public String getRealPathFromURI(Context context, Uri contentUri) {
+    //    public String getRealPathFromURI(Context context, Uri contentUri) {
 //        Cursor cursor = null;
 //        try {
 //            String[] proj = { MediaStore.Audio.Media.DATA };
@@ -133,7 +130,6 @@ public class SongDbHelper {
 
         songEntity.setFavorite(!songEntity.isFavorite());
     }
-
 
 
 }

@@ -27,5 +27,6 @@
     <string name="data">DATA</string>
     <string name="list_song">LIST_SONG</string>
     <string name="all_music">All music</string>
+    <string name="FIREBASE_LINK">gs://testfirebase-b2bcc.appspot.com/</string>
     <!--    End Drawer Constants-->
 </resources>

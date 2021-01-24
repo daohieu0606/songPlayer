@@ -9,8 +9,10 @@ import android.util.Log;
 import com.example.songplayer.db.MusicAppRoomDatabase;
 import com.example.songplayer.db.OnlSongDatabase;
 import com.example.songplayer.db.SongDatabase;
+import com.example.songplayer.db.entity.Genre;
 import com.example.songplayer.utils.PlaylistRelatedDbHelper;
 
+import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -69,6 +71,7 @@ public class MyApplication extends Application {
                 }
             }
 
+
             reloadData();
 
 //            HashMap<AlbumEntity, List<SongEntity>> albums = listDBHelper.scanAllAlbums();
@@ -103,7 +106,15 @@ public class MyApplication extends Application {
 
         // Backup all song in play list
         MusicAppRoomDatabase.getSql().execSQL("delete  from songs ");
-        songDatabase.songDAO().getAllSongs().forEach(database.songDao()::insert);
+        HashMap<Integer, Genre> genreListHashMap = MyApplication.listDBHelper.scanAllGenresV2();
+        genreListHashMap.forEach((song,genre)->{
+            database.genreDAORoom().insert(genre);
+        });
+
+        songDatabase.songDAO().getAllSongs().forEach((song)->{
+            song.setGenre(genreListHashMap.get(song.getId()).getGenreName());
+            database.songDao().insert(song);
+        });
 
         try{
             MusicAppRoomDatabase.getSql().execSQL("insert into listMusicOfPlaylist(playlistID,songID) " +

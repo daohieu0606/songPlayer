@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.songplayer.MyApplication;
+import com.example.songplayer.R;
 import com.example.songplayer.dao.daointerface.SongDAO;
 import com.example.songplayer.db.entity.SongEntity;
 import com.google.firebase.database.DataSnapshot;
@@ -151,7 +152,7 @@ public class OnlSongDAOImp implements SongDAO {
         // Get the default bucket from a custom FirebaseApp
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a reference to a file from a Google Cloud Storage URI
-        String url = "gs://testfirebase-b2bcc.appspot.com/" + fileName;
+        String url = MyApplication.getContext().getString(R.string.FIREBASE_LINK) + fileName;
 
         StorageReference gsReference = storage.getReferenceFromUrl(url);
 

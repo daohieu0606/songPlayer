@@ -41,6 +41,7 @@ import java.util.List;
 
 import static com.example.songplayer.utils.Constants.DASH_BOARD;
 import static com.example.songplayer.utils.Constants.DOWNLOAD_SCREEN;
+import static com.example.songplayer.utils.Constants.FAVORITE_SCREEN;
 import static com.example.songplayer.utils.Constants.SCREEN_TYPE;
 
 public class DashboardFragment extends Fragment implements SongAdapter.SongAdapterCallback {
@@ -116,13 +117,15 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
             screenTitle.setText("All music");
         } else if (screenType.equals(DOWNLOAD_SCREEN)) {
             screenTitle.setText("Downloads");
+        } else if (screenType.equals(FAVORITE_SCREEN)) {
+            screenTitle.setText("Favorite");
         }
 
         setUpSongListView(result);
 
         view = result;
 
-        btnPlayAll.setOnClickListener((v)->{
+        btnPlayAll.setOnClickListener((v) -> {
             Bundle bundle = new Bundle();
             bundle.putSerializable(getString(R.string.list_song), (Serializable) songAdapter.getSongs());
             MainActivity.getNavController().navigate(R.id.musicPlayerFragment, bundle);
@@ -193,6 +196,17 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                 });
                 songAdapter.appendWithOnlineSongs(downloadSongs);
 
+            } else if (screenType.equals(FAVORITE_SCREEN)) {
+                ArrayList<SongEntity> favSongs = new ArrayList<>();
+
+                songEntities.forEach((song) -> {
+                    if (song.isOnline()) {
+                        favSongs.add(song);
+                    }
+                });
+                songAdapter.appendWithOnlineSongs(favSongs);
+
+
             } else {
                 if (songEntities != null) {
                     songAdapter.appendWithOnlineSongs(songEntities);
@@ -249,17 +263,17 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
 
     @Override
     public void favoriteASong(SongEntity song) {
-        MyApplication.database.songDao().getAllSongs().observe(getActivity(),(songs)->{
-            song.setFavorite(!song.isFavorite());
-            new Thread(()->{
-                if(songs.contains(song)){
-                    MyApplication.database.songDao().update(song);
-                }else{
-                    MyApplication.database.songDao().insert(song);
-                }
-            }).start();
 
-        });
+        song.setFavorite(!song.isFavorite());
+        new Thread(() -> {
+                if(song.isOnline()) {
+                    MyApplication.database.songDao().insert(song);
+                }else{
+                    MyApplication.database.songDao().update(song);
+                }
+
+        }
+        ).start();
     }
 
     @Override

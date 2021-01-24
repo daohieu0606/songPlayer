@@ -53,10 +53,12 @@ import java.io.Serializable;
 
 import static com.example.songplayer.utils.Constants.DASH_BOARD;
 import static com.example.songplayer.utils.Constants.DOWNLOAD_SCREEN;
+import static com.example.songplayer.utils.Constants.FAVORITE_SCREEN;
 import static com.example.songplayer.utils.Constants.SCREEN_TYPE;
 import static com.example.songplayer.utils.DrawerCreater.POS_ALBUM;
 import static com.example.songplayer.utils.DrawerCreater.POS_CATEGORY;
 import static com.example.songplayer.utils.DrawerCreater.POS_DOWNLOAD;
+import static com.example.songplayer.utils.DrawerCreater.POS_FAVORITE;
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
 import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
 import static com.example.songplayer.utils.DrawerCreater.POS_PLAYLIST;
@@ -303,12 +305,12 @@ public class MainActivity extends AppCompatActivity implements
     public void onItemSelected(int position) {
 
         switch (position) {
-            case POS_HOME:{
+            case POS_HOME: {
                 Bundle data = new Bundle();
-                data.putString(SCREEN_TYPE,DASH_BOARD);
+                data.putString(SCREEN_TYPE, DASH_BOARD);
                 navController.navigate(R.id.dashboardFragment, data);
             }
-                break;
+            break;
             case POS_MUSIC:
                 navController.navigate(R.id.musicPlayerFragment);
                 break;
@@ -327,12 +329,20 @@ public class MainActivity extends AppCompatActivity implements
                 navController.navigate(R.id.listRelatedFragment, data);
                 break;
             }
-            case POS_DOWNLOAD:{
+            case POS_DOWNLOAD: {
                 Bundle data = new Bundle();
-                data.putString(SCREEN_TYPE,DOWNLOAD_SCREEN);
+                data.putString(SCREEN_TYPE, DOWNLOAD_SCREEN);
                 navController.navigate(R.id.dashboardFragment, data);
+                break;
             }
 
+            case POS_FAVORITE: {
+                Bundle data = new Bundle();
+                data.putString(SCREEN_TYPE, FAVORITE_SCREEN);
+                navController.navigate(R.id.dashboardFragment, data);
+                break;
+
+            }
         }
 
         if (slidingRootNav != null) {
@@ -414,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements
             if (songEntities != null) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(getString(R.string.list_song), (Serializable) songEntities);
-                navController.navigate(R.id.musicPlayerFragment,bundle);
+                navController.navigate(R.id.musicPlayerFragment, bundle);
             } else {
                 Toast.makeText(MainActivity.this, "The album is empty", Toast.LENGTH_SHORT).show();
             }
@@ -427,9 +437,9 @@ public class MainActivity extends AppCompatActivity implements
         MyApplication.database.songDao().getAllSongsOfPlaylist(playlist.getPlaylistID()).observe(this, (songs) -> {
             if (songs != null) {
                 Bundle bundle = new Bundle();
-                bundle.putSerializable(getString(R.string.list_song),(Serializable)songs);
-                navController.navigate(R.id.musicPlayerFragment,bundle);
-            }else{
+                bundle.putSerializable(getString(R.string.list_song), (Serializable) songs);
+                navController.navigate(R.id.musicPlayerFragment, bundle);
+            } else {
                 Toast.makeText(MainActivity.this, "The playlist is empty", Toast.LENGTH_SHORT).show();
             }
         });
@@ -500,27 +510,21 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void toggleFavorite(SongEntity songEntity) {
-        songEntity.setFavorite(!songEntity.isFavorite());
-        MyApplication.database.songDao().getAllSongs().observe(this,(songs)->{
-            if(songs.contains(songEntity)){
+    public void toggleFavorite(SongEntity song) {
 
-                new Thread(() -> {
-                    MyApplication.database.songDao().update(songEntity);
-                }).start();
-
+        song.setFavorite(!song.isFavorite());
+        new Thread(() -> {
+            if(song.isOnline()) {
+                MyApplication.database.songDao().insert(song);
             }else{
-
-                new Thread(()->{
-                    MyApplication.songDatabase.songDAO().insert(songEntity);
-                }).start();
-
+                MyApplication.database.songDao().update(song);
             }
-        });
 
+        }
+        ).start();
     }
 
-    public static NavController getNavController(){
+    public static NavController getNavController() {
         return navController;
     }
 }
