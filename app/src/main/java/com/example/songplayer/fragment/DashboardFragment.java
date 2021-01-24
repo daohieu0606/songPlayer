@@ -204,7 +204,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                         favSongs.add(song);
                     }
                 });
-                songAdapter.appendWithOnlineSongs(favSongs);
+                songAdapter.setSongs(favSongs);
 
 
             } else {

@@ -82,6 +82,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             holder.txtSongName.setText(currentSong.getSongName());
             SongAdapterCallback finalCallback = callback;
 
+            if(!currentSong.isFavorite()){
+                holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.selector_favorite));
+
+            }else{
+                holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.favimagered));
+
+            }
+
             if (!currentSong.isOnline()) {
                 holder.btnDownloadSong.setVisibility(View.INVISIBLE);
                 holder.btnDownloadSong.setEnabled(false);
@@ -112,6 +120,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                     holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.favimagered));
 
                 }
+
                 finalCallback.favoriteASong(currentSong);
 
             });

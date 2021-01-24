@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 
@@ -45,6 +46,15 @@ public class SongAdapter2 extends RecyclerView.Adapter<SongAdapter2.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        SongEntity currentSong = songs.get(position);
+
+        if(!currentSong.isFavorite()){
+            holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.selector_favorite));
+
+        }else{
+            holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.favimagered));
+
+        }
 
         holder.btnDownloadSong.setOnClickListener((v) -> {
             callback.downloadSong(songs.get(position));
@@ -55,10 +65,18 @@ public class SongAdapter2 extends RecyclerView.Adapter<SongAdapter2.ViewHolder> 
         });
 
         holder.btnMarkFavoriteSong.setOnClickListener((v)->{
+
+            if(currentSong.isFavorite()){
+                holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.selector_favorite));
+
+            }else{
+                holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.favimagered));
+
+            }
+
             callback.toggleFavorite(songs.get(position));
         });
 
-        SongEntity currentSong = songs.get(position);
 
         holder.txtSongName.setText(songs.get(position).getSongName());
         holder.itemView.setBackgroundResource(gradients.get(getItemViewType(position)));
