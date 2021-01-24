@@ -9,13 +9,8 @@ import android.util.Log;
 import com.example.songplayer.db.MusicAppRoomDatabase;
 import com.example.songplayer.db.OnlSongDatabase;
 import com.example.songplayer.db.SongDatabase;
-import com.example.songplayer.db.entity.AlbumEntity;
-import com.example.songplayer.db.entity.ListMusicOfAlbum;
-import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.utils.PlaylistRelatedDbHelper;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -44,9 +39,9 @@ public class MyApplication extends Application {
         final boolean firstLoad = preferences.getBoolean(getString(R.string.first_load), true);
 //        if (firstLoad) {
 
-            fistLoadAction();
-            editor.putBoolean(getString(R.string.first_load), false);
-            editor.apply();
+        fistLoadAction();
+        editor.putBoolean(getString(R.string.first_load), false);
+        editor.apply();
 //        }
 
 
@@ -62,32 +57,29 @@ public class MyApplication extends Application {
     // Find all genre and related genre's song and insert it to genre
     // Then load all data from room database
 
-    public void fistLoadAction() {
+    public void  fistLoadAction() {
 
         new Thread(() -> {
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
 
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
                 try {
                     semaphore.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            Log.d(TAG, "fistLoadAction: continue run ");
-            songDatabase.songDAO().getAllSongs().forEach(database.songDao()::insert);
 
-            HashMap<AlbumEntity, List<SongEntity>> albums = listDBHelper.scanAllAlbums();
-            albums.forEach((album, songs) -> {
-                database.albumDAORoom().insert(album);
+            reloadData();
 
-                songs.forEach((song) -> {
-                    database.listMusicOfAlbumDAORoom().insert(new ListMusicOfAlbum(song.getId(), album.getId()));
-                });
-
-
-
-            });
-
+//            HashMap<AlbumEntity, List<SongEntity>> albums = listDBHelper.scanAllAlbums();
+//            albums.forEach((album, songs) -> {
+//                database.albumDAORoom().insert(album);
+//
+//                songs.forEach((song) -> {
+//                    database.listMusicOfAlbumDAORoom().insert(new ListMusicOfAlbum(song.getId(), album.getId()));
+//                });
+//            });
+//
 
 //            HashMap<Genre, List<SongEntity>> genres = listDBHelper.scanAllGenres();
 //            genres.forEach((genre, songs) -> {
@@ -98,7 +90,32 @@ public class MyApplication extends Application {
 
 
     }
+    public static void reloadData(){
+        while (MusicAppRoomDatabase.getSql() == null) { }
 
+
+        MusicAppRoomDatabase.getSql().execSQL("drop table if exists music_playlist_temp");
+
+        MusicAppRoomDatabase.getSql().execSQL("create table if not exists music_playlist_temp(playlistID int,songID int)");
+        MusicAppRoomDatabase.getSql().execSQL("delete from music_playlist_temp");
+        MusicAppRoomDatabase.getSql().execSQL("insert into music_playlist_temp(playlistID ,songID)" +
+                "select ls.playlistID,ls.songID from listMusicOfPlaylist ls");
+
+        // Backup all song in play list
+        MusicAppRoomDatabase.getSql().execSQL("delete  from songs ");
+        songDatabase.songDAO().getAllSongs().forEach(database.songDao()::insert);
+
+        try{
+            MusicAppRoomDatabase.getSql().execSQL("insert into music_playlist(playlistID,songID) " +
+                                                    "select ls.playlistID,ls.songID " +
+                                                    "from music_playlist_temp ls"
+            );
+        }catch (Exception e){
+            Log.d("TESST", "fistLoadAction: "+ e);
+        }
+
+
+    }
     @Override
     public void onTerminate() {
         super.onTerminate();

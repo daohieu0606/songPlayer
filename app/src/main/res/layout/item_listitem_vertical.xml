@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:background="@drawable/gradient1"
+    >
+    <TextView
+        android:id="@+id/txtAlbumName"
+        android:layout_width="0dp"
+        android:paddingHorizontal="5dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:text="Hello"
+        android:layout_weight="1"
+        />
+    <ImageButton
+        android:id="@+id/btnPlayAlbum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_play"
+
+        android:tint="@color/colorAccent"
+        android:contentDescription="@string/play_btn" />
+
+</LinearLayout>

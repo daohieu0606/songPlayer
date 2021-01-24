@@ -34,42 +34,57 @@ import com.example.songplayer.db.entity.SongEntity;
         ListMusicOfPlaylist.class,
         Performer.class,
         Playlist.class
-},version = 5,exportSchema = false)
-public abstract class MusicAppRoomDatabase  extends RoomDatabase{
+}, version = 7, exportSchema = false)
+public abstract class MusicAppRoomDatabase extends RoomDatabase {
     private static MusicAppRoomDatabase INSTANCE = null;
+
     public abstract AlbumDAORoom albumDAORoom();
+
     public abstract ArtistDaoRoom artistDAORoom();
+
     public abstract SongDAORoom songDao();
+
     public abstract GenreDAORoom genreDAORoom();
+
     public abstract ListMusicOfAlbumDAORoom listMusicOfAlbumDAORoom();
+
     public abstract ListMusicOfPlaylistDAORoom listMusicOfPlaylistDAORoom();
+
     public abstract PerformerDAORoom performerDAORoom();
+
     public abstract PlaylistDAORoom playlistDAORoom();
+
+    public static SupportSQLiteDatabase sql;
 
     private static RoomDatabase.Callback callback = new RoomDatabase.Callback() {
         @Override
         public void onOpen(@NonNull SupportSQLiteDatabase db) {
             super.onOpen(db);
-//            db.execSQL("DELETE from songs");
-//            db.execSQL("DELETE from playlists");
-//            db.execSQL("DELETE from albums");
-//            db.execSQL("DELETE from performers");
-//            db.execSQL("DELETE from genres");
-//            db.execSQL("DELETE from artists");
-
+//          db.execSQL("DELETE from songs");
+//          db.execSQL("DELETE from playlists");
+//          db.execSQL("DELETE from albums");
+//          db.execSQL("DELETE from performers");
+//          db.execSQL("DELETE from genres");
+//          db.execSQL("DELETE from artists");
+            sql = db;
 
         }
     };
-    public static MusicAppRoomDatabase getDatabase(final Application app){
-        if(INSTANCE == null){
-            synchronized (MusicAppRoomDatabase.class){
-                if(INSTANCE == null){
-                    INSTANCE = Room.databaseBuilder(app,MusicAppRoomDatabase.class,"MUSIC_APP")
+
+    public static MusicAppRoomDatabase getDatabase(final Application app) {
+        if (INSTANCE == null) {
+            synchronized (MusicAppRoomDatabase.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = Room.databaseBuilder(app, MusicAppRoomDatabase.class, "MUSIC_APP")
                             .fallbackToDestructiveMigration().addCallback(callback).build();
                 }
             }
         }
         return INSTANCE;
+    }
+
+    public static SupportSQLiteDatabase getSql() {
+        return sql;
     }
 
 }

@@ -15,6 +15,9 @@
         <action
             android:id="@+id/action_category"
             app:destination="@id/categoryFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_songListFragment"
+            app:destination="@id/listRelatedFragment" />
     </fragment>
     <fragment
         android:id="@+id/musicPlayerFragment"
@@ -24,4 +27,17 @@
         android:id="@+id/categoryFragment"
         android:name="com.example.songplayer.fragment.CategoryFragment"
         android:label="CategoryFragment" />
+    <fragment
+        android:id="@+id/listRelatedFragment"
+        android:name="com.example.songplayer.fragment.ListFragment"
+        android:label="fragment_song_list" >
+        <action
+            android:id="@+id/action_listRelatedFragment_to_songListFragment"
+            app:destination="@id/songListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/songListFragment"
+        android:name="com.example.songplayer.fragment.SongListFragment"
+        android:label="fragment_song_list"
+        tools:layout="@layout/fragment_song_list" />
 </navigation>

@@ -11,11 +11,12 @@ import com.example.songplayer.utils.UriToString;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.Random;
 
 @Entity(tableName = "albums")
 @TypeConverters({UriToString.class})
-public class AlbumEntity {
+public class AlbumEntity  implements Serializable {
     @ColumnInfo(name = "id")
     @PrimaryKey
     private int id;
@@ -33,7 +34,7 @@ public class AlbumEntity {
 //        this.albumName = albumName;
 //    }
 
-    public AlbumEntity( String albumName) {
+    public AlbumEntity(String albumName) {
         this.albumName = albumName;
         this.id = Math.abs(new Random(System.currentTimeMillis()).nextInt());;
     }

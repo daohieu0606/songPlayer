@@ -29,7 +29,7 @@ public interface SongDAORoom {
     @Query("delete from songs")
     void deleteAll();
 
-    @Query("select s.* from listMusicOfPlaylist l join songs s on l.songID = s.id where playlistID=:playlistID")
+    @Query("select s.* from listMusicOfPlaylist l join songs s on l.songID = s.id where l.playlistID = :playlistID")
     LiveData<List<SongEntity>> getAllSongsOfPlaylist(int playlistID);
 
     @Query("delete from listMusicOfPlaylist where songID= :songID and playlistID= :playlistID")

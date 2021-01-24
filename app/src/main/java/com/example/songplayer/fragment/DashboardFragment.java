@@ -3,7 +3,6 @@ package com.example.songplayer.fragment;
 import android.app.ProgressDialog;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.songplayer.Data.DummyData;
 import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
-import com.example.songplayer.adapter.AlbumAdapter;
+import com.example.songplayer.adapter.AlbumHorizontalAdapter;
 import com.example.songplayer.adapter.SongAdapter;
 import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
 import com.example.songplayer.db.entity.AlbumEntity;
@@ -43,9 +42,10 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     private ArtistViewModel artistViewModel;
 
     private RecyclerView lstAlbums;
-    private AlbumAdapter albumAdapter;
+    private AlbumHorizontalAdapter albumHorizontalAdapter;
     private AlbumViewModel albumViewModel;
     private SongViewModel songViewModel;
+    private View view;
 
     private MyDialog dialog;
 
@@ -91,6 +91,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         setUpSongListView(result);
         setUpAlbumList(result);
 
+        view = result;
         return result;
     }
 
@@ -98,9 +99,9 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         lstAlbums = view.findViewById(R.id.rvAlbums);
 
 //        albumAdapter = new AlbumAdapter(DummyData.albums);
-        albumAdapter = new AlbumAdapter(new ArrayList<>(), this);
+        albumHorizontalAdapter = new AlbumHorizontalAdapter(new ArrayList<>(), this);
 
-        lstAlbums.setAdapter(albumAdapter);
+        lstAlbums.setAdapter(albumHorizontalAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         lstAlbums.setLayoutManager(layoutManager);
 
@@ -111,11 +112,11 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
 
             }
         });
-        albumAdapter.notifyDataSetChanged();
+        albumHorizontalAdapter.notifyDataSetChanged();
 
         albumViewModel.getAllAlbums().observe(getViewLifecycleOwner(), albumEntities -> {
             if (albumEntities != null) {
-                albumAdapter.setAlbum(albumEntities);
+                albumHorizontalAdapter.setAlbum(albumEntities);
             }
         });
     }
@@ -141,16 +142,16 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
 
         songViewModel.getAllOfflineSongs().observe(getViewLifecycleOwner(), songEntities -> {
             if(songEntities!=null){
-                songAdapter.setSongs(songEntities);
+                songAdapter.appendWithOnlineSongs(songEntities);
             }
         });
 
         songViewModel.getAllOnlineSongs().observe(getViewLifecycleOwner(), (songs) -> {
             if (songs != null && songs.size() > 0) {
-                Log.d(TAG, "Onl songs" + songs);
                 songAdapter.appendWithOnlineSongs(songs);
             }
         });
+
     }
 
 
@@ -175,6 +176,8 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                         dialog.setMessage("Download completed");
                         try {
                             Thread.sleep(500);
+                            setUpSongListView(view);
+
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -204,7 +207,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                         dialog.hide();
                     }
 
-                    dialog = new MyDialog(getContext(), "Hello", song, (ArrayList<Playlist>) playlists);
+                    dialog = new MyDialog(getContext(), "Add song to playlist", song, (ArrayList<Playlist>) playlists);
                     dialog.show();
                 } else {
                     Toast.makeText(getContext(), "There are no playlist in your phone", Toast.LENGTH_SHORT).show();
@@ -236,12 +239,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     }
 
     public void displayListSongOfAlbum(AlbumEntity album) {
-        songViewModel.getAllSongOfAlbum(album).observe(getViewLifecycleOwner(), new Observer<List<SongEntity>>() {
-            @Override
-            public void onChanged(List<SongEntity> songEntities) {
-                songAdapter.setSongs(songEntities);
-            }
-        });
+        songViewModel.getAllSongOfAlbum(album).observe(getViewLifecycleOwner(), songEntities -> songAdapter.setSongs(songEntities));
 
     }
 

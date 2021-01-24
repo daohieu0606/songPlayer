@@ -23,7 +23,7 @@ public interface ArtistDaoRoom {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void update(ArtistEntity albumEntity);
 
-    @Query("delete from albums where id = :ID")
+    @Query("delete from artists where id = :ID")
     void delete(int ID);
 
 }

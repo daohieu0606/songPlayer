@@ -14,14 +14,15 @@ import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
-
 
 
     private List<SongEntity> songs;
     private final List<Integer> gradients;
     private final SongAdapterCallback callback;
+    private Semaphore mutex = new Semaphore(1);
 
     public SongAdapter(List<SongEntity> songs, List<Integer> gradients, SongAdapterCallback callback) {
         this.songs = songs;
@@ -29,14 +30,27 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         this.gradients = gradients;
     }
 
-    public void setSongs(List<SongEntity> songs){
-        this.songs = songs;
-        notifyDataSetChanged();
+    public void setSongs(List<SongEntity> songs) {
+        try {
+            mutex.acquire();
+            this.songs = songs;
+            notifyDataSetChanged();
+            mutex.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public void appendWithOnlineSongs(List<SongEntity> onlSongs){
-        this.songs.addAll(onlSongs);
-        this.notifyDataSetChanged();
+    public void appendWithOnlineSongs(List<SongEntity> onlSongs) {
+        try {
+            mutex.acquire();
+            this.songs.addAll(onlSongs);
+            this.notifyDataSetChanged();
+            mutex.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @NonNull
@@ -50,7 +64,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return position%gradients.size();
+        return position % gradients.size();
     }
 
     @Override
@@ -59,29 +73,35 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         final SongEntity currentSong = songs.get(position);
 
 
-
         if (currentSong != null) {
             holder.txtSongName.setText(currentSong.getSongName());
             SongAdapterCallback finalCallback = callback;
 
-            if(!currentSong.isOnline()){
-                holder.btnDownloadSong.setVisibility(View.GONE);
-            }else{
+            if (!currentSong.isOnline()) {
+                holder.btnDownloadSong.setVisibility(View.INVISIBLE);
+                holder.btnDownloadSong.setEnabled(false);
+
+            } else {
+                holder.btnDownloadSong.setEnabled(true);
+                holder.btnDownloadSong.setVisibility(View.VISIBLE);
+
                 holder.btnDownloadSong.setOnClickListener((view) -> {
                     finalCallback.downloadASong(currentSong);
+
+
                 });
             }
 
-            holder.btnMarkFavoriteSong.setOnClickListener((view)->{
+            holder.btnMarkFavoriteSong.setOnClickListener((view) -> {
                 finalCallback.favoriteASong(currentSong);
             });
 
-            holder.btnMoreSongOptions.setOnClickListener((v)->{
+            holder.btnMoreSongOptions.setOnClickListener((v) -> {
                 callback.addToPlaylist(currentSong);
             });
         }
 
-        holder.itemView.setOnClickListener((v)->callback.onClickPlay(songs.get(position)));
+        holder.itemView.setOnClickListener((v) -> callback.onClickPlay(songs.get(position)));
         holder.itemView.setBackgroundResource(gradients.get(getItemViewType(position)));
     }
 

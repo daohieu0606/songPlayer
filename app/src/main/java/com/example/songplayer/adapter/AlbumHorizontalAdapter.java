@@ -14,11 +14,13 @@ import com.example.songplayer.fragment.DashboardFragment;
 
 import java.util.List;
 
-public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> {
+import static com.example.songplayer.utils.Constants.DEFAULT_NAME;
+
+public class AlbumHorizontalAdapter extends RecyclerView.Adapter<AlbumHorizontalAdapter.ViewHolder> {
 
     private List<AlbumEntity> albums;
     private DashboardFragment fragment;
-    public AlbumAdapter(List<AlbumEntity> newItemList, DashboardFragment fragment) {
+    public AlbumHorizontalAdapter(List<AlbumEntity> newItemList, DashboardFragment fragment) {
         this.fragment = fragment;
         this.albums = newItemList;
     }
@@ -26,7 +28,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
 
     @NonNull
     @Override
-    public AlbumAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public AlbumHorizontalAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.item_album, parent, false);
@@ -34,9 +36,15 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AlbumAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AlbumHorizontalAdapter.ViewHolder holder, int position) {
 
-        holder.txtAlbumName.setText(albums.get(position).getAlbumName());
+        String name =albums.get(position).getAlbumName();
+
+        if(name == null || "".trim().equals(name)){
+            name = DEFAULT_NAME;
+        }
+
+        holder.txtAlbumName.setText(name);
         holder.itemView.setOnClickListener((v)->{
             fragment.displayListSongOfAlbum(albums.get(position));
         });

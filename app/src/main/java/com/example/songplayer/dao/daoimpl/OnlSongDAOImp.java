@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.dao.daointerface.SongDAO;
 import com.example.songplayer.db.entity.SongEntity;
 import com.google.firebase.database.DataSnapshot;
@@ -25,7 +26,7 @@ import java.util.concurrent.Semaphore;
 
 public class OnlSongDAOImp implements SongDAO {
 
-
+    private Semaphore mutex = new Semaphore(1);
     private static final String TAG = "TESST";
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("SongEntity");
 
@@ -42,10 +43,19 @@ public class OnlSongDAOImp implements SongDAO {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
+                    SongEntity songEntity;
                     for (DataSnapshot ds : snapshot.getChildren()) {
-                        SongEntity songEntity = ds.getValue(SongEntity.class);
-                        songEntity.setOnline(true);
-                        songEntities.add(songEntity);
+
+                        songEntity = ds.getValue(SongEntity.class);
+                        try {
+                            mutex.acquire();
+                            songEntity.setOnline(true);
+
+                            songEntities.add(songEntity);
+                            mutex.release();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 semaphore.release();
@@ -59,6 +69,7 @@ public class OnlSongDAOImp implements SongDAO {
 
         try {
             semaphore.acquire();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -140,10 +151,17 @@ public class OnlSongDAOImp implements SongDAO {
         // Get the default bucket from a custom FirebaseApp
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a reference to a file from a Google Cloud Storage URI
-        StorageReference gsReference = storage.getReferenceFromUrl("gs://songplayer-82ff0.appspot.com/" + fileName);
+        String url = "gs://songplayer-82ff0.appspot.com/" + fileName;
+
+        StorageReference gsReference = storage.getReferenceFromUrl(url);
 
         gsReference.getFile(musicFile).addOnSuccessListener(taskSnapshot -> {
-            if (handler != null) handler.success();
+            if (handler != null) {
+                handler.success();
+                new Thread(()->{
+                    MyApplication.reloadData();
+                }).start();
+            }
         }).addOnProgressListener(snapshot -> {
             final int percent = (int) (snapshot.getBytesTransferred() * 100.0 / snapshot.getTotalByteCount());
             if (handler != null) handler.updateProgress(percent);
@@ -154,7 +172,6 @@ public class OnlSongDAOImp implements SongDAO {
 
     public interface UIHandler {
         void updateProgress(int percent);
-
         void success();
     }
 

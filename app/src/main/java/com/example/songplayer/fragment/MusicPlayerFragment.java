@@ -30,13 +30,14 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.notification.NotificationHelper;
 import com.example.songplayer.receiver.NotificationReceiver;
 import com.example.songplayer.service.MusicService;
 import com.example.songplayer.viewmodel.SongViewModel;
+
+import java.util.ArrayList;
 
 public class MusicPlayerFragment
         extends Fragment
@@ -85,7 +86,7 @@ public class MusicPlayerFragment
         @Override
         public void run() {
             musicService = MusicService.getInstance();
-            if(musicService == null){
+            if (musicService == null) {
                 handler.postDelayed(this, 20);
             }
         }
@@ -123,29 +124,22 @@ public class MusicPlayerFragment
             }
         });
 
-        MyApplication.database.songDao().getAllSongs().observe(this, songEntities -> {
-            if (musicService == null) return;
-            if (songEntities.size() > 0) {
-                currentSongLiveData.setValue(songEntities.get(0));
-            }
-            musicService.setSongList(songEntities);
-            musicService.preparePlaySyn();
-            handlePlaySong();
-        });
-
-
         NotificationHelper.createNotificationChannel(getContext());
         songControlReceiver = new NotificationReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 super.onReceive(context, intent);
                 String message = intent.getStringExtra(INTENT_FILTER_ACTION);
-                if (message.equals(NotificationHelper.ACTION_PREVIOUS)) {
-                    onTakePreSong();
-                } else if (message.equals(NotificationHelper.ACTION_PLAY)) {
-                    handlePlaySong();
-                } else if (message.equals(NotificationHelper.ACTION_NEXT)) {
-                    onTakeNextSong();
+                switch (message) {
+                    case NotificationHelper.ACTION_PREVIOUS:
+                        onTakePreSong();
+                        break;
+                    case NotificationHelper.ACTION_PLAY:
+                        handlePlaySong();
+                        break;
+                    case NotificationHelper.ACTION_NEXT:
+                        onTakeNextSong();
+                        break;
                 }
             }
         };
@@ -313,16 +307,32 @@ public class MusicPlayerFragment
             Bundle bundle = getArguments();
             Object song = bundle.getSerializable(getString(R.string.SONG));
 
-            if (song != null && getActivity() != null) {
-                currentSongLiveData.setValue((SongEntity) song);
-                playIntent.putExtra(getString(R.string.SONG), (SongEntity) song);
-                getContext().startService(playIntent);
+            if (song == null) {
+                Object listSongsObj = bundle.getSerializable(getString(R.string.list_song));
+                if (listSongsObj != null) {
+                    ArrayList<SongEntity> data = (ArrayList)listSongsObj;
+                    playIntent.putExtra(getString(R.string.list_song), data);
 
+                    if(data.size()>0){
+                        currentSongLiveData.setValue(data.get(0));
+                    }else{
+                        Toast.makeText(getContext(), "There is no songs", Toast.LENGTH_SHORT).show();
+                    }
+                    getContext().startService(playIntent);
+                    handler.postDelayed(runnable, 0);
 
-                handler.postDelayed(runnable, 0);
-
-
+                } else {
+                    Toast.makeText(getContext(), "There is no songs", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                if (getActivity() != null) {
+                    currentSongLiveData.setValue((SongEntity) song);
+                    playIntent.putExtra(getString(R.string.SONG), (SongEntity) song);
+                    getContext().startService(playIntent);
+                    handler.postDelayed(runnable, 0);
+                }
             }
+
 
         }
 
@@ -355,7 +365,7 @@ public class MusicPlayerFragment
         if (!isPlayable()) {
             return;
         }
-        musicService.go();
+        musicService.playMusic();
         sbSongProcess.setMax(getDuration());
         Log.d(TAG, "playSong: duration " + getDuration());
         String durationTimeStr = getTimeStringFromMilliSeconds(getDuration());

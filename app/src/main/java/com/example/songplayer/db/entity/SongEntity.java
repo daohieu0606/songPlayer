@@ -6,8 +6,6 @@ import androidx.room.PrimaryKey;
 
 import com.example.songplayer.model.MySong;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.Serializable;
 import java.util.Random;
 
@@ -42,10 +40,10 @@ public class SongEntity implements MySong, Serializable {
     @ColumnInfo(name = "genre")
     private String genre;
 
-    @ColumnInfo(name = "isFavorite")
+    @ColumnInfo(name = "isFavorite",defaultValue = "0")
     private boolean isFavorite;
 
-    @ColumnInfo(name = "isOnline", defaultValue = "false")
+    @ColumnInfo(name = "isOnline", defaultValue = "0")
     private boolean isOnline;
 
     public boolean isOnline() {

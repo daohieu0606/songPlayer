@@ -22,5 +22,9 @@
     <string name="prev">PREV</string>
     <string name="first_load">FIRST_LOAD</string>
     <string name="MUSIC_SERVICE">MUSIC_SERVICE</string>
+    <string name="play_btn">Play btn</string>
+    <string name="type">TYPE</string>
+    <string name="data">DATA</string>
+    <string name="list_song">LIST_SONG</string>
     <!--    End Drawer Constants-->
 </resources>

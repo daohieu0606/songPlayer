@@ -4,10 +4,11 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.util.Random;
 
 @Entity(tableName = "playlists")
-public class Playlist {
+public class Playlist implements Serializable {
 
     @ColumnInfo(name = "playlistID")
     @PrimaryKey

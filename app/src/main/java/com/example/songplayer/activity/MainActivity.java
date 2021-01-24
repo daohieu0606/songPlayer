@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,19 +34,33 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.DrawerAdapter;
+import com.example.songplayer.adapter.SongAdapter2;
+import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
+import com.example.songplayer.db.entity.AlbumEntity;
+import com.example.songplayer.db.entity.Playlist;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.DashboardFragment;
+import com.example.songplayer.fragment.ListFragment;
 import com.example.songplayer.service.Restarter;
 import com.example.songplayer.service.YourService;
+import com.example.songplayer.utils.Constants;
 import com.example.songplayer.utils.DrawerCreater;
 import com.example.songplayer.viewmodel.SongViewModel;
 import com.yarolegovich.slidingrootnav.SlidingRootNav;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+
+import static com.example.songplayer.utils.DrawerCreater.POS_ALBUM;
 import static com.example.songplayer.utils.DrawerCreater.POS_CATEGORY;
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
 import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
+import static com.example.songplayer.utils.DrawerCreater.POS_PLAYLIST;
 
-public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnItemSelectedListener, DashboardFragment.DashboardCallback {
+public class MainActivity extends AppCompatActivity implements
+        DrawerAdapter.OnItemSelectedListener,
+        DashboardFragment.DashboardCallback,
+        ListFragment.ListFragmentCallback, SongAdapter2.SongAdapterCallback2 {
 
     //VIEW
     private SearchView searchView;
@@ -216,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
-        navController.navigate(R.id.action_play_music);
+//        navController.navigate(R.id.action_play_music);
     }
 
     @Override
@@ -293,6 +308,19 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
             case POS_CATEGORY:
                 navController.navigate(R.id.categoryFragment);
                 break;
+            case POS_PLAYLIST: {
+                Bundle data = new Bundle();
+                data.putString(getString(R.string.type), Constants.PLAYLIST);
+                navController.navigate(R.id.listRelatedFragment, data);
+                break;
+            }
+            case POS_ALBUM: {
+                Bundle data = new Bundle();
+                data.putString(getString(R.string.type), Constants.ALBUM);
+                navController.navigate(R.id.listRelatedFragment, data);
+                break;
+            }
+
         }
 
         if (slidingRootNav != null) {
@@ -365,5 +393,105 @@ public class MainActivity extends AppCompatActivity implements DrawerAdapter.OnI
                         MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE));
         AlertDialog alert = alertBuilder.create();
         alert.show();
+    }
+
+
+    @Override
+    public void playAllList(AlbumEntity albumEntity) {
+        MyApplication.database.songDao().getAllSongsOfAlbum(albumEntity.getId()).observe(this, songEntities -> {
+            if (songEntities != null) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(getString(R.string.list_song), (Serializable) songEntities);
+                navController.navigate(R.id.musicPlayerFragment,bundle);
+            } else {
+                Toast.makeText(MainActivity.this, "The album is empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    @Override
+    public void playAllList(Playlist playlist) {
+        MyApplication.database.songDao().getAllSongsOfPlaylist(playlist.getPlaylistID()).observe(this, (songs) -> {
+            if (songs != null) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(getString(R.string.list_song),(Serializable)songs);
+                navController.navigate(R.id.musicPlayerFragment,bundle);
+            }else{
+                Toast.makeText(MainActivity.this, "The playlist is empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void viewAlbumDetail(AlbumEntity albumEntity) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(getString(R.string.data), albumEntity);
+        navController.navigate(R.id.songListFragment, bundle);
+    }
+
+    @Override
+    public void viewPlaylistDetail(Playlist playlist) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(getString(R.string.data), playlist);
+        navController.navigate(R.id.songListFragment, bundle);
+    }
+
+    @Override
+    public void onClickPlay(SongEntity song) {
+        play(song);
+    }
+
+
+    @Override
+    public void downloadSong(SongEntity songEntity) {
+
+        final ProgressDialog dialog = ProgressDialog.show(
+                this, "Downloading", "Loading...please wait");
+
+        new Thread(() -> {
+
+            try {
+                MyApplication.onlSongDatabase.onlSongDao().downloadFile(songEntity.getSongName(), new OnlSongDAOImp.UIHandler() {
+                    @Override
+                    public void updateProgress(int percent) {
+                        dialog.setMessage("Downloaded " + percent + "%");
+                    }
+
+                    @Override
+                    public void success() {
+                        dialog.setMessage("Download completed");
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+
+                        dialog.dismiss();
+                    }
+                });
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+    }
+
+    @Override
+    public void deleteSongFromList(SongEntity songEntity, Object listObj) {
+        if (listObj instanceof AlbumEntity) {
+            new Thread(() -> {
+                MyApplication.database.songDao().deleteFromAlbum(songEntity.getId(), ((AlbumEntity) listObj).getId());
+            }).start();
+        }
+    }
+
+    @Override
+    public void toggleFavorite(SongEntity songEntity) {
+        songEntity.setFavorite(!songEntity.isFavorite());
+        new Thread(() -> {
+            MyApplication.database.songDao().update(songEntity);
+        }).start();
     }
 }
