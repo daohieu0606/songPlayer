@@ -151,7 +151,7 @@ public class OnlSongDAOImp implements SongDAO {
         // Get the default bucket from a custom FirebaseApp
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a reference to a file from a Google Cloud Storage URI
-        String url = "gs://songplayer-82ff0.appspot.com/" + fileName;
+        String url = "gs://testfirebase-b2bcc.appspot.com/" + fileName;
 
         StorageReference gsReference = storage.getReferenceFromUrl(url);
 
