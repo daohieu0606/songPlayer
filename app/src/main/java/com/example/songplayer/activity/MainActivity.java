@@ -248,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+
                 return true;
             }
 
@@ -515,9 +516,9 @@ public class MainActivity extends AppCompatActivity implements
 
         song.setFavorite(!song.isFavorite());
         new Thread(() -> {
-            if(song.isOnline()) {
+            if (song.isOnline()) {
                 MyApplication.database.songDao().insert(song);
-            }else{
+            } else {
                 MyApplication.database.songDao().update(song);
             }
         }

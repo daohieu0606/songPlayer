@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 
@@ -102,7 +103,17 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             }
 
             holder.btnMarkFavoriteSong.setOnClickListener((view) -> {
+//                holder.btnMarkFavoriteSong
+
+                if(currentSong.isFavorite()){
+                    holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.selector_favorite));
+
+                }else{
+                    holder.btnMarkFavoriteSong.setBackground(MyApplication.getContext().getDrawable(R.drawable.favimagered));
+
+                }
                 finalCallback.favoriteASong(currentSong);
+
             });
 
             holder.btnMoreSongOptions.setOnClickListener((v) -> {

@@ -28,7 +28,7 @@
             android:backgroundTint="@color/colorAccent"
             android:textColor="@color/white"
             android:layout_height="wrap_content"
-            android:text="Button"
+            android:text="Add"
 
             app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName"
             tools:layout_editor_absoluteY="202dp" />

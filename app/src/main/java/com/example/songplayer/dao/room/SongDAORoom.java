@@ -45,5 +45,8 @@ public interface SongDAORoom {
     @Query("select * from songs where genre = :genreName")
     LiveData<List<SongEntity>> getSongsFromGenre(String genreName);
 
+    @Query("select * from songs where songName LIKE '%" + ":term" + "%'")
+    LiveData<List<SongEntity>> searchSongs(String term);
+
 
 }
