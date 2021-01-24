@@ -249,7 +249,17 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
 
     @Override
     public void favoriteASong(SongEntity song) {
+        MyApplication.database.songDao().getAllSongs().observe(getActivity(),(songs)->{
+            song.setFavorite(!song.isFavorite());
+            new Thread(()->{
+                if(songs.contains(song)){
+                    MyApplication.database.songDao().update(song);
+                }else{
+                    MyApplication.database.songDao().insert(song);
+                }
+            }).start();
 
+        });
     }
 
     @Override

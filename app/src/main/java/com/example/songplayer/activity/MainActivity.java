@@ -502,9 +502,22 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void toggleFavorite(SongEntity songEntity) {
         songEntity.setFavorite(!songEntity.isFavorite());
-        new Thread(() -> {
-            MyApplication.database.songDao().update(songEntity);
-        }).start();
+        MyApplication.database.songDao().getAllSongs().observe(this,(songs)->{
+            if(songs.contains(songEntity)){
+
+                new Thread(() -> {
+                    MyApplication.database.songDao().update(songEntity);
+                }).start();
+
+            }else{
+
+                new Thread(()->{
+                    MyApplication.songDatabase.songDAO().insert(songEntity);
+                }).start();
+
+            }
+        });
+
     }
 
     public static NavController getNavController(){
