@@ -18,13 +18,14 @@ import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.adapter.SongAdapter2;
 import com.example.songplayer.db.entity.AlbumEntity;
+import com.example.songplayer.db.entity.Genre;
 import com.example.songplayer.db.entity.Playlist;
 
 public class SongListFragment extends Fragment {
 
     private RecyclerView rvListSong;
     private SongAdapter2 songAdapter;
-
+    private boolean canDeleteSong = false;
     public SongListFragment() {
 
     }
@@ -75,7 +76,7 @@ public class SongListFragment extends Fragment {
                             .getPlaylistID())
                     .observe(getViewLifecycleOwner(), (songs) -> {
 
-                        Log.d("BUGG", "onCreateView: "+ songs);
+                        Log.d("BUGG", "onCreateView: " + songs);
                         if (songAdapter == null) {
                             songAdapter = new SongAdapter2(songs, DummyData.gradients, callback2, data);
                             rvListSong.setAdapter(songAdapter);
@@ -93,6 +94,29 @@ public class SongListFragment extends Fragment {
                         }
                     });
 
+            canDeleteSong = true;
+
+        } else if (data instanceof Genre) {
+            MyApplication.database.songDao().getSongsFromGenre(((Genre) data).getGenreName())
+                    .observe(getViewLifecycleOwner(), (songs) -> {
+
+                        if (songAdapter == null) {
+                            songAdapter = new SongAdapter2(songs, DummyData.gradients, callback2, data);
+                            rvListSong.setAdapter(songAdapter);
+                            rvListSong.setLayoutManager(new LinearLayoutManager(getContext()));
+
+                            rvListSong.addItemDecoration(new RecyclerView.ItemDecoration() {
+                                @Override
+                                public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                                    outRect.bottom = 25;
+                                }
+                            });
+
+                        } else {
+                            songAdapter.setSongs(songs);
+                        }
+
+                    });
         }
 
         return viewResult;

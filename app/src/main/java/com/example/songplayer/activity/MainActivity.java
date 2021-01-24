@@ -343,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements
                 break;
 
             }
+
         }
 
         if (slidingRootNav != null) {
@@ -502,9 +503,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void deleteSongFromList(SongEntity songEntity, Object listObj) {
-        if (listObj instanceof AlbumEntity) {
+        if (listObj instanceof Playlist) {
             new Thread(() -> {
-                MyApplication.database.songDao().deleteFromAlbum(songEntity.getId(), ((AlbumEntity) listObj).getId());
+                MyApplication.database.songDao().deleteFromPlayList(songEntity.getId(), ((Playlist) listObj).getPlaylistID());
             }).start();
         }
     }
@@ -519,7 +520,6 @@ public class MainActivity extends AppCompatActivity implements
             }else{
                 MyApplication.database.songDao().update(song);
             }
-
         }
         ).start();
     }

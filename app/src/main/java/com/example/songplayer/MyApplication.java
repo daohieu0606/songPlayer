@@ -9,7 +9,9 @@ import android.util.Log;
 import com.example.songplayer.db.MusicAppRoomDatabase;
 import com.example.songplayer.db.OnlSongDatabase;
 import com.example.songplayer.db.SongDatabase;
+import com.example.songplayer.db.entity.AlbumEntity;
 import com.example.songplayer.db.entity.Genre;
+import com.example.songplayer.db.entity.ListMusicOfAlbum;
 import com.example.songplayer.utils.PlaylistRelatedDbHelper;
 
 import java.util.HashMap;
@@ -59,7 +61,7 @@ public class MyApplication extends Application {
     // Find all genre and related genre's song and insert it to genre
     // Then load all data from room database
 
-    public void  fistLoadAction() {
+    public void fistLoadAction() {
 
         new Thread(() -> {
 
@@ -93,12 +95,17 @@ public class MyApplication extends Application {
 
 
     }
-    public static void reloadData(){
-        while (MusicAppRoomDatabase.getSql() == null) { }
 
+    public static void reloadData() {
+        while (MusicAppRoomDatabase.getSql() == null) {
+        }
+
+        MusicAppRoomDatabase.getSql().execSQL("drop table if exists song_fav_backup");
+        MusicAppRoomDatabase.getSql().execSQL("create table if not exists song_fav_backup(songID int)");
+        MusicAppRoomDatabase.getSql().execSQL("insert into song_fav_backup(songID) " +
+                "                               select id from songs where isFavorite=1");
 
         MusicAppRoomDatabase.getSql().execSQL("drop table if exists music_playlist_temp");
-
         MusicAppRoomDatabase.getSql().execSQL("create table if not exists music_playlist_temp(playlistID int,songID int)");
         MusicAppRoomDatabase.getSql().execSQL("delete from music_playlist_temp");
         MusicAppRoomDatabase.getSql().execSQL("insert into music_playlist_temp(playlistID ,songID)" +
@@ -106,27 +113,46 @@ public class MyApplication extends Application {
 
         // Backup all song in play list
         MusicAppRoomDatabase.getSql().execSQL("delete  from songs ");
+
         HashMap<Integer, Genre> genreListHashMap = MyApplication.listDBHelper.scanAllGenresV2();
-        genreListHashMap.forEach((song,genre)->{
+        HashMap<Integer, AlbumEntity> albums = MyApplication.listDBHelper.scanAllAlbums();
+
+        albums.forEach((song, album) -> {
+            database.albumDAORoom().insert(album);
+        });
+
+        genreListHashMap.forEach((song, genre) -> {
             database.genreDAORoom().insert(genre);
         });
 
-        songDatabase.songDAO().getAllSongs().forEach((song)->{
+        MusicAppRoomDatabase.getSql().execSQL("delete  from listMusicOfAlbum");
+
+        songDatabase.songDAO().getAllSongs().forEach((song) -> {
             song.setGenre(genreListHashMap.get(song.getId()).getGenreName());
             database.songDao().insert(song);
+
+
+            database.listMusicOfAlbumDAORoom()
+                    .insert(new ListMusicOfAlbum(song.getId(), albums.get(song.getId()).getId()));
         });
 
-        try{
+        try {
             MusicAppRoomDatabase.getSql().execSQL("insert into listMusicOfPlaylist(playlistID,songID) " +
-                                                    "select ls.playlistID,ls.songID " +
-                                                    "from music_playlist_temp ls"
+                    "select ls.playlistID,ls.songID " +
+                    "from music_playlist_temp ls"
             );
-        }catch (Exception e){
-            Log.d("TESST", "fistLoadAction: "+ e);
+
+
+            MusicAppRoomDatabase.getSql().execSQL("update songs set isFavorite=1 where id in (select songID from song_fav_backup)"
+            );
+
+        } catch (Exception e) {
+            Log.d("TESST", "fistLoadAction: " + e);
         }
 
 
     }
+
     @Override
     public void onTerminate() {
         super.onTerminate();

@@ -6,6 +6,7 @@ import androidx.room.Entity;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity(tableName = "genres",primaryKeys = {
@@ -13,7 +14,7 @@ import java.util.Objects;
         "genreName"
 }
 )
-public class Genre {
+public class Genre  implements Serializable {
 
     @ColumnInfo(name = "genreID")
     private int genreID;

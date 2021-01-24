@@ -200,7 +200,7 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                 ArrayList<SongEntity> favSongs = new ArrayList<>();
 
                 songEntities.forEach((song) -> {
-                    if (song.isOnline()) {
+                    if (song.isFavorite()) {
                         favSongs.add(song);
                     }
                 });

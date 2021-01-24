@@ -24,13 +24,12 @@ import java.util.Arrays;
 public class DrawerCreater {
 
     public static final int POS_HOME = 0;
-    public static final int POS_CATEGORY = 1;
-    public static final int POS_FAVORITE = 2;
-    public static final int POS_DOWNLOAD = 3;
-    public static final int POS_PLAYLIST = 4;
-    public static final int POS_ALBUM = 5;
-    public static final int POS_MORE_APP = 6;
-    public static final int POS_MUSIC = 7;
+    public static final int POS_FAVORITE = 1;
+    public static final int POS_DOWNLOAD = 2;
+    public static final int POS_PLAYLIST = 3;
+    public static final int POS_ALBUM = 4;
+    public static final int POS_CATEGORY = 5;
+    public static final int POS_MUSIC = 6;
 
     private Context context;
     private Drawable[] screenIcons;
@@ -72,28 +71,27 @@ public class DrawerCreater {
                 .withSelectedTextTint(getColor(R.color.accent_material_dark));
     }
 
-    private DrawerItem createItemFor(int position,String topTitle) {
-        return new SimpleItemWithTopPart(screenIcons[position], screenTitles[position],topTitle)
+    private DrawerItem createItemFor(int position, String topTitle) {
+        return new SimpleItemWithTopPart(screenIcons[position], screenTitles[position], topTitle)
                 .withIconTint(getColor(R.color.white))
                 .withTextTint(getColor(R.color.white))
                 .withSelectedIconTint(getColor(R.color.accent_material_dark))
                 .withSelectedTextTint(getColor(R.color.accent_material_dark));
     }
 
-    private  int getColor(int id) {
+    private int getColor(int id) {
         return context.getColor(id);
     }
 
-    public SlidingRootNav createDrawer(){
+    public SlidingRootNav createDrawer() {
 
         screenTitles = new String[]{
                 context.getString(R.string.home),
-                context.getString(R.string.category),
                 context.getString(R.string.favorite),
                 context.getString(R.string.download),
                 context.getString(R.string.share_app),
                 context.getString(R.string.rate_app),
-                context.getString(R.string.more_app),
+                context.getString(R.string.category),
                 context.getString(R.string.music_app)
         };
 
@@ -101,13 +99,12 @@ public class DrawerCreater {
 
         DrawerAdapter adapter = new DrawerAdapter(Arrays.asList(
                 createItemFor(POS_HOME).setChecked(true),
-                createItemFor(POS_CATEGORY),
                 createItemFor(POS_FAVORITE),
                 createItemFor(POS_DOWNLOAD),
-                createItemFor(POS_PLAYLIST,"List"),
+                createItemFor(POS_PLAYLIST, "List"),
                 createItemFor(POS_ALBUM),
-                createItemFor(POS_MORE_APP),
-                createItemFor(POS_MUSIC,"Music player")
+                createItemFor(POS_CATEGORY),
+                createItemFor(POS_MUSIC, "Music player")
 
         ));
 
@@ -123,7 +120,7 @@ public class DrawerCreater {
 
         adapter.setListener((DrawerAdapter.OnItemSelectedListener) context);
 
-        RecyclerView menu = ((MainActivity)context).getMenu();
+        RecyclerView menu = ((MainActivity) context).getMenu();
 
         menu.setNestedScrollingEnabled(false);
         menu.setLayoutManager(new LinearLayoutManager(context));

@@ -41,4 +41,9 @@ public interface SongDAORoom {
 
     @Query("delete from listMusicOfAlbum where songID= :songID and albumID=:albumID")
     void deleteFromAlbum(int songID, int albumID);
+
+    @Query("select * from songs where genre = :genreName")
+    LiveData<List<SongEntity>> getSongsFromGenre(String genreName);
+
+
 }

@@ -17,8 +17,10 @@ import java.util.List;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
     private List<Genre> categories;
     private List<Integer> colors = DummyData.gradients;
-    public CategoryAdapter(List<Genre> newItemList) {
-        categories = newItemList;
+    private CategoryCallback categoryCallback;
+    public CategoryAdapter(List<Genre> newItemList, CategoryCallback categoryCallback) {
+        this.categories = newItemList;
+        this.categoryCallback = categoryCallback;
     }
 
 
@@ -35,6 +37,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         if (categories != null) {
             holder.itemView.setBackgroundResource(colors.get(position%colors.size()));
             holder.textCategory.setText(categories.get(position).getGenreName());
+
+            holder.itemView.setOnClickListener((v)->{
+                categoryCallback.click(categories.get(position));
+            });
+
         }
     }
 
@@ -55,5 +62,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             super(itemView);
             textCategory = itemView.findViewById(R.id.categoryName);
         }
+    }
+
+    public interface CategoryCallback {
+        void click(Genre genre);
     }
 }

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -116,6 +117,31 @@ public class ListFragment extends Fragment implements ListItemAdapter.AlbumVerti
     @Override
     public void viewPlaylistDetail(Object listItem) {
         callback.viewPlaylistDetail((Playlist) listItem);
+    }
+
+    @Override
+    public void deletePlaylistItem(Object listItem) {
+
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogCustom).create();
+        alertDialog.setTitle("Alert Dialog");
+        alertDialog.setMessage("Delete this playlist ?");
+
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> {
+            new Thread(()->{
+                MyApplication
+                        .database
+                        .playlistDAORoom()
+                        .delete(((Playlist) listItem).getPlaylistID());
+            }).start();
+            dialog.dismiss();
+        });
+
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE,"CANCEL", (d,w)->{
+            d.dismiss();
+        });
+
+        alertDialog.show();
+
     }
 
     public interface ListFragmentCallback {

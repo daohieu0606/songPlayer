@@ -85,14 +85,19 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                 holder.btnDownloadSong.setVisibility(View.INVISIBLE);
                 holder.btnDownloadSong.setEnabled(false);
 
+                holder.btnMarkFavoriteSong.setVisibility(View.VISIBLE);
+                holder.btnMarkFavoriteSong.setEnabled(true);
+
             } else {
                 holder.btnDownloadSong.setEnabled(true);
                 holder.btnDownloadSong.setVisibility(View.VISIBLE);
 
+                holder.btnMarkFavoriteSong.setVisibility(View.INVISIBLE);
+                holder.btnMarkFavoriteSong.setVisibility(View.GONE);
+                holder.btnMarkFavoriteSong.setEnabled(false);
+
                 holder.btnDownloadSong.setOnClickListener((view) -> {
                     finalCallback.downloadASong(currentSong);
-
-
                 });
             }
 

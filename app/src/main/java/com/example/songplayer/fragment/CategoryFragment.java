@@ -8,27 +8,26 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.songplayer.R;
+import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.adapter.CategoryAdapter;
 import com.example.songplayer.db.entity.Genre;
-import com.example.songplayer.viewmodel.AlbumViewModel;
 import com.example.songplayer.viewmodel.GenreViewModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link CategoryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CategoryFragment extends Fragment {
+public class CategoryFragment extends Fragment implements CategoryAdapter.CategoryCallback {
 
 
     private RecyclerView recyclerView;
@@ -74,7 +73,7 @@ public class CategoryFragment extends Fragment {
         recyclerView = view.findViewById(R.id.rvCategories);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         GenreViewModel genreViewModel = new GenreViewModel(getActivity().getApplication());
-        adapter= new CategoryAdapter(genreViewModel.getAllGenres().getValue()==null?new ArrayList():genreViewModel.getAllGenres().getValue());
+        adapter= new CategoryAdapter(genreViewModel.getAllGenres().getValue()==null?new ArrayList():genreViewModel.getAllGenres().getValue(),CategoryFragment.this);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
@@ -82,14 +81,17 @@ public class CategoryFragment extends Fragment {
                 outRect.bottom = 20;
             }
         });
-        genreViewModel.getAllGenres().observe(getViewLifecycleOwner(), new Observer<List<Genre>>() {
-            @Override
-            public void onChanged(List<Genre> genres) {
-                adapter.setCategories(genres);
-            }
-        });
+        genreViewModel.getAllGenres().observe(getViewLifecycleOwner(), genres -> adapter.setCategories(genres));
 
         return view;
 
+    }
+
+
+    @Override
+    public void click(Genre genre) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(getString(R.string.data), (Serializable) genre);
+        MainActivity.getNavController().navigate(R.id.songListFragment, bundle);
     }
 }

@@ -57,6 +57,17 @@ public class ListItemAdapter<E> extends RecyclerView.Adapter<ListItemAdapter.Vie
                 name = DEFAULT_NAME;
             }
             holder.txtListName.setText(name);
+
+
+
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    callback.deletePlaylistItem(listItems.get(position) );
+
+                    return false;
+                }
+            });
         } else if (listItems.get(position) instanceof AlbumEntity) {
             String name = ((AlbumEntity) listItems.get(position)).getAlbumName();
 
@@ -92,5 +103,6 @@ public class ListItemAdapter<E> extends RecyclerView.Adapter<ListItemAdapter.Vie
         void playAllList(E listItem);
         void viewAlbumDetail(E listItem);
         void viewPlaylistDetail(E listItem);
+        void deletePlaylistItem(E listItem);
     }
 }

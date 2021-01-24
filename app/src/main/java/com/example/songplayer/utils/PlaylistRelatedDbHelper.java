@@ -106,15 +106,12 @@ public class PlaylistRelatedDbHelper {
         return result;
     }
 
-    public HashMap<AlbumEntity, List<SongEntity>> scanAllAlbums() {
 
-        HashMap<AlbumEntity, List<SongEntity>> result = new HashMap<>();
-        List<SongEntity> songEntities = new ArrayList<>();
+    public HashMap<Integer, AlbumEntity> scanAllAlbums() {
+
+        HashMap<Integer, AlbumEntity> result = new HashMap<>();
         String[] songProjection = {
                 MediaStore.Audio.Media._ID, //0
-                MediaStore.Audio.Media.DISPLAY_NAME, // 1
-                MediaStore.Audio.Media.SIZE, // 3
-                MediaStore.Audio.Artists.ARTIST, // 5
                 MediaStore.Audio.Albums.ALBUM, //6,
                 MediaStore.Audio.Albums._ID // 7
 
@@ -125,28 +122,13 @@ public class PlaylistRelatedDbHelper {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            SongEntity songEntity = new SongEntity();
 
-            songEntity.setId(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)));
-            songEntity.setSongName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
-            songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)));
-            songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
 
-            Uri contentUri = ContentUris.withAppendedId(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());
-            songEntity.setUriString(contentUri.toString());
+            Integer id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
 
-            songEntities.add(songEntity);
-
-            AlbumEntity album = new AlbumEntity(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)));
-
-            if (!result.containsKey(album)) {
-                result.put(album, new ArrayList<>());
-            }
-
-            result.get(album).add(songEntity);
+            result.put(id, new AlbumEntity(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM))
+            ));
 
             cursor.moveToNext();
         }

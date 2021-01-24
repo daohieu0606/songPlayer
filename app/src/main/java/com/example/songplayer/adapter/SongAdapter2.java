@@ -22,7 +22,6 @@ public class SongAdapter2 extends RecyclerView.Adapter<SongAdapter2.ViewHolder> 
     private final List<Integer> gradients;
     private final SongAdapterCallback2 callback;
     private Object listItem;
-
     public SongAdapter2(List<SongEntity> songs, List<Integer> gradients, SongAdapterCallback2 callback, Object listItem) {
         this.songs = songs;
         this.callback = callback;
@@ -68,9 +67,15 @@ public class SongAdapter2 extends RecyclerView.Adapter<SongAdapter2.ViewHolder> 
             holder.btnDownloadSong.setVisibility(View.INVISIBLE);
             holder.btnDownloadSong.setEnabled(false);
 
+            holder.btnMarkFavoriteSong.setVisibility(View.VISIBLE);
+            holder.btnMarkFavoriteSong.setEnabled(true);
+
         } else {
             holder.btnDownloadSong.setEnabled(true);
             holder.btnDownloadSong.setVisibility(View.VISIBLE);
+
+            holder.btnMarkFavoriteSong.setVisibility(View.GONE);
+            holder.btnMarkFavoriteSong.setEnabled(false);
 
             holder.btnDownloadSong.setOnClickListener((view) -> {
                 callback.downloadSong(currentSong);
