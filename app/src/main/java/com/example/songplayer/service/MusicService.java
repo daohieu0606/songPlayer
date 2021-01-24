@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.RepeatMode;
@@ -118,6 +119,7 @@ public class MusicService
             songPlayer.reset();
             try {
                 if (currentSong.isOnline()) {
+                    Log.d(TAG, "preparePlayASyn: "+currentSong.getUriString());
                     songPlayer.setDataSource(currentSong.getUriString());
                 } else {
                     songPlayer.setDataSource(getApplicationContext(), Uri.parse(currentSong.getUriString()));
@@ -187,12 +189,13 @@ public class MusicService
     public void prepareSourceForPlaying(SongEntity song) {
 
         if (song.isOnline()) {
+
             FirebaseStorage storage = FirebaseStorage.getInstance();
             storage.getReference().child(song.getSongName()).getDownloadUrl().addOnSuccessListener(uri -> {
-                song.setUriString(uri.toString());
-                setCurrentSong(song);
+                setCurrentSong(song) ;
+            song.setUriString(uri.toString());
                 preparePlayASyn();
-            }).addOnFailureListener(e -> Log.d(TAG, "onFailure: "));
+            }).addOnFailureListener(e -> Log.d(TAG, "onFailure: "+e));
 
         } else {
             setCurrentSong(song);
@@ -201,7 +204,7 @@ public class MusicService
     }
 
     public void playMusic() {
-//        try{
+        try{
         songPlayer.start();
 
         Notification not = NotificationHelper.createNotification(getApplicationContext()
@@ -211,10 +214,10 @@ public class MusicService
                 , isPng());
 
         startForeground(NOTIFY_ID, not);
-//        }catch (Exception e){
-//            Log.d(TAG, "playMusic: "+ e);
-//            Toast.makeText(MyApplication.getContext(), "Cannot play this song", Toast.LENGTH_SHORT).show();
-//        }
+        }catch (Exception e){
+            Log.d(TAG, "playMusic: "+ e);
+            Toast.makeText(MyApplication.getContext(), "Cannot play this song", Toast.LENGTH_SHORT).show();
+        }
 
 
     }
