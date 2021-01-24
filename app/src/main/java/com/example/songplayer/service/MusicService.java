@@ -37,6 +37,15 @@ public class MusicService
     private List<SongEntity> songEntities;
     private SongEntity currentSong;
 
+    public int getStartID() {
+        return startID;
+    }
+
+    public void setStartID(int startID) {
+        this.startID = startID;
+    }
+
+    private int startID;
     boolean isShuffle;
     private RepeatMode repeatMode;
 
@@ -153,7 +162,7 @@ public class MusicService
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
+        setStartID(startId);
         Object object = intent.getSerializableExtra(getString(R.string.SONG));
 
 
@@ -312,6 +321,11 @@ public class MusicService
         stopForeground(true);
 
         super.onDestroy();
+    }
+
+    public void stop(){
+        pausePlayer();
+        stopSelf(startID);
     }
 
 
