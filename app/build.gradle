@@ -66,6 +66,7 @@ dependencies {
     //LIB
     implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever-core:1.0.15'
     implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever-native:1.0.15'
+    implementation 'com.google.android.material:material:1.0.0'
 
     //RX Java
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'

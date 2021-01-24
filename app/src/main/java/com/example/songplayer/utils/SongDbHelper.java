@@ -33,6 +33,7 @@ public class SongDbHelper {
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.DISPLAY_NAME,
 //                MediaStore.Audio.Media.RELATIVE_PATH,
+                MediaStore.Audio.Media.DATA,
                 MediaStore.Audio.Media.SIZE,
                 MediaStore.Audio.Artists.ARTIST,
                 MediaStore.Audio.Albums.ALBUM,
@@ -56,7 +57,6 @@ public class SongDbHelper {
             songEntity.setId(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)));
 
             songEntity.setSongName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)));
-//            songEntity.setPath(cursor.getString(2));
             songEntity.setSize(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)));
             songEntity.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST)));
             songEntity.setGenre(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.GENRE)));
@@ -67,6 +67,8 @@ public class SongDbHelper {
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songEntity.getId());
             songEntity.setUriString(contentUri.toString());
 
+            songEntity.setPath(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
+
             songEntities.add(songEntity);
             cursor.moveToNext();
         }
@@ -74,6 +76,20 @@ public class SongDbHelper {
         return songEntities;
     }
 
+//    public String getRealPathFromURI(Context context, Uri contentUri) {
+//        Cursor cursor = null;
+//        try {
+//            String[] proj = { MediaStore.Audio.Media.DATA };
+//            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+//            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+//            cursor.moveToFirst();
+//            return cursor.getString(column_index);
+//        } finally {
+//            if (cursor != null) {
+//                cursor.close();
+//            }
+//        }
+//    }
     public void insert(SongEntity songEntity) {
         ContentResolver resolver = application.getContentResolver();
 

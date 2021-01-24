@@ -51,8 +51,12 @@ import com.yarolegovich.slidingrootnav.SlidingRootNav;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 
+import static com.example.songplayer.utils.Constants.DASH_BOARD;
+import static com.example.songplayer.utils.Constants.DOWNLOAD_SCREEN;
+import static com.example.songplayer.utils.Constants.SCREEN_TYPE;
 import static com.example.songplayer.utils.DrawerCreater.POS_ALBUM;
 import static com.example.songplayer.utils.DrawerCreater.POS_CATEGORY;
+import static com.example.songplayer.utils.DrawerCreater.POS_DOWNLOAD;
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
 import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
 import static com.example.songplayer.utils.DrawerCreater.POS_PLAYLIST;
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements
     private SongViewModel songViewModel;
     private SlidingRootNav slidingRootNav;
     private NavHostFragment navHostFragment;
-    private NavController navController;
+    private static NavController navController;
     //DATA
     private static final String TAG = "TESST";
     private Bundle savedInstance;
@@ -299,8 +303,11 @@ public class MainActivity extends AppCompatActivity implements
     public void onItemSelected(int position) {
 
         switch (position) {
-            case POS_HOME:
-                navController.navigate(R.id.dashboardFragment);
+            case POS_HOME:{
+                Bundle data = new Bundle();
+                data.putString(SCREEN_TYPE,DASH_BOARD);
+                navController.navigate(R.id.dashboardFragment, data);
+            }
                 break;
             case POS_MUSIC:
                 navController.navigate(R.id.musicPlayerFragment);
@@ -319,6 +326,11 @@ public class MainActivity extends AppCompatActivity implements
                 data.putString(getString(R.string.type), Constants.ALBUM);
                 navController.navigate(R.id.listRelatedFragment, data);
                 break;
+            }
+            case POS_DOWNLOAD:{
+                Bundle data = new Bundle();
+                data.putString(SCREEN_TYPE,DOWNLOAD_SCREEN);
+                navController.navigate(R.id.dashboardFragment, data);
             }
 
         }
@@ -493,5 +505,9 @@ public class MainActivity extends AppCompatActivity implements
         new Thread(() -> {
             MyApplication.database.songDao().update(songEntity);
         }).start();
+    }
+
+    public static NavController getNavController(){
+        return navController;
     }
 }

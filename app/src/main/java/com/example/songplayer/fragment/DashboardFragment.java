@@ -3,9 +3,11 @@ package com.example.songplayer.fragment;
 import android.app.ProgressDialog;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.songplayer.Data.DummyData;
 import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
+import com.example.songplayer.activity.MainActivity;
 import com.example.songplayer.adapter.AlbumHorizontalAdapter;
 import com.example.songplayer.adapter.SongAdapter;
 import com.example.songplayer.dao.daoimpl.OnlSongDAOImp;
@@ -29,10 +32,16 @@ import com.example.songplayer.utils.MyDialog;
 import com.example.songplayer.viewmodel.AlbumViewModel;
 import com.example.songplayer.viewmodel.ArtistViewModel;
 import com.example.songplayer.viewmodel.SongViewModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.songplayer.utils.Constants.DASH_BOARD;
+import static com.example.songplayer.utils.Constants.DOWNLOAD_SCREEN;
+import static com.example.songplayer.utils.Constants.SCREEN_TYPE;
 
 public class DashboardFragment extends Fragment implements SongAdapter.SongAdapterCallback {
 
@@ -48,6 +57,9 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     private View view;
 
     private MyDialog dialog;
+    private String screenType;
+    private TextView screenTitle;
+    private FloatingActionButton btnPlayAll;
 
     public DashboardFragment() {
     }
@@ -55,6 +67,10 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getArguments() == null) {
+            setArguments(new Bundle());
+        }
 
         albumViewModel = new ViewModelProvider(getActivity(), new ViewModelProvider.Factory() {
             @NonNull
@@ -88,10 +104,31 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View result = inflater.inflate(R.layout.fragment_dashboard, container, false);
+
+        screenTitle = result.findViewById(R.id.screenTitle);
+        btnPlayAll = result.findViewById(R.id.fab);
+
+        screenType = getArguments().getString(SCREEN_TYPE) == null ? DASH_BOARD :
+                getArguments().getString(SCREEN_TYPE);
+
+        if (screenType.equals(DASH_BOARD)) {
+            setUpAlbumList(result);
+            screenTitle.setText("All music");
+        } else if (screenType.equals(DOWNLOAD_SCREEN)) {
+            screenTitle.setText("Downloads");
+        }
+
         setUpSongListView(result);
-        setUpAlbumList(result);
 
         view = result;
+
+        btnPlayAll.setOnClickListener((v)->{
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(getString(R.string.list_song), (Serializable) songAdapter.getSongs());
+            MainActivity.getNavController().navigate(R.id.musicPlayerFragment, bundle);
+        });
+
+
         return result;
     }
 
@@ -141,16 +178,36 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         songAdapter.notifyDataSetChanged();
 
         songViewModel.getAllOfflineSongs().observe(getViewLifecycleOwner(), songEntities -> {
-            if(songEntities!=null){
-                songAdapter.appendWithOnlineSongs(songEntities);
+
+            if (screenType.equals(DOWNLOAD_SCREEN)) {
+                ArrayList<SongEntity> downloadSongs = new ArrayList<>();
+
+                songEntities.forEach((song) -> {
+
+                    if (song.getPath() != null &&
+                            song.getPath()
+                                    .toLowerCase()
+                                    .contains(Environment.DIRECTORY_DOWNLOADS.toLowerCase())) {
+                        downloadSongs.add(song);
+                    }
+                });
+                songAdapter.appendWithOnlineSongs(downloadSongs);
+
+            } else {
+                if (songEntities != null) {
+                    songAdapter.appendWithOnlineSongs(songEntities);
+                }
             }
+
         });
 
-        songViewModel.getAllOnlineSongs().observe(getViewLifecycleOwner(), (songs) -> {
-            if (songs != null && songs.size() > 0) {
-                songAdapter.appendWithOnlineSongs(songs);
-            }
-        });
+        if (screenType.equals(DASH_BOARD)) {
+            songViewModel.getAllOnlineSongs().observe(getViewLifecycleOwner(), (songs) -> {
+                if (songs != null && songs.size() > 0) {
+                    songAdapter.appendWithOnlineSongs(songs);
+                }
+            });
+        }
 
     }
 
@@ -181,8 +238,6 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-
-
                         dialog.dismiss();
                     }
                 });
@@ -242,5 +297,4 @@ public class DashboardFragment extends Fragment implements SongAdapter.SongAdapt
         songViewModel.getAllSongOfAlbum(album).observe(getViewLifecycleOwner(), songEntities -> songAdapter.setSongs(songEntities));
 
     }
-
 }

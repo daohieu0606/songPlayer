@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.example.songplayer.MyApplication;
 import com.example.songplayer.R;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.RepeatMode;
@@ -165,6 +164,7 @@ public class MusicService
         if (object != null) {
             SongEntity song = (SongEntity) object;
             prepareSourceForPlaying(song);
+
             playMusic();
 
         } else {
@@ -201,19 +201,20 @@ public class MusicService
     }
 
     public void playMusic() {
-        try{
-            songPlayer.start();
+//        try{
+        songPlayer.start();
 
-            Notification not = NotificationHelper.createNotification(getApplicationContext()
-                    , currentSong
-                    , songEntities.indexOf(currentSong)
-                    , songEntities.size()
-                    , isPng());
+        Notification not = NotificationHelper.createNotification(getApplicationContext()
+                , currentSong
+                , songEntities.indexOf(currentSong)
+                , songEntities.size()
+                , isPng());
 
-            startForeground(NOTIFY_ID, not);
-        }catch (Exception e){
-            Toast.makeText(MyApplication.getContext(), "Cannot play this song", Toast.LENGTH_SHORT).show();
-        }
+        startForeground(NOTIFY_ID, not);
+//        }catch (Exception e){
+//            Log.d(TAG, "playMusic: "+ e);
+//            Toast.makeText(MyApplication.getContext(), "Cannot play this song", Toast.LENGTH_SHORT).show();
+//        }
 
 
     }

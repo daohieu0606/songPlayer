@@ -106,7 +106,7 @@ public class MyApplication extends Application {
         songDatabase.songDAO().getAllSongs().forEach(database.songDao()::insert);
 
         try{
-            MusicAppRoomDatabase.getSql().execSQL("insert into music_playlist(playlistID,songID) " +
+            MusicAppRoomDatabase.getSql().execSQL("insert into listMusicOfPlaylist(playlistID,songID) " +
                                                     "select ls.playlistID,ls.songID " +
                                                     "from music_playlist_temp ls"
             );

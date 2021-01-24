@@ -306,7 +306,6 @@ public class MusicPlayerFragment
             playIntent = new Intent(getActivity(), MusicService.class);
             Bundle bundle = getArguments();
             Object song = bundle.getSerializable(getString(R.string.SONG));
-
             if (song == null) {
                 Object listSongsObj = bundle.getSerializable(getString(R.string.list_song));
                 if (listSongsObj != null) {

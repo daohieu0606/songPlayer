@@ -42,6 +42,10 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     }
 
+    public List<SongEntity> getSongs() {
+        return songs;
+    }
+
     public void appendWithOnlineSongs(List<SongEntity> onlSongs) {
         try {
             mutex.acquire();

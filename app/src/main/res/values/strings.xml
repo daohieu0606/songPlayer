@@ -26,5 +26,6 @@
     <string name="type">TYPE</string>
     <string name="data">DATA</string>
     <string name="list_song">LIST_SONG</string>
+    <string name="all_music">All music</string>
     <!--    End Drawer Constants-->
 </resources>

@@ -59,8 +59,23 @@ public class SongAdapter2 extends RecyclerView.Adapter<SongAdapter2.ViewHolder> 
             callback.toggleFavorite(songs.get(position));
         });
 
+        SongEntity currentSong = songs.get(position);
+
         holder.txtSongName.setText(songs.get(position).getSongName());
         holder.itemView.setBackgroundResource(gradients.get(getItemViewType(position)));
+
+        if (!currentSong.isOnline()) {
+            holder.btnDownloadSong.setVisibility(View.INVISIBLE);
+            holder.btnDownloadSong.setEnabled(false);
+
+        } else {
+            holder.btnDownloadSong.setEnabled(true);
+            holder.btnDownloadSong.setVisibility(View.VISIBLE);
+
+            holder.btnDownloadSong.setOnClickListener((view) -> {
+                callback.downloadSong(currentSong);
+            });
+        }
 
     }
 
