@@ -84,7 +84,7 @@ public class PlaylistRelatedDbHelper {
         String[] songProjection = {
                 MediaStore.Audio.Genres.Members.AUDIO_ID,
                 MediaStore.Audio.Genres.Members.GENRE_ID,
-                MediaStore.Audio.Genres.Members.DISPLAY_NAME
+                MediaStore.Audio.Genres.Members.GENRE
         };
 
         ContentResolver resolver = application.getContentResolver();
@@ -94,10 +94,12 @@ public class PlaylistRelatedDbHelper {
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.AUDIO_ID));
-
+            String name =  cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.GENRE));
+            if(name == null || "".equals(name.trim())){
+                name = "Unknown name";
+            }
             Genre genre = new Genre(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.GENRE_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.DISPLAY_NAME)));
-
+                name );
             result.put(id, genre);
             cursor.moveToNext();
         }

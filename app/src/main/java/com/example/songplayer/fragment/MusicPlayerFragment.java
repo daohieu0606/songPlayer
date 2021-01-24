@@ -346,6 +346,8 @@ public class MusicPlayerFragment
     @Override
     public void onDestroy() {
         getContext().unregisterReceiver(songControlReceiver);
+        getContext().stopService(playIntent);
+
         musicService = null;
         super.onDestroy();
     }

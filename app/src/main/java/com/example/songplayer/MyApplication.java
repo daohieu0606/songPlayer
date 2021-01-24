@@ -101,6 +101,7 @@ public class MyApplication extends Application {
         }
 
         MusicAppRoomDatabase.getSql().execSQL("drop table if exists song_fav_backup");
+
         MusicAppRoomDatabase.getSql().execSQL("create table if not exists song_fav_backup(songID int)");
         MusicAppRoomDatabase.getSql().execSQL("insert into song_fav_backup(songID) " +
                 "                               select id from songs where isFavorite=1");
@@ -121,6 +122,7 @@ public class MyApplication extends Application {
             database.albumDAORoom().insert(album);
         });
 
+        MusicAppRoomDatabase.getSql().execSQL("delete from genres");
         genreListHashMap.forEach((song, genre) -> {
             database.genreDAORoom().insert(genre);
         });
