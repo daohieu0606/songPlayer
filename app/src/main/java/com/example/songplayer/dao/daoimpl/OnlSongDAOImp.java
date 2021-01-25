@@ -46,17 +46,21 @@ public class OnlSongDAOImp implements SongDAO {
                 if (snapshot.exists()) {
                     SongEntity songEntity;
                     for (DataSnapshot ds : snapshot.getChildren()) {
-
-                        songEntity = ds.getValue(SongEntity.class);
                         try {
-                            mutex.acquire();
-                            songEntity.setOnline(true);
+                            songEntity = ds.getValue(SongEntity.class);
+                            try {
+                                mutex.acquire();
+                                songEntity.setOnline(true);
 
-                            songEntities.add(songEntity);
-                            mutex.release();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                                songEntities.add(songEntity);
+                                mutex.release();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        } catch (Exception e) {
+
                         }
+
                     }
                 }
                 semaphore.release();
@@ -159,7 +163,7 @@ public class OnlSongDAOImp implements SongDAO {
         gsReference.getFile(musicFile).addOnSuccessListener(taskSnapshot -> {
             if (handler != null) {
                 handler.success();
-                new Thread(()->{
+                new Thread(() -> {
                     MyApplication.reloadData();
                 }).start();
             }
@@ -173,6 +177,7 @@ public class OnlSongDAOImp implements SongDAO {
 
     public interface UIHandler {
         void updateProgress(int percent);
+
         void success();
     }
 

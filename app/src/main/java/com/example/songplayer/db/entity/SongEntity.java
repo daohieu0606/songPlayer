@@ -2,6 +2,7 @@ package com.example.songplayer.db.entity;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.example.songplayer.model.MySong;
@@ -45,6 +46,17 @@ public class SongEntity implements MySong, Serializable {
 
     @ColumnInfo(name = "isOnline", defaultValue = "0")
     private boolean isOnline;
+
+    @Ignore
+    private String lyric;
+
+    public String getLyric() {
+        return lyric;
+    }
+
+    public void setLyric(String lyric) {
+        this.lyric = lyric;
+    }
 
     public boolean isOnline() {
         return isOnline;

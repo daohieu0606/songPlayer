@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_dashboardFragment_to_songListFragment"
             app:destination="@id/listRelatedFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_lyricFragment"
+            app:destination="@id/lyricFragment" />
     </fragment>
     <fragment
         android:id="@+id/musicPlayerFragment"
@@ -40,4 +43,8 @@
         android:name="com.example.songplayer.fragment.SongListFragment"
         android:label="fragment_song_list"
         tools:layout="@layout/fragment_song_list" />
+    <fragment
+        android:id="@+id/lyricFragment"
+        android:name="com.example.songplayer.fragment.LyricFragment"
+        android:label="LyricFragment" />
 </navigation>

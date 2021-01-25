@@ -41,6 +41,7 @@ import com.example.songplayer.db.entity.Playlist;
 import com.example.songplayer.db.entity.SongEntity;
 import com.example.songplayer.fragment.DashboardFragment;
 import com.example.songplayer.fragment.ListFragment;
+import com.example.songplayer.service.MusicService;
 import com.example.songplayer.service.Restarter;
 import com.example.songplayer.service.YourService;
 import com.example.songplayer.utils.Constants;
@@ -60,6 +61,7 @@ import static com.example.songplayer.utils.DrawerCreater.POS_CATEGORY;
 import static com.example.songplayer.utils.DrawerCreater.POS_DOWNLOAD;
 import static com.example.songplayer.utils.DrawerCreater.POS_FAVORITE;
 import static com.example.songplayer.utils.DrawerCreater.POS_HOME;
+import static com.example.songplayer.utils.DrawerCreater.POS_LYRIC;
 import static com.example.songplayer.utils.DrawerCreater.POS_MUSIC;
 import static com.example.songplayer.utils.DrawerCreater.POS_PLAYLIST;
 
@@ -343,6 +345,15 @@ public class MainActivity extends AppCompatActivity implements
                 navController.navigate(R.id.dashboardFragment, data);
                 break;
 
+            }
+            case POS_LYRIC:{
+                MusicService service = MusicService.getInstance();
+                SongEntity currentSong = service.getCurrentSong();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("LYRIC", currentSong.getLyric());
+                navController.navigate(R.id.lyricFragment, bundle);
+
+                break;
             }
 
         }

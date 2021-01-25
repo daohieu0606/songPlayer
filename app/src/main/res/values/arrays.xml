@@ -3,6 +3,7 @@
     <string-array name="ld_activityScreenIcons">
         <item>@drawable/ic_home</item>
         <item>@drawable/ic_favorite</item>
+        <item>@drawable/lyric</item>
         <item>@drawable/ic_download</item>
         <item>@drawable/ic_share</item>
         <item>@drawable/ic_rate</item>

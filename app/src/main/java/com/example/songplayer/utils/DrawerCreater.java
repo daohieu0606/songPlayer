@@ -25,11 +25,12 @@ public class DrawerCreater {
 
     public static final int POS_HOME = 0;
     public static final int POS_FAVORITE = 1;
-    public static final int POS_DOWNLOAD = 2;
-    public static final int POS_PLAYLIST = 3;
-    public static final int POS_ALBUM = 4;
-    public static final int POS_CATEGORY = 5;
-    public static final int POS_MUSIC = 6;
+    public static final int POS_LYRIC = 2;
+    public static final int POS_DOWNLOAD = 3;
+    public static final int POS_PLAYLIST = 4;
+    public static final int POS_ALBUM = 5;
+    public static final int POS_CATEGORY = 6;
+    public static final int POS_MUSIC = 7;
 
     private Context context;
     private Drawable[] screenIcons;
@@ -88,6 +89,7 @@ public class DrawerCreater {
         screenTitles = new String[]{
                 context.getString(R.string.home),
                 context.getString(R.string.favorite),
+                context.getString(R.string.lyric),
                 context.getString(R.string.download),
                 context.getString(R.string.share_app),
                 context.getString(R.string.rate_app),
@@ -100,6 +102,7 @@ public class DrawerCreater {
         DrawerAdapter adapter = new DrawerAdapter(Arrays.asList(
                 createItemFor(POS_HOME).setChecked(true),
                 createItemFor(POS_FAVORITE),
+                createItemFor(POS_LYRIC),
                 createItemFor(POS_DOWNLOAD),
                 createItemFor(POS_PLAYLIST, "List"),
                 createItemFor(POS_ALBUM),
